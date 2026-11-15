@@ -1,0 +1,46 @@
+mode: demo              # demo = données synthétiques | live = yfinance + flux RSS
+db_path: data/radar.db
+horizons: [1, 5, 20]    # en jours de bourse
+main_horizon: 5
+replay_dates: 20        # points de rejeu point-in-time pour amorcer le journal
+demo:
+  seed: 7
+  years: 3
+  shock: 0.03           # intensité des effets cachés des événements (démo seulement)
+  sources:              # fiabilité cachée (démo) : l'outil doit la retrouver
+    Agence_A: 0.90
+    Presse_B: 0.80
+    Blog_C: 0.50
+    Reseaux_D: 0.30
+gdelt:                  # mode live : historique mondial d'actualités (volume et ton quotidiens)
+  enabled: true
+  years: 3
+  pause: 6              # secondes entre requêtes (limite GDELT : 5 s)
+  budget_s: 900         # temps maximal par exécution ; le reste est repris au passage suivant
+feeds:                  # mode live 
+  lemonde_inter: https://www.lemonde.fr/international/rss_full.xml
+  lemonde_eco: https://www.lemonde.fr/economie/rss_full.xml
+  bbc_world: https://feeds.bbci.co.uk/news/world/rss.xml
+  bbc_business: https://feeds.bbci.co.uk/news/business/rss.xml
+  france24: https://www.france24.com/fr/rss
+watchlist:
+  AAPL:   {name: Apple, gdelt: 'Apple (iPhone OR "Tim Cook" OR shares)', sector: tech, techs: [ia, semi-conducteurs]}
+  MSFT:   {name: Microsoft, sector: tech, techs: [ia, cloud, cyber]}
+  NVDA:   {name: Nvidia, sector: tech, techs: [ia, semi-conducteurs]}
+  GOOGL:  {name: Alphabet, gdelt: '(Google OR "Alphabet Inc")', aliases: [Google], sector: tech, techs: [ia, quantique]}
+  META:   {name: Meta, gdelt: '(Facebook OR "Meta Platforms" OR Zuckerberg)', sector: tech, techs: [ia]}
+  ASML:   {name: ASML, sector: tech, techs: [semi-conducteurs]}
+  AMZN:   {name: Amazon, gdelt: 'Amazon (AWS OR Bezos OR shares OR retailer)', sector: conso, techs: [cloud, robotique]}
+  TSLA:   {name: Tesla, sector: auto, techs: [batteries, robotique]}
+  JPM:    {name: JPMorgan, gdelt: '(JPMorgan OR "JP Morgan")', sector: finance, techs: []}
+  BNP.PA: {name: BNP Paribas, sector: finance, techs: []}
+  XOM:    {name: Exxon Mobil, gdelt: '(Exxon OR ExxonMobil)', sector: energie, techs: [hydrogene]}
+  TTE.PA: {name: TotalEnergies, sector: energie, techs: [hydrogene, batteries]}
+  LMT:    {name: Lockheed Martin, sector: defense, techs: [drones, spatial]}
+  RTX:    {name: RTX, gdelt: '(Raytheon OR "RTX Corp")', sector: defense, techs: [drones, cyber]}
+  HO.PA:  {name: Thales, gdelt: 'Thales (defense OR defence OR aerospace OR radar)', sector: defense, techs: [cyber, spatial, drones]}
+  SAF.PA: {name: Safran, gdelt: 'Safran (engine OR aerospace OR aircraft)', sector: aero, techs: [spatial]}
+  AIR.PA: {name: Airbus, sector: aero, techs: [spatial]}
+  MC.PA:  {name: LVMH, sector: luxe, techs: []}
+  LLY:    {name: Eli Lilly, sector: sante, techs: [biotech]}
+  SAN.PA: {name: Sanofi, sector: sante, techs: [biotech]}
