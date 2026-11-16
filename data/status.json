@@ -1,25 +1,24 @@
 {
- "genere_utc": "2026-11-15 19:03",
+ "genere_utc": "2026-11-16 13:52",
  "mode": "live",
- "cours_au": "2026-11-13",
- "jours_de_retard": 2,
+ "cours_au": "2026-11-16",
+ "jours_de_retard": 0,
  "anomalies": [
   "GDELT militaire : RuntimeError",
   "GDELT securitaire : RuntimeError",
   "GDELT politique : RuntimeError",
   "GDELT meteo : RuntimeError",
-  "GDELT economique : RuntimeError",
-  "GDELT : budget de temps atteint, 28 séries reportées"
+  "GDELT : abandon (source injoignable)"
  ],
  "journal": {
   "cours": [
    "yfinance (20)"
   ],
   "flux_ok": 5,
-  "gdelt_series": 1,
-  "gdelt_signaux": 1032,
-  "nouveaux_articles": 147,
-  "rejeu": 20,
-  "resolues": 1200
+  "gdelt_series": 0,
+  "gdelt_signaux": 1033,
+  "nouveaux_articles": 86,
+  "rejeu": 0,
+  "resolues": 20
  }
 }
