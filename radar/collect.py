@@ -105,6 +105,12 @@ def demo_generate(cfg, con):
     con.commit()
 
 
+def _open_day():
+    """Date à écarter (séance peut-être en cours). Après 22 h UTC, New York a clôturé : rien à écarter."""
+    now = dt.datetime.now(dt.timezone.utc)
+    return now.strftime("%Y-%m-%d") if now.hour < 22 else "9999-12-31"
+
+
 STOOQ_SUFFIX = {"PA": "fr", "AS": "nl", "DE": "de", "L": "uk"}
 
 
@@ -119,7 +125,7 @@ def _prices_yfinance(tickers):
     import yfinance as yf
     data = yf.download(tickers, period="3y", auto_adjust=True, progress=False, group_by="column", threads=False)
     close, vol = data["Close"], data["Volume"]
-    rows, today = [], dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
+    rows, today = [], _open_day()
     for t in tickers:
         if t not in close:
             continue
@@ -134,7 +140,7 @@ def _prices_yfinance(tickers):
 def _prices_stooq(tickers):
     import io
     import requests
-    rows, today = [], dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
+    rows, today = [], _open_day()
     for t in tickers:
         try:
             r = requests.get(f"https://stooq.com/q/d/l/?s={_stooq_symbol(t)}&i=d", timeout=20,

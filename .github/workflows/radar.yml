@@ -1,7 +1,8 @@
 name: radar-bourse
 on:
   schedule:
-    - cron: "15 5 * * 1-5"   # 5h15 UTC = 6h15 (hiver) ou 7h15 (été) en France
+    - cron: "37 22 * * 1-5"  # 22h37 UTC, après la clôture de New York. GitHub déclenche souvent avec des heures de retard :
+                             # lancer la veille au soir garantit un brief prêt le lendemain matin.
   workflow_dispatch: {}
 permissions:
   contents: write
@@ -26,6 +27,7 @@ jobs:
           git config user.email "radar-bot@users.noreply.github.com"
           git add data dashboard.html
           git commit -m "Radar $(date -u +%F)" || echo "rien à enregistrer"
+          git pull --rebase -q origin main
           git push
       - name: Signaler l'échec dans le brief
         if: failure()
