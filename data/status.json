@@ -1,11 +1,9 @@
 {
- "genere_utc": "2026-11-17 21:55",
+ "genere_utc": "2026-11-17 22:16",
  "mode": "live",
- "cours_au": "2026-11-16",
- "jours_de_retard": 1,
- "anomalies": [
-  "GDELT : 4 séries à jour sur 29 (4 avec historique), collecte horaire en cours, dernier refus 2026-11-17 14:19 : AIR.PA : HTTP 429 'Please limit requests to one every 5 seconds or contact kale'"
- ],
+ "cours_au": "2026-11-17",
+ "jours_de_retard": 0,
+ "anomalies": [],
  "journal": {
   "cours": [
    "yfinance (138)"
@@ -19,11 +17,22 @@
    "sans_cik": 0
   },
   "flux_ok": 5,
-  "gdelt_series": 4,
-  "gdelt_signaux": 4126,
-  "nouveaux_articles": 32,
+  "gdelt_series": 3,
+  "gdelt_evenements": {
+   "jours_acquis": 1077,
+   "sources": {
+    "v1": 1077
+   },
+   "historique": {
+    "jours": 1077,
+    "du": "2023-11-18",
+    "au": "2026-11-16"
+   }
+  },
+  "gdelt_signaux": 8380,
+  "nouveaux_articles": 0,
   "rejeu": 0,
-  "resolues": 0,
+  "resolues": 138,
   "signalees_resolues": 0
  }
 }
