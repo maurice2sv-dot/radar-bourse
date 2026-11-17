@@ -362,10 +362,6 @@ watchlist:
     name: Novo Nordisk
     sector: sante
     techs: [biotech]
-  ROG.SW:
-    name: Roche
-    sector: sante
-    techs: [biotech]
   NOVN.SW:
     name: Novartis
     sector: sante
