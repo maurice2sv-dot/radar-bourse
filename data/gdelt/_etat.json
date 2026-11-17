@@ -1,0 +1,10 @@
+{
+ "utc": "2026-11-17 14:19",
+ "acquises": [],
+ "refus": [
+  "AIR.PA : HTTP 429 'Please limit requests to one every 5 seconds or contact kale'"
+ ],
+ "a_jour": 4,
+ "total": 29,
+ "restant_aujourdhui": 29
+}
