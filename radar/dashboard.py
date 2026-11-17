@@ -22,7 +22,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 .fill{position:absolute;top:0;bottom:0;border-radius:4px}.mid{position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:var(--surface)}
 .one{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink2)}
 .pill{display:inline-block;padding:1px 8px;border-radius:10px;border:1px solid var(--grid);font-size:12px;color:var(--ink2)}
-.pc{display:flex;align-items:center;gap:6px;min-width:96px}.pc .track{width:54px;flex:none}.pc span{font-variant-numeric:tabular-nums;width:38px;text-align:right}
+.pc{display:flex;align-items:center;gap:6px;min-width:120px}.pc .track{width:64px;flex:none}.pc span{font-variant-numeric:tabular-nums;width:48px;text-align:right}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
 .mute{color:var(--mute);font-size:12px}ul{margin:0;padding-left:18px}li{margin:6px 0}
 @media (max-width:640px){.row{grid-template-columns:110px 1fr 70px}th.h,td.h{display:none}}
@@ -33,14 +33,16 @@ def pct(x):
     return f"{x * 100:.0f} %"
 
 
-def cbar(p):
-    """Barre centrée sur 50 % : bleu = hausse, orange = baisse. Texte en couleur d'encre."""
-    w = abs(p - 0.5) * 100
-    if p >= 0.5:
-        f = f'<div class="fill" style="left:50%;width:{w:.1f}%;background:var(--s1)"></div>'
-    else:
-        f = f'<div class="fill" style="right:50%;width:{w:.1f}%;background:var(--s2)"></div>'
-    return f'<div class="pc" title="Probabilité de battre le marché : {pct(p)}"><div class="track">{f}<div class="mid"></div></div><span>{pct(p)}</span></div>'
+def cbar(p, dmax=0.5):
+    """Barre centrée sur 50 % : bleu = surperformance probable, orange = sous-performance. La longueur est relative
+    à l'écart le plus fort du tableau (les probabilités restent proches de 50 % tant que le modèle n'a pas fait
+    ses preuves), avec un minimum visible. Texte en couleur d'encre."""
+    w = min(50.0, abs(p - 0.5) / max(dmax, 0.005) * 50)
+    side = "left" if p >= 0.5 else "right"
+    col = "var(--s1)" if p >= 0.5 else "var(--s2)"
+    f = f'<div class="fill" style="{side}:50%;width:max({w:.1f}%,3px);background:{col}"></div>' if abs(p - 0.5) >= 0.0005 else ""
+    return (f'<div class="pc" title="Probabilité de faire mieux que son secteur : {p * 100:.1f} %"><div class="track">{f}<div class="mid"></div></div>'
+            f'<span>{p * 100:.1f} %</span></div>')
 
 
 def spark(v):
@@ -99,13 +101,14 @@ def render(rep, path):
 
     # Valeurs à surveiller
     hz = rep["horizons"]
+    dmax = max([abs(w["p"][str(h)] - 0.5) for w in rep["watch"] for h in hz] or [0.5])
     rows = "".join(
         f'<tr><td><b>{e(w["name"])}</b><div class="mute">{e(w["ticker"])} · {e(w["sector"])}</div></td>'
-        + "".join(f'<td>{cbar(w["p"][str(h)])}</td>' for h in hz)
+        + "".join(f'<td>{cbar(w["p"][str(h)], dmax)}</td>' for h in hz)
         + f'<td class="h">{spark(w["spark"])}</td><td class="h"><span class="pill">{e(w["driver"])}</span>' + (' <span class="pill">résultats sous 5 j</span>' if w.get("earn") else "") + '</td>'
         f'<td class="n h">{w["mentions"]:.1f}×</td></tr>' for w in rep["watch"])
     out.append('<section class="card"><h2>Valeurs à surveiller</h2><p class="sub">Classées par attention : intensité des actualités, volatilité inhabituelle et conviction du modèle. '
-               'Probabilité de faire mieux que la moyenne de son secteur. Barre bleue = surperformance probable, orange = sous-performance.</p><div style="overflow-x:auto"><table><thead><tr><th>Valeur</th>'
+               'Probabilité de faire mieux que la moyenne de son secteur. Barre bleue = surperformance probable, orange = sous-performance ; longueur relative à l\'écart le plus fort du tableau.</p><div style="overflow-x:auto"><table><thead><tr><th>Valeur</th>'
                + "".join(f'<th>Surperf. à {h} j</th>' for h in hz)
                + '<th class="h">60 jours</th><th class="h">Pilote</th><th class="n h">Mentions</th></tr></thead><tbody>' + rows + '</tbody></table></div></section>')
 
