@@ -119,11 +119,13 @@ def _prices_yfinance(tickers):
     import yfinance as yf
     data = yf.download(tickers, period="3y", auto_adjust=True, progress=False, group_by="column", threads=False)
     close, vol = data["Close"], data["Volume"]
-    rows = []
+    rows, today = [], dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
     for t in tickers:
         if t not in close:
             continue
         for d, p in close[t].dropna().items():
+            if d.strftime("%Y-%m-%d") >= today:
+                continue  # séance en cours : cours partiel, écarté
             v = vol[t].get(d, 0)
             rows.append((t, d.strftime("%Y-%m-%d"), float(p), float(v) if v == v else 0.0))
     return rows
@@ -132,7 +134,7 @@ def _prices_yfinance(tickers):
 def _prices_stooq(tickers):
     import io
     import requests
-    rows = []
+    rows, today = [], dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
     for t in tickers:
         try:
             r = requests.get(f"https://stooq.com/q/d/l/?s={_stooq_symbol(t)}&i=d", timeout=20,
@@ -142,7 +144,8 @@ def _prices_stooq(tickers):
             if "Close" not in df:
                 continue
             for d, p, v in zip(df["Date"].tail(800), df["Close"].tail(800), df.get("Volume", pd.Series(0, index=df.index)).tail(800)):
-                rows.append((t, str(d), float(p), float(v) if v == v else 0.0))
+                if str(d) < today:
+                    rows.append((t, str(d), float(p), float(v) if v == v else 0.0))
         except Exception:
             continue
     return rows
@@ -233,11 +236,11 @@ def _gdelt_get(query, mode, start, end, pause):
     import requests
     params = {"query": query, "mode": mode, "format": "json",
               "startdatetime": start.strftime("%Y%m%d000000"), "enddatetime": end.strftime("%Y%m%d%H%M%S")}
-    for attempt in range(3):
+    for attempt in range(4):
         time.sleep(pause)  # limite officielle : une requête toutes les 5 secondes
         r = requests.get(GDELT_URL, params=params, timeout=60, headers={"User-Agent": "radar-bourse/0.2"})
         if r.status_code == 429:
-            time.sleep(20 * (attempt + 1))
+            time.sleep(30 * (attempt + 1))
             continue
         r.raise_for_status()
         return parse_gdelt_timeline(r.json())
@@ -251,17 +254,16 @@ def collect_gdelt(cfg, con):
     g = cfg.get("gdelt", {})
     if not g.get("enabled", True):
         return 0, []
-    pause, budget = g.get("pause", 6), g.get("budget_s", 900)
+    pause, budget = g.get("pause", 8), g.get("budget_s", 1200)
     now = dt.datetime.now(dt.timezone.utc).replace(tzinfo=None)
     keys = [("cat", c, q) for c, q in GDELT_CATS.items()]
     for t, v in cfg["watchlist"].items():
         keys.append(("ticker", t, v.get("gdelt") or f'"{v["name"]}"'))
     last = dict(con.execute("SELECT kind||'|'||key, MAX(date) FROM gdelt GROUP BY kind,key").fetchall())
     keys.sort(key=lambda k: last.get(f"{k[0]}|{k[1]}", ""))  # les séries les plus en retard d'abord
-    t0, done, errs = time.time(), 0, []
+    t0, done, errs, streak, failed = time.time(), 0, [], 0, []
     for kind, key, query in keys:
         if time.time() - t0 > budget:
-            errs.append(f"GDELT : budget de temps atteint, {len(keys) - done} séries reportées")
             break
         l = last.get(f"{kind}|{key}")
         start = (dt.datetime.fromisoformat(l) - dt.timedelta(days=3)) if l else now - dt.timedelta(days=int(g.get("years", 3) * 365))
@@ -269,13 +271,20 @@ def collect_gdelt(cfg, con):
             vol = _gdelt_get(query, "timelinevol", start, now, pause)
             tone = _gdelt_get(query, "timelinetone", start, now, pause)
         except Exception as e:
-            errs.append(f"GDELT {key} : {type(e).__name__}")
-            if len(errs) >= 4 and done == 0:
-                errs.append("GDELT : abandon (source injoignable)")
-                break
+            failed.append(f"{key} ({type(e).__name__})")
+            streak += 1
+            if streak >= 3:
+                break  # inutile d'insister : la limite de débit se durcit si on force
             continue
+        streak = 0
         con.executemany("INSERT OR REPLACE INTO gdelt VALUES (?,?,?,?,?)",
                         [(kind, key, d, v, tone.get(d)) for d, v in vol.items()])
         con.commit()
         done += 1
+    total = con.execute("SELECT COUNT(DISTINCT kind||'|'||key) FROM gdelt").fetchone()[0]
+    fresh = con.execute("SELECT COUNT(*) FROM (SELECT MAX(date) m FROM gdelt GROUP BY kind,key) WHERE m >= ?",
+                        ((now - dt.timedelta(days=2)).strftime("%Y-%m-%d"),)).fetchone()[0]
+    if fresh < len(keys):
+        errs.append(f"GDELT : {fresh} séries à jour sur {len(keys)} ({total} avec historique), {done} acquises à ce passage"
+                    + (f", refus : {', '.join(failed[:3])}" if failed else "") + ". Reprise au prochain passage.")
     return done, errs

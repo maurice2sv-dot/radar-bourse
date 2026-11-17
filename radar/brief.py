@@ -14,10 +14,12 @@ def generate(rep, out_dir):
     tag = " (DÉMO, données synthétiques)" if demo else ""
 
     w = rep["watch"][:3]
-    t = next((x for x in rep["techs"] if x["status"] != "stable"), None)
-    h = max(rep["heat"], key=lambda x: x["ratio"])
+    t = next((x for x in rep["techs"] if x["status"] in ("émergente", "en hausse")), None)
+    hs = [x for x in rep["heat"] if x["ratio"] is not None]
+    h = max(hs, key=lambda x: x["ratio"]) if hs else None
     ev = rep["events"][0] if rep["events"] else None
-    alerte = f"{h['cat']} à ×{h['ratio']:.1f} la normale" if h["ratio"] >= 2 else "aucune pression inhabituelle"
+    alerte = (f"{h['cat']} à ×{h['ratio']:.1f} la normale" if h and h["ratio"] >= 2 else
+              "aucune pression inhabituelle" if h else "en calibrage (historique d'actualités insuffisant)")
     if ev:
         alerte += f". Événement marquant : {ev['title']} ({ev['source']})"
     fiab = (f"AUC backtest {bt['auc']:.2f} (apport des actualités {gain:+.2f}), coefficient de confiance {rep['shrink']:.2f}, "
@@ -30,7 +32,8 @@ def generate(rep, out_dir):
     daily = [f"Radar bourse, cours au {rep['as_of']}, généré le {rep.get('generated_utc', '')} UTC{tag}",
              "- Valeurs à surveiller : " + " ; ".join(
                  f"{x['name']} ({_p(x['p'][main])} de chances de battre le marché à {main} j, pilote {x['driver']})" for x in w),
-             "- Technologie à veiller : " + (f"{t['tech']} ({t['status']}, {t['m7']} mentions sur 7 j)" if t else "aucune hausse notable"),
+             "- Technologie à veiller : " + (f"{t['tech']} ({t['status']}, {t['m7']} mentions sur 7 j)" if t else
+                                            f"en calibrage, encore {rep['calib_days']} jours de bourse" if rep.get("calib_days") else "aucune hausse notable"),
              f"- Alerte : {alerte}",
              f"- Fiabilité : {fiab}",
              f"- État : {etat}",

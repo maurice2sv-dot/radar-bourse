@@ -112,12 +112,12 @@ def render(rep, path):
     tec = "".join(hbar(t["tech"], max(t["z"], 0), zv, f'{t["status"]}',
                        f'{t["m7"]} mentions sur 7 j · valeurs liées : {", ".join(t["related"]) or "aucune"}') for t in rep["techs"][:8])
     out.append('<div class="grid2"><section class="card"><h2>Tendances sectorielles</h2><p class="sub">Momentum 20 j et signal d\'actualité combinés. Passez la souris pour le détail.</p>'
-               + sec + '</section><section class="card"><h2>Technologies à veiller</h2><p class="sub">Mentions des 7 derniers jours contre la norme des 60 jours précédents (écart en z).</p>'
+               + sec + '</section><section class="card"><h2>Technologies à veiller</h2><p class="sub">Mentions des 7 derniers jours contre la norme des 60 jours précédents (écart en z).' + (f' <b>En calibrage : encore {rep["calib_days"]} jours de bourse d\'articles à accumuler avant toute alerte.</b>' if rep.get("calib_days") else '') + '</p>'
                + tec + '</section></div>')
 
     # Catégories
-    hv = max(max(h["ratio"] for h in rep["heat"]), 2)
-    heat = "".join(hbar(h["cat"], h["ratio"], hv, f'×{h["ratio"]:.1f}', f'{h["s7"]:.1f} d\'intensité sur 7 j', one=1.0) for h in rep["heat"])
+    hv = max(max((h["ratio"] or 0) for h in rep["heat"]), 2)
+    heat = "".join(hbar(h["cat"], h["ratio"] or 0, hv, f'×{h["ratio"]:.1f}' if h["ratio"] is not None else 'calibrage', f'{h["s7"]:.1f} d\'intensité sur 7 j', one=1.0) for h in rep["heat"])
     out.append('<section class="card"><h2>Pression par type d\'événement</h2><p class="sub">Intensité des 7 derniers jours rapportée à la normale (trait gris = 1,0 = normal).</p>' + heat + '</section>')
 
     # Adaptation

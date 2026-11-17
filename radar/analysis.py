@@ -7,6 +7,7 @@ from .events import CATS, TECHS
 CAT_FR = {"militaire": "militaire", "securitaire": "sécuritaire", "politique": "politique", "financier": "financier",
           "meteo": "météo", "economique": "économique", "scientifique": "scientifique", "religieux": "religieux",
           "media": "médiatique"}
+MIN_HIST = 30  # jours actifs exigés sur les 60 jours de référence avant de parler de hausse ou d'émergence
 SEC_FR = {"tech": "Technologie", "conso": "Consommation", "auto": "Automobile", "finance": "Finance",
           "energie": "Énergie", "defense": "Défense", "aero": "Aéronautique", "luxe": "Luxe", "sante": "Santé"}
 
@@ -41,30 +42,43 @@ def analyze(df, scores, close, cfg, preds, wcs):
 
     # Technologies : z-score des mentions 7 j contre les 60 j précédents
     counts = pd.DataFrame(0.0, index=idx, columns=list(TECHS))
+    is_g = (scores["source"].values == "GDELT") if len(scores) else np.zeros(0, bool)
+    pos = np.minimum(idx.searchsorted(scores["date"].values), n - 1) if len(scores) else np.zeros(0, int)
+    def active(mask):  # jours distincts avec données dans la fenêtre de référence (un vieil article isolé ne compte pas)
+        a = np.unique(pos[mask])
+        return int(((a >= n - 67) & (a < n - 7)).sum())
+
+    hist_rss = active(~is_g) if len(scores) else 0
     if len(scores):
-        pos = np.minimum(idx.searchsorted(scores["date"].values), n - 1)
         for p, tl in zip(pos, scores["techs"]):
             for t in tl:
                 counts.iloc[p, counts.columns.get_loc(t)] += 1
     base = counts.iloc[-67:-7]
     m7 = counts.tail(7).mean()
     z = (m7 - base.mean()) / np.maximum(base.std() / np.sqrt(7), 0.08)
+    calib = hist_rss < MIN_HIST
+    if calib:
+        z = z * 0
     techs = []
     for t in z.sort_values(ascending=False).index:
         rel = [k for k, v in wl.items() if t in v.get("techs", [])]
         techs.append({"tech": t, "z": float(z[t]), "m7": int(counts.tail(7)[t].sum()), "related": rel,
-                      "status": "émergente" if z[t] > 2.5 and counts.tail(7)[t].sum() >= 3 else "en hausse" if z[t] > 1 else "stable"})
+                      "status": "calibrage" if calib else "émergente" if z[t] > 2.5 and counts.tail(7)[t].sum() >= 3 else "en hausse" if z[t] > 1 else "stable"})
 
     # Chaleur des catégories (intensité brute 7 j vs moyenne des 90 j précédents)
     heat = []
     for c in CATS:
         daily = np.zeros(n)
-        if len(scores):
-            pos = np.minimum(idx.searchsorted(scores["date"].values), n - 1)
-            np.add.at(daily, pos, [d.get(c, 0.0) for d in scores["cats"]])
+        inten = np.array([d.get(c, 0.0) for d in scores["cats"]]) if len(scores) else np.zeros(0)
+        g = is_g & (inten > 0)
+        use = g if g.any() else ~is_g  # série GDELT (avec historique) si elle existe, sinon articles RSS
+        np.add.at(daily, pos[use], inten[use])
+        hist = active(use) if len(scores) else 0
         s7 = daily[-7:].sum()
-        b = daily[-97:-7].sum() / (90 / 7)
-        heat.append({"cat": CAT_FR[c], "s7": float(s7), "ratio": float(s7 / (b + 0.5))})
+        ratio = None  # pas de norme tant que l'historique est trop court : aucune alerte
+        if hist >= MIN_HIST:
+            ratio = float(s7 / (daily[-67:-7].mean() * 7 + 0.5))
+        heat.append({"cat": CAT_FR[c], "s7": float(s7), "ratio": ratio, "hist": int(max(hist, 0))})
 
     # Valeurs à surveiller
     p_main = preds[preds.h == main].set_index("ticker")
@@ -91,5 +105,5 @@ def analyze(df, scores, close, cfg, preds, wcs):
         for row in r.sort_values("mag", ascending=False).head(8).itertuples():
             ev.append({"date": row.date.strftime("%d/%m"), "source": row.source, "title": row.title,
                        "cats": [CAT_FR[c] for c in row.cats], "pol": float(row.polarity)})
-    return {"as_of": last_date.strftime("%Y-%m-%d"), "sectors": sectors, "techs": techs, "heat": heat,
+    return {"calib_days": int(max(0, MIN_HIST - hist_rss)), "as_of": last_date.strftime("%Y-%m-%d"), "sectors": sectors, "techs": techs, "heat": heat,
             "watch": watch, "drivers": {t: driver(t)[0] for t in last.index}, "all_p5": sorted(allp, key=lambda x: -x["p5"]), "events": ev}
