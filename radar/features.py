@@ -9,7 +9,8 @@ from .events import CATS, SECTORS, SENSITIVE, rel_exposure
 PRICE_FEATS = ["ret1", "ret5", "ret20", "rel5", "rel20", "vol20", "volratio", "dist_ma50", "rsi", "vol_rel",
                "mkt_ret5", "mkt_ret20", "sec_id"]
 NEWS_FEATS = [f"n_{c}" for c in CATS] + ["news_comp", "co_sent", "co_mentions"]
-ALL_FEATS = PRICE_FEATS + NEWS_FEATS
+CAL_FEATS = ["earn_next", "earn_since", "earn_surprise", "cb_next"]
+ALL_FEATS = PRICE_FEATS + NEWS_FEATS + CAL_FEATS
 
 
 def load_prices(con, wl, min_rows=120):
@@ -37,9 +38,34 @@ def _roll3(pos, values, n, idx):
     return pd.Series(out, index=idx).rolling(3, min_periods=1).sum()
 
 
-def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None):
+def load_earnings(con):
+    e = pd.read_sql("SELECT ticker,date,surprise FROM earnings", con, parse_dates=["date"])
+    return e.sort_values("date")
+
+
+def _cb_dates(cal):
+    out = []
+    for ds in (cal or {}).get("cb", {}).values():
+        out += [np.datetime64(pd.Timestamp(str(d))) for d in ds]
+    return np.array(sorted(out), dtype="datetime64[ns]")
+
+
+def _to_next(ev, iv, cap):
+    """Jours calendaires jusqu'au prochain événement (date incluse), plafonnés. Dates supposées connues d'avance."""
+    if len(ev) == 0:
+        return np.full(len(iv), float(cap))
+    j = np.searchsorted(ev, iv, side="left")
+    d = (ev[np.minimum(j, len(ev) - 1)] - iv) / np.timedelta64(1, "D")
+    return np.clip(np.where(j < len(ev), d, cap), 0, cap)
+
+
+def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None, cal=None):
     wsrc, wcs = wsrc or {}, wcs or {}
     idx, n = close.index, len(close)
+    iv = idx.values.astype("datetime64[ns]")
+    cb_next = _to_next(_cb_dates(cal), iv, 15) / 15
+    earn = (cal or {}).get("earn")
+    earn_by = {t: g for t, g in earn.groupby("ticker")} if earn is not None and len(earn) else {}
     xr = rel_exposure(wl)
     has = len(scores) > 0
     if has:
@@ -70,6 +96,15 @@ def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None):
         f["vol_rel"] = v / (v.rolling(20).mean() + 1e-9)
         f["mkt_ret5"] = mkt.rolling(5).sum()
         f["mkt_ret20"] = mkt.rolling(20).sum()
+        g = earn_by.get(t)
+        ev = g["date"].values.astype("datetime64[ns]") if g is not None else np.array([], dtype="datetime64[ns]")
+        f["earn_next"] = _to_next(ev, iv, 30) / 30
+        j = np.searchsorted(ev, iv, side="left") - 1  # dernier résultat strictement passé : surprise connue
+        since = np.where(j >= 0, (iv - ev[np.maximum(j, 0)]) / np.timedelta64(1, "D"), 30) if len(ev) else np.full(n, 30.0)
+        f["earn_since"] = np.clip(since, 0, 30) / 30
+        sur = g["surprise"].values.astype(float) if g is not None else np.zeros(0)
+        f["earn_surprise"] = np.clip(np.nan_to_num(np.where(j >= 0, sur[np.maximum(j, 0)], 0.0)), -0.5, 0.5) if len(ev) else 0.0
+        f["cb_next"] = cb_next
         f["sec_id"] = SECTORS.index(sector)  # sans lui, les actualités serviraient surtout à reconnaître le secteur
         comp = 0
         for k in CATS:

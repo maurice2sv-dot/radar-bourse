@@ -6,7 +6,8 @@ si chaque catégorie et chaque source tiennent leurs promesses (voir journal.py)
 import hashlib
 import re
 
-SECTORS = ["tech", "conso", "auto", "finance", "energie", "defense", "aero", "luxe", "sante"]
+SECTORS = ["tech", "conso", "auto", "finance", "energie", "defense", "aero", "luxe", "sante",
+           "distribution", "industrie", "materiaux", "services_publics", "telecom"]
 
 
 def _U(base, **kw):
@@ -43,6 +44,17 @@ KEYWORDS = {
 }
 CATS = list(KEYWORDS)
 
+# Expositions des secteurs ajoutés avec l'univers élargi (a priori, corrigé ensuite par les poids appris)
+for _c, _kw in {
+    "militaire": dict(industrie=0.1, materiaux=0.2, distribution=-0.1),
+    "securitaire": dict(telecom=0.1, services_publics=-0.1),
+    "financier": dict(services_publics=0.4, telecom=0.2),
+    "meteo": dict(services_publics=0.4, distribution=-0.1, materiaux=0.1, industrie=-0.1),
+    "economique": dict(industrie=0.7, materiaux=0.7, distribution=0.2, services_publics=0.2, telecom=0.2),
+    "scientifique": dict(industrie=0.2, materiaux=0.2),
+}.items():
+    EXPOSURE[_c].update(_kw)
+
 TECHS = {
     "ia": r"\bia\b|intelligence artificielle|\bai\b|artificial intelligence|\bllm",
     "semi-conducteurs": r"semi-?conducteur|semiconductor|\bpuces?\b|\bchips?\b|\bgpu",
@@ -69,8 +81,9 @@ _POS, _NEG = re.compile(POS, re.I), re.compile(NEG, re.I)
 def company_matchers(wl):
     out = {}
     for t, v in wl.items():
-        names = [v["name"]] + list(v.get("aliases", []))
-        out[t] = re.compile(r"\b(?:" + "|".join(re.escape(n) for n in names) + r")\b", re.I)
+        names = v.get("match") or [v["name"]] + list(v.get("aliases", []))
+        flags = 0 if v.get("case") else re.I  # sigles ambigus (UPS, Intel, AXA...) : casse exacte
+        out[t] = re.compile(r"(?<!\w)(?:" + "|".join(re.escape(n) for n in names) + r")(?!\w)", flags)
     return out
 
 

@@ -76,6 +76,11 @@ def run(cfg, root=".", do_replay=True):
         st, e = collect.collect_prices_live(cfg, con)
         log["cours"], errs = st["sources"], errs + e
         try:
+            log["resultats"], e = collect.collect_earnings_live(cfg, con)
+            errs += e
+        except Exception as ex:
+            errs.append(f"calendrier des résultats : {type(ex).__name__}")
+        try:
             log["flux_ok"], ko = collect.collect_news_live(cfg, con)
             errs += ko
         except Exception as ex:
@@ -97,7 +102,8 @@ def run(cfg, root=".", do_replay=True):
     scores = features.load_scores(con)
 
     # 1. Backtest honnête : poids neutres (les poids appris utilisent des rendements qui seraient « futurs »)
-    df0 = features.build_features(close, volume, scores, wl, hz)
+    cal = {"earn": features.load_earnings(con), "cb": cfg.get("calendrier", {}).get("banques_centrales", {})}
+    df0 = features.build_features(close, volume, scores, wl, hz, cal=cal)
     bt = model.run_backtests(df0, hz, main)
 
     # 2. Journal : rejeu point-in-time puis résolution
@@ -110,12 +116,12 @@ def run(cfg, root=".", do_replay=True):
     wsrc, wcs = db.get_weights(con, "source"), db.get_weights(con, "catsec")
 
     # 4. Prédiction du jour avec les poids appris
-    df = features.build_features(close, volume, scores, wl, hz, wsrc, wcs)
+    df = features.build_features(close, volume, scores, wl, hz, wsrc, wcs, cal=cal)
     preds, last = model.predict_latest(df, features.ALL_FEATS, hz)
     stats = journal.live_stats(con)
     k, n_res, hit = journal.shrink_factor(stats, main)
     preds["p_up"] = 0.5 + k * (preds["p_raw"] - 0.5)
-    rep = analysis.analyze(df, scores, close, dict(cfg, watchlist=wl), preds, wcs)
+    rep = analysis.analyze(df, scores, close, dict(cfg, watchlist=wl), preds, wcs, cal)
     run_date = last.strftime("%Y-%m-%d")
     journal.log_predictions(con, run_date, [(r.ticker, int(r.h), r.p_up, r.p_raw, rep["drivers"][r.ticker])
                                             for r in preds.itertuples()], "live")

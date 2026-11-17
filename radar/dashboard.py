@@ -98,7 +98,7 @@ def render(rep, path):
     rows = "".join(
         f'<tr><td><b>{e(w["name"])}</b><div class="mute">{e(w["ticker"])} · {e(w["sector"])}</div></td>'
         + "".join(f'<td>{cbar(w["p"][str(h)])}</td>' for h in hz)
-        + f'<td class="h">{spark(w["spark"])}</td><td class="h"><span class="pill">{e(w["driver"])}</span></td>'
+        + f'<td class="h">{spark(w["spark"])}</td><td class="h"><span class="pill">{e(w["driver"])}</span>' + (' <span class="pill">résultats sous 5 j</span>' if w.get("earn") else "") + '</td>'
         f'<td class="n h">{w["mentions"]:.1f}×</td></tr>' for w in rep["watch"])
     out.append('<section class="card"><h2>Valeurs à surveiller</h2><p class="sub">Classées par attention : intensité des actualités, volatilité inhabituelle et conviction du modèle. '
                'Probabilité de faire mieux que la moyenne des valeurs suivies. Barre bleue = surperformance probable, orange = sous-performance.</p><div style="overflow-x:auto"><table><thead><tr><th>Valeur</th>'
@@ -132,13 +132,17 @@ def render(rep, path):
                   f'<td class="n">{bt[str(h)]["auc"]:.3f}</td><td class="n">{bt[str(h)]["brier"]:.3f}</td>'
                   f'<td class="n">{bt[str(h)]["acc_conf"] * 100:.1f} % ({bt[str(h)]["n_conf"]})</td></tr>' for h in hz)
     po = bt["price_only"]
+    sc_txt = f" Sans le calendrier : AUC {bt['sans_calendrier']['auc']:.3f}." if "sans_calendrier" in bt else ""
     out.append('<section class="card"><h2>Fiabilité du modèle (backtest sans fuite)</h2><p class="sub">Entraînement sur le passé seul, test sur 5 périodes successives, écart de h jours entre les deux. '
                'Cible : battre la moyenne des valeurs suivies. Poids neutres (les poids appris utilisent des résultats futurs). Les rendements se chevauchent : lire les chiffres comme des ordres de grandeur.</p>'
                '<div style="overflow-x:auto"><table><thead><tr><th>Horizon</th><th class="n">Précision</th><th class="n">Référence (toujours la même direction)</th><th class="n">AUC</th><th class="n">Brier</th><th class="n">Précision si confiance forte (n)</th></tr></thead><tbody>'
-               + trs + f'</tbody></table></div><p class="mute">Sans les actualités (prix seuls, {main} j) : AUC {po["auc"]:.3f}, précision {po["acc"] * 100:.1f} %.</p></section>')
+               + trs + f'</tbody></table></div><p class="mute">Sans les actualités (prix seuls, {main} j) : AUC {po["auc"]:.3f}, précision {po["acc"] * 100:.1f} %.{sc_txt}</p></section>')
 
     # Événements
     ev = "".join(f'<li><b>{e(x["date"])}</b> · {e(x["source"])} · {e(x["title"])} <span class="pill">{e(", ".join(x["cats"]))}</span></li>' for x in rep["events"])
+    ag = "".join(f'<li><b>{e(a["date"])}</b> · {e(a["label"])}</li>' for a in rep.get("agenda", []))
+    out.append('<section class="card"><h2>Agenda</h2><p class="sub">Résultats des 7 prochains jours et décisions de la Fed et de la BCE des 14 prochains jours.</p>'
+               + (f'<ul>{ag}</ul>' if ag else '<p class="mute">Rien d\'inscrit pour l\'instant.</p>') + '</section>')
     out.append('<section class="card"><h2>Événements marquants</h2><p class="sub">Trois dernières séances.</p><ul>' + ev + '</ul></section>')
     out.append('</main></body></html>')
     open(path, "w", encoding="utf-8").write("".join(out))

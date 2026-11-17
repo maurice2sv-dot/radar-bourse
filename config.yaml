@@ -18,30 +18,421 @@ gdelt:                  # historique mondial d'actualités, collecté par le wor
   pause: 10             # secondes entre requêtes (limite GDELT : 5 s, adresses partagées sur GitHub)
   per_run: 3            # séries au plus par passage horaire ; arrêt au premier refus
   budget_s: 360
+  tickers: [AAPL, MSFT, NVDA, GOOGL, META, ASML, AMZN, TSLA, JPM, BNP.PA, XOM, TTE.PA, LMT, RTX, HO.PA, SAF.PA, AIR.PA, MC.PA, LLY, SAN.PA]   # séries par entreprise suivies dans GDELT (limite de débit)
 feeds:                  # mode live 
   lemonde_inter: https://www.lemonde.fr/international/rss_full.xml
   lemonde_eco: https://www.lemonde.fr/economie/rss_full.xml
   bbc_world: https://feeds.bbci.co.uk/news/world/rss.xml
   bbc_business: https://feeds.bbci.co.uk/news/business/rss.xml
   france24: https://www.france24.com/fr/rss
+calendrier:
+  max_par_passage: 70   # valeurs dont on rafraîchit les dates de résultats à chaque passage (cycle d'une semaine)
+  banques_centrales:    # dates de décision. Sources : federalreserve.gov (2027 révisé le 12/11/2026), ecb.europa.eu
+    Fed: [2023-11-01, 2023-12-13, 2024-01-31, 2024-03-20, 2024-05-01, 2024-06-12, 2024-07-31, 2024-09-18, 2024-11-07, 2024-12-18,
+          2025-01-29, 2025-03-19, 2025-05-07, 2025-06-18, 2025-07-30, 2025-09-17, 2025-10-29, 2025-12-10,
+          2026-01-28, 2026-03-18, 2026-04-29, 2026-06-17, 2026-07-29, 2026-09-16, 2026-10-28, 2026-12-09,
+          2027-01-27, 2027-03-17, 2027-04-28, 2027-06-09, 2027-07-28, 2027-09-15, 2027-11-17]
+    BCE: [2023-10-26, 2023-12-14, 2024-01-25, 2024-03-07, 2024-04-11, 2024-06-06, 2024-07-18, 2024-09-12, 2024-10-17, 2024-12-12,
+          2025-01-30, 2025-03-06, 2025-04-17, 2025-06-05, 2025-07-24, 2025-09-11, 2025-10-30, 2025-12-18,
+          2026-02-05, 2026-03-19, 2026-04-30, 2026-06-11, 2026-07-23, 2026-09-10, 2026-10-29, 2026-12-17,
+          2027-02-04, 2027-03-18, 2027-04-29, 2027-06-10, 2027-07-22, 2027-09-09, 2027-10-28, 2027-12-16]
 watchlist:
-  AAPL:   {name: Apple, gdelt: 'Apple (iPhone OR "Tim Cook" OR shares)', sector: tech, techs: [ia, semi-conducteurs]}
-  MSFT:   {name: Microsoft, sector: tech, techs: [ia, cloud, cyber]}
-  NVDA:   {name: Nvidia, sector: tech, techs: [ia, semi-conducteurs]}
-  GOOGL:  {name: Alphabet, gdelt: '(Google OR "Alphabet Inc")', aliases: [Google], sector: tech, techs: [ia, quantique]}
-  META:   {name: Meta, gdelt: '(Facebook OR "Meta Platforms" OR Zuckerberg)', sector: tech, techs: [ia]}
-  ASML:   {name: ASML, sector: tech, techs: [semi-conducteurs]}
-  AMZN:   {name: Amazon, gdelt: 'Amazon (AWS OR Bezos OR shares OR retailer)', sector: conso, techs: [cloud, robotique]}
-  TSLA:   {name: Tesla, sector: auto, techs: [batteries, robotique]}
-  JPM:    {name: JPMorgan, gdelt: '(JPMorgan OR "JP Morgan")', sector: finance, techs: []}
-  BNP.PA: {name: BNP Paribas, sector: finance, techs: []}
-  XOM:    {name: Exxon Mobil, gdelt: '(Exxon OR ExxonMobil)', sector: energie, techs: [hydrogene]}
-  TTE.PA: {name: TotalEnergies, sector: energie, techs: [hydrogene, batteries]}
-  LMT:    {name: Lockheed Martin, sector: defense, techs: [drones, spatial]}
-  RTX:    {name: RTX, gdelt: '(Raytheon OR "RTX Corp")', sector: defense, techs: [drones, cyber]}
-  HO.PA:  {name: Thales, gdelt: 'Thales (defense OR defence OR aerospace OR radar)', sector: defense, techs: [cyber, spatial, drones]}
-  SAF.PA: {name: Safran, gdelt: 'Safran (engine OR aerospace OR aircraft)', sector: aero, techs: [spatial]}
-  AIR.PA: {name: Airbus, sector: aero, techs: [spatial]}
-  MC.PA:  {name: LVMH, sector: luxe, techs: []}
-  LLY:    {name: Eli Lilly, sector: sante, techs: [biotech]}
-  SAN.PA: {name: Sanofi, sector: sante, techs: [biotech]}
+  AAPL:
+    name: Apple
+    sector: tech
+    techs: [ia, semi-conducteurs]
+    gdelt: Apple (iPhone OR "Tim Cook" OR shares)
+  MSFT:
+    name: Microsoft
+    sector: tech
+    techs: [ia, cloud, cyber]
+  NVDA:
+    name: Nvidia
+    sector: tech
+    techs: [ia, semi-conducteurs]
+  GOOGL:
+    name: Alphabet
+    sector: tech
+    techs: [ia, quantique]
+    aliases: [Google]
+    gdelt: (Google OR "Alphabet Inc")
+  META:
+    name: Meta Platforms
+    sector: tech
+    techs: [ia]
+    aliases: [Facebook, Instagram, Zuckerberg]
+    gdelt: (Facebook OR "Meta Platforms" OR Zuckerberg)
+  ASML:
+    name: ASML
+    sector: tech
+    techs: [semi-conducteurs]
+  AVGO:
+    name: Broadcom
+    sector: tech
+    techs: [semi-conducteurs, ia]
+  ORCL:
+    name: Oracle
+    sector: tech
+    techs: [cloud]
+  CRM:
+    name: Salesforce
+    sector: tech
+    techs: [ia, cloud]
+  ADBE:
+    name: Adobe
+    sector: tech
+    techs: [ia]
+  AMD:
+    name: AMD
+    sector: tech
+    techs: [semi-conducteurs, ia]
+    aliases: [Advanced Micro Devices]
+  INTC:
+    name: Intel
+    sector: tech
+    techs: [semi-conducteurs]
+    case: true
+  QCOM:
+    name: Qualcomm
+    sector: tech
+    techs: [semi-conducteurs]
+  TXN:
+    name: Texas Instruments
+    sector: tech
+    techs: [semi-conducteurs]
+  IBM:
+    name: IBM
+    sector: tech
+    techs: [quantique, ia]
+  CSCO:
+    name: Cisco
+    sector: tech
+    techs: [cyber]
+  SAP.DE:
+    name: SAP
+    sector: tech
+    techs: [ia, cloud]
+    case: true
+  IFX.DE:
+    name: Infineon
+    sector: tech
+    techs: [semi-conducteurs]
+  STMPA.PA:
+    name: STMicroelectronics
+    sector: tech
+    techs: [semi-conducteurs]
+    aliases: [STMicro]
+  CAP.PA:
+    name: Capgemini
+    sector: tech
+    techs: [ia]
+  DSY.PA:
+    name: Dassault Systèmes
+    sector: tech
+    techs: [ia]
+    aliases: [Dassault Systemes]
+  AMZN:
+    name: Amazon
+    sector: conso
+    techs: [cloud, robotique]
+    match: [Amazon.com, AWS, Amazon Web Services, Bezos, Jassy]
+    gdelt: Amazon (AWS OR Bezos OR shares OR retailer)
+  NFLX: {name: Netflix, sector: conso}
+  DIS:
+    name: Disney
+    sector: conso
+    aliases: [Walt Disney]
+  MCD:
+    name: McDonald's
+    sector: conso
+    aliases: [McDonalds]
+  NKE: {name: Nike, sector: conso}
+  SBUX: {name: Starbucks, sector: conso}
+  HD: {name: Home Depot, sector: conso}
+  ADS.DE: {name: Adidas, sector: conso}
+  AC.PA: {name: Accor, sector: conso}
+  ITX.MC:
+    name: Inditex
+    sector: conso
+    aliases: [Zara]
+  PUB.PA:
+    name: Publicis
+    sector: conso
+    techs: [ia]
+  WMT: {name: Walmart, sector: distribution}
+  COST: {name: Costco, sector: distribution}
+  PG: {name: Procter & Gamble, sector: distribution}
+  KO: {name: Coca-Cola, sector: distribution}
+  PEP: {name: PepsiCo, sector: distribution}
+  BN.PA: {name: Danone, sector: distribution}
+  RI.PA: {name: Pernod Ricard, sector: distribution}
+  CA.PA: {name: Carrefour, sector: distribution}
+  NESN.SW:
+    name: Nestlé
+    sector: distribution
+    aliases: [Nestle]
+  ULVR.L: {name: Unilever, sector: distribution}
+  OR.PA:
+    name: L'Oréal
+    sector: distribution
+    aliases: [L'Oreal, Loreal]
+  MC.PA: {name: LVMH, sector: luxe}
+  RMS.PA:
+    name: Hermès
+    sector: luxe
+    aliases: [Hermes]
+  KER.PA: {name: Kering, sector: luxe}
+  EL.PA: {name: EssilorLuxottica, sector: luxe}
+  TSLA:
+    name: Tesla
+    sector: auto
+    techs: [batteries, robotique]
+  MBG.DE:
+    name: Mercedes-Benz
+    sector: auto
+    techs: [batteries]
+  BMW.DE:
+    name: BMW
+    sector: auto
+    techs: [batteries]
+  VOW3.DE:
+    name: Volkswagen
+    sector: auto
+    techs: [batteries]
+  RNO.PA:
+    name: Renault
+    sector: auto
+    techs: [batteries]
+  STLAP.PA:
+    name: Stellantis
+    sector: auto
+    techs: [batteries]
+  ML.PA: {name: Michelin, sector: auto}
+  JPM:
+    name: JPMorgan
+    sector: finance
+    aliases: [JP Morgan]
+    gdelt: (JPMorgan OR "JP Morgan")
+  BAC: {name: Bank of America, sector: finance}
+  WFC: {name: Wells Fargo, sector: finance}
+  GS: {name: Goldman Sachs, sector: finance}
+  MS: {name: Morgan Stanley, sector: finance}
+  C:
+    name: Citigroup
+    sector: finance
+    aliases: [Citi, Citibank]
+  BLK: {name: BlackRock, sector: finance}
+  V:
+    name: Visa
+    sector: finance
+    match: [Visa Inc]
+  MA: {name: Mastercard, sector: finance}
+  BRK-B: {name: Berkshire Hathaway, sector: finance}
+  AXP: {name: American Express, sector: finance}
+  BNP.PA: {name: BNP Paribas, sector: finance}
+  GLE.PA:
+    name: Société Générale
+    sector: finance
+    aliases: [Societe Generale]
+  ACA.PA:
+    name: Crédit Agricole
+    sector: finance
+    aliases: [Credit Agricole]
+  CS.PA: {name: AXA, sector: finance, case: true}
+  ALV.DE: {name: Allianz, sector: finance}
+  MUV2.DE: {name: Munich Re, sector: finance}
+  DBK.DE: {name: Deutsche Bank, sector: finance}
+  HSBA.L: {name: HSBC, sector: finance}
+  ISP.MI: {name: Intesa Sanpaolo, sector: finance}
+  SAN.MC:
+    name: Banco Santander
+    sector: finance
+    aliases: [Santander]
+  XOM:
+    name: Exxon Mobil
+    sector: energie
+    techs: [hydrogene]
+    aliases: [ExxonMobil, Exxon]
+    gdelt: (Exxon OR ExxonMobil)
+  CVX: {name: Chevron, sector: energie}
+  COP: {name: ConocoPhillips, sector: energie}
+  SLB:
+    name: SLB
+    sector: energie
+    aliases: [Schlumberger]
+    case: true
+  TTE.PA:
+    name: TotalEnergies
+    sector: energie
+    techs: [hydrogene, batteries]
+  SHEL.L:
+    name: Shell
+    sector: energie
+    match: [Shell plc, groupe Shell, Royal Dutch Shell]
+  ENI.MI: {name: Eni, sector: energie, case: true}
+  LMT:
+    name: Lockheed Martin
+    sector: defense
+    techs: [drones, spatial]
+  RTX:
+    name: RTX
+    sector: defense
+    techs: [drones, cyber]
+    aliases: [Raytheon]
+    gdelt: (Raytheon OR "RTX Corp")
+  NOC:
+    name: Northrop Grumman
+    sector: defense
+    techs: [spatial, drones]
+  GD: {name: General Dynamics, sector: defense}
+  HO.PA:
+    name: Thales
+    sector: defense
+    techs: [cyber, spatial, drones]
+    gdelt: Thales (defense OR defence OR aerospace OR radar)
+  RHM.DE:
+    name: Rheinmetall
+    sector: defense
+    techs: [drones]
+  BA.L: {name: BAE Systems, sector: defense}
+  LDO.MI:
+    name: Leonardo
+    sector: defense
+    techs: [spatial]
+    match: [Leonardo SpA, groupe Leonardo, Leonardo DRS]
+  SAAB-B.ST:
+    name: Saab
+    sector: defense
+    techs: [drones]
+  AM.PA: {name: Dassault Aviation, sector: defense}
+  BA:
+    name: Boeing
+    sector: aero
+    techs: [spatial]
+  AIR.PA:
+    name: Airbus
+    sector: aero
+    techs: [spatial]
+  SAF.PA:
+    name: Safran
+    sector: aero
+    techs: [spatial]
+    gdelt: Safran (engine OR aerospace OR aircraft)
+  RR.L:
+    name: Rolls-Royce
+    sector: aero
+    techs: [nucleaire]
+  GE:
+    name: GE Aerospace
+    sector: aero
+    aliases: [General Electric]
+  LLY:
+    name: Eli Lilly
+    sector: sante
+    techs: [biotech]
+  UNH: {name: UnitedHealth, sector: sante}
+  JNJ: {name: Johnson & Johnson, sector: sante}
+  PFE:
+    name: Pfizer
+    sector: sante
+    techs: [biotech]
+  MRK:
+    name: Merck
+    sector: sante
+    techs: [biotech]
+  ABBV:
+    name: AbbVie
+    sector: sante
+    techs: [biotech]
+  TMO: {name: Thermo Fisher, sector: sante}
+  ABT: {name: Abbott, sector: sante}
+  AMGN:
+    name: Amgen
+    sector: sante
+    techs: [biotech]
+  GILD:
+    name: Gilead
+    sector: sante
+    techs: [biotech]
+  SAN.PA:
+    name: Sanofi
+    sector: sante
+    techs: [biotech]
+  NOVO-B.CO:
+    name: Novo Nordisk
+    sector: sante
+    techs: [biotech]
+  ROG.SW:
+    name: Roche
+    sector: sante
+    techs: [biotech]
+  NOVN.SW:
+    name: Novartis
+    sector: sante
+    techs: [biotech]
+  AZN.L:
+    name: AstraZeneca
+    sector: sante
+    techs: [biotech]
+  BAYN.DE:
+    name: Bayer
+    sector: sante
+    techs: [biotech]
+  CAT:
+    name: Caterpillar
+    sector: industrie
+    techs: [robotique]
+  DE:
+    name: Deere
+    sector: industrie
+    techs: [robotique]
+    aliases: [John Deere]
+  HON:
+    name: Honeywell
+    sector: industrie
+    techs: [quantique]
+  UPS: {name: UPS, sector: industrie, case: true}
+  UNP: {name: Union Pacific, sector: industrie}
+  SIE.DE:
+    name: Siemens
+    sector: industrie
+    techs: [robotique]
+  SU.PA: {name: Schneider Electric, sector: industrie}
+  DG.PA:
+    name: Vinci
+    sector: industrie
+    match: [groupe Vinci, Vinci SA, Vinci Autoroutes, Vinci Construction, Vinci Energies]
+  SGO.PA: {name: Saint-Gobain, sector: industrie}
+  LR.PA: {name: Legrand, sector: industrie}
+  EN.PA: {name: Bouygues, sector: industrie}
+  ABBN.SW:
+    name: ABB
+    sector: industrie
+    techs: [robotique]
+    case: true
+  LIN:
+    name: Linde
+    sector: materiaux
+    techs: [hydrogene]
+  AI.PA:
+    name: Air Liquide
+    sector: materiaux
+    techs: [hydrogene]
+  BAS.DE: {name: BASF, sector: materiaux}
+  NEE: {name: NextEra Energy, sector: services_publics}
+  DUK: {name: Duke Energy, sector: services_publics}
+  SO: {name: Southern Company, sector: services_publics}
+  ENGI.PA:
+    name: Engie
+    sector: services_publics
+    techs: [hydrogene]
+  VIE.PA: {name: Veolia, sector: services_publics}
+  IBE.MC: {name: Iberdrola, sector: services_publics}
+  VZ: {name: Verizon, sector: telecom}
+  T: {name: AT&T, sector: telecom}
+  TMUS: {name: T-Mobile, sector: telecom}
+  ORA.PA:
+    name: Orange
+    sector: telecom
+    match: [opérateur Orange, groupe Orange, Orange SA, Orange Business]
+  DTE.DE: {name: Deutsche Telekom, sector: telecom}

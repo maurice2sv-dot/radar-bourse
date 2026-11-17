@@ -209,3 +209,47 @@ def collect_news_live(cfg, con):
         ok += 1
     con.commit()
     return ok, ko
+
+
+def collect_earnings_live(cfg, con):
+    """Dates et surprises de résultats (yfinance). Rafraîchit chaque passage les valeurs les plus anciennes,
+    pour couvrir tout l'univers en une semaine. Ne lève jamais : renvoie un état et des anomalies."""
+    tickers = list(cfg["watchlist"])
+    cap = cfg.get("calendrier", {}).get("max_par_passage", 70)
+    now = dt.datetime.now(dt.timezone.utc)
+    seen = dict(con.execute("SELECT ticker, fetched FROM earnings_fetch").fetchall())
+    lim = (now - dt.timedelta(days=6)).isoformat()
+    todo = sorted([t for t in tickers if seen.get(t, "") < lim], key=lambda t: seen.get(t, ""))[:cap]
+    if not todo:
+        return {"rafraichies": 0}, []
+    try:
+        import yfinance as yf
+    except Exception as e:
+        return {"rafraichies": 0}, [f"calendrier des résultats : {type(e).__name__}"]
+    ok, vides, ko = 0, [], []
+    for t in todo:
+        try:
+            e = yf.Ticker(t).get_earnings_dates(limit=16)
+        except Exception as ex:
+            ko.append(t)
+            if len(ko) >= 8 and ok == 0:
+                break  # source manifestement indisponible : inutile d'insister
+            continue
+        rows = []
+        if e is not None and len(e):
+            col = lambda *names: next((e[n] for n in names if n in e), pd.Series(np.nan, index=e.index))
+            est, act, sur = col("EPS Estimate"), col("Reported EPS"), col("Surprise(%)")
+            for d, a, b, c in zip(e.index, est, act, sur):
+                day = pd.Timestamp(d).strftime("%Y-%m-%d")
+                f = lambda x: None if x is None or x != x else float(x)
+                rows.append((t, day, f(a), f(b), None if f(c) is None else f(c) / 100))
+        else:
+            vides.append(t)
+        con.executemany("INSERT OR REPLACE INTO earnings VALUES (?,?,?,?,?)", rows)
+        con.execute("INSERT OR REPLACE INTO earnings_fetch VALUES (?,?,?)", (t, now.isoformat(), len(rows)))
+        ok += 1
+    con.commit()
+    errs = []
+    if ko:
+        errs.append(f"calendrier des résultats : {len(ko)} valeurs en échec sur {len(todo)} (reprise au prochain passage)")
+    return {"rafraichies": ok, "sans_donnees": len(vides)}, errs

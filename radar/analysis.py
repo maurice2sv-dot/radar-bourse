@@ -9,7 +9,9 @@ CAT_FR = {"militaire": "militaire", "securitaire": "sécuritaire", "politique": 
           "media": "médiatique"}
 MIN_HIST = 30  # jours actifs exigés sur les 60 jours de référence avant de parler de hausse ou d'émergence
 SEC_FR = {"tech": "Technologie", "conso": "Consommation", "auto": "Automobile", "finance": "Finance",
-          "energie": "Énergie", "defense": "Défense", "aero": "Aéronautique", "luxe": "Luxe", "sante": "Santé"}
+          "energie": "Énergie", "defense": "Défense", "aero": "Aéronautique", "luxe": "Luxe", "sante": "Santé",
+          "distribution": "Grande consommation", "industrie": "Industrie", "materiaux": "Matériaux",
+          "services_publics": "Services publics", "telecom": "Télécoms"}
 
 
 def _z(s):
@@ -17,7 +19,7 @@ def _z(s):
     return (s - s.mean()) / (sd if sd and not np.isnan(sd) else 1.0)
 
 
-def analyze(df, scores, close, cfg, preds, wcs):
+def analyze(df, scores, close, cfg, preds, wcs, cal=None):
     wl, main = cfg["watchlist"], cfg["main_horizon"]
     last_date = df["date"].max()
     last = df[df["date"] == last_date].set_index("ticker")
@@ -84,7 +86,8 @@ def analyze(df, scores, close, cfg, preds, wcs):
     p_main = preds[preds.h == main].set_index("ticker")
     tab = pd.DataFrame({
         "news": last["news_comp"].abs(), "vr": last["volratio"], "conf": (p_main["p_up"] - 0.5).abs()}).dropna()
-    tab["attention"] = _z(tab["news"]) + _z(tab["vr"]) + _z(tab["conf"])
+    tab["earn"] = (last["earn_next"] <= 5 / 30).astype(float).reindex(tab.index).fillna(0)  # résultats sous 5 jours
+    tab["attention"] = _z(tab["news"]) + _z(tab["vr"]) + _z(tab["conf"]) + 1.0 * tab["earn"]
     recent = close.tail(60)
     watch = []
     for t in tab.sort_values("attention", ascending=False).index[:8]:
@@ -93,6 +96,7 @@ def analyze(df, scores, close, cfg, preds, wcs):
         watch.append({"ticker": t, "name": wl[t]["name"], "sector": SEC_FR.get(wl[t]["sector"], wl[t]["sector"]),
                       "p": ps, "driver": d, "mentions": float(last.loc[t, "co_mentions"]), "ret5": float(last.loc[t, "ret5"]),
                       "volratio": float(last.loc[t, "volratio"]), "attention": float(tab.loc[t, "attention"]),
+                      "earn": bool(tab.loc[t, "earn"]),
                       "spark": [float(x) for x in (recent[t] / recent[t].iloc[0]).values]})
     allp = [{"ticker": t, "name": wl[t]["name"], "p5": float(p_main.loc[t, "p_up"])} for t in p_main.index]
 
@@ -105,5 +109,17 @@ def analyze(df, scores, close, cfg, preds, wcs):
         for row in r.sort_values("mag", ascending=False).head(8).itertuples():
             ev.append({"date": row.date.strftime("%d/%m"), "source": row.source, "title": row.title,
                        "cats": [CAT_FR[c] for c in row.cats], "pol": float(row.polarity)})
-    return {"calib_days": int(max(0, MIN_HIST - hist_rss)), "as_of": last_date.strftime("%Y-%m-%d"), "sectors": sectors, "techs": techs, "heat": heat,
+    # Agenda : résultats des 7 prochains jours, décisions de banques centrales des 14 prochains jours
+    agenda = []
+    e = (cal or {}).get("earn")
+    if e is not None and len(e):
+        up = e[(e["date"] > last_date) & (e["date"] <= last_date + pd.Timedelta(days=7)) & e["ticker"].isin(list(wl))]
+        for r in up.sort_values("date").itertuples():
+            agenda.append({"d": r.date, "date": r.date.strftime("%d/%m"), "label": f"résultats {wl[r.ticker]['name']}"})
+    for name, ds in ((cal or {}).get("cb") or {}).items():
+        nxt = [pd.Timestamp(str(d)) for d in ds if last_date < pd.Timestamp(str(d)) <= last_date + pd.Timedelta(days=14)]
+        if nxt:
+            agenda.append({"d": nxt[0], "date": nxt[0].strftime("%d/%m"), "label": f"décision {name}"})
+    agenda = [{k: v for k, v in a.items() if k != "d"} for a in sorted(agenda, key=lambda a: a["d"])]
+    return {"agenda": agenda, "calib_days": int(max(0, MIN_HIST - hist_rss)), "as_of": last_date.strftime("%Y-%m-%d"), "sectors": sectors, "techs": techs, "heat": heat,
             "watch": watch, "drivers": {t: driver(t)[0] for t in last.index}, "all_p5": sorted(allp, key=lambda x: -x["p5"]), "events": ev}

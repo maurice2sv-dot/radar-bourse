@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.metrics import brier_score_loss, roc_auc_score
 
-from .features import ALL_FEATS, PRICE_FEATS
+from .features import ALL_FEATS, NEWS_FEATS, PRICE_FEATS
 
 
 def make_model(iters=120):
@@ -42,6 +42,7 @@ def backtest(df, feats, h, n_folds=5, start_frac=0.4):
 def run_backtests(df, horizons, main):
     res = {str(h): backtest(df, ALL_FEATS, h) for h in horizons}
     res["price_only"] = backtest(df, PRICE_FEATS, main)  # test de valeur ajoutée des actualités
+    res["sans_calendrier"] = backtest(df, PRICE_FEATS + NEWS_FEATS, main)  # valeur ajoutée du calendrier
     return res
 
 

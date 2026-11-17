@@ -34,7 +34,10 @@ def _now():
 
 def series(cfg):
     out = [("cat", c, q) for c, q in CATS.items()]
+    track = cfg.get("gdelt", {}).get("tickers")
     for t, v in cfg["watchlist"].items():
+        if track is not None and t not in track:
+            continue
         out.append(("ticker", t, v.get("gdelt") or f'"{v["name"]}"'))
     return out
 

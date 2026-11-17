@@ -22,6 +22,8 @@ def generate(rep, out_dir):
               "aucune pression inhabituelle" if h else "en calibrage (historique d'actualités insuffisant)")
     if ev:
         alerte += f". Événement marquant : {ev['title']} ({ev['source']})"
+    if rep.get("agenda"):
+        alerte += ". À venir : " + " ; ".join(f"{a['label']} le {a['date']}" for a in rep["agenda"][:4])
     fiab = (f"AUC backtest {bt['auc']:.2f} (apport des actualités {gain:+.2f}), coefficient de confiance {rep['shrink']:.2f}, "
             f"{rep['n_resolved']} prévisions résolues")
     if rep.get("live_hit") is not None:
