@@ -1,19 +1,25 @@
 {
- "genere_utc": "2026-11-17 07:00",
+ "genere_utc": "2026-11-17 14:40",
  "mode": "live",
  "cours_au": "2026-11-16",
  "jours_de_retard": 1,
  "anomalies": [
-  "GDELT : 4 séries à jour sur 29 (4 avec historique), 1 acquises à ce passage, refus : MSFT (HTTP 429 'Please limit requests to one every 5 seconds or contact kale') ; NVDA (HTTP 429 'Please limit requests to one every 5 seconds or contact kale'). Reprise au prochain passage."
+  "cours non mis à jour : ROG.SW",
+  "GDELT : 4 séries à jour sur 29 (4 avec historique), collecte horaire en cours, dernier refus 2026-11-17 14:19 : AIR.PA : HTTP 429 'Please limit requests to one every 5 seconds or contact kale'",
+  "valeurs écartées faute d'historique : ROG.SW"
  ],
  "journal": {
   "cours": [
-   "yfinance (20)"
+   "yfinance (138)"
   ],
+  "resultats": {
+   "rafraichies": 70,
+   "sans_donnees": 0
+  },
   "flux_ok": 5,
-  "gdelt_series": 1,
+  "gdelt_series": 4,
   "gdelt_signaux": 4126,
-  "nouveaux_articles": 6,
+  "nouveaux_articles": 79,
   "rejeu": 0,
   "resolues": 0
  }
