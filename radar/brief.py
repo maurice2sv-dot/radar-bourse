@@ -20,6 +20,8 @@ def generate(rep, out_dir):
     ev = rep["events"][0] if rep["events"] else None
     alerte = (f"{h['cat']} à ×{h['ratio']:.1f} la normale" if h and h["ratio"] >= 2 else
               "aucune pression inhabituelle" if h else "en calibrage (historique d'actualités insuffisant)")
+    if rep.get("alertes_marche"):
+        alerte = "MARCHÉS : " + " ; ".join(rep["alertes_marche"]) + ". " + alerte[0].upper() + alerte[1:]
     if ev:
         alerte += f". Événement marquant : {ev['title']} ({ev['source']})"
     if rep.get("agenda"):
@@ -28,6 +30,11 @@ def generate(rep, out_dir):
             f"{rep['n_resolved']} prévisions résolues")
     if rep.get("live_hit") is not None:
         fiab += f", {_p(rep['live_hit'])} justes"
+    sv = rep.get("suivi") or {}
+    if sv.get("n"):
+        fiab += f" ; valeurs signalées : {_p(sv['beat'])} ont battu le marché à {main} j (écart moyen {sv['excess'] * 100:+.2f} %, {sv['n']} cas sur {sv['jours']} jour{'s' if sv['jours'] > 1 else ''})"
+    else:
+        fiab += " ; suivi des valeurs signalées démarré, premier bilan après 5 séances"
     anomalies = ([f"cours figés depuis {rep['stale_days']} jours"] if rep.get('stale_days', 0) > 4 else []) + rep.get('errors', [])
     plus = f" (+{len(anomalies) - 3} autres, voir data/status.json)" if len(anomalies) > 3 else ""
     etat = ("ANOMALIES : " + " ; ".join(anomalies[:3]) + plus) if anomalies else "toutes les sources ont répondu"
@@ -51,6 +58,7 @@ def generate(rep, out_dir):
               "- Sources les plus fiables : " + ", ".join(f"{x['key']} {x['value']:.2f}" for x in rep["weights_source"][:3]),
               f"- Liens événement × secteur validés ({rep['n_sig']} significatifs sur {rep['n_tests']} testés) : "
               + (", ".join(f"{x['key']} {x['value']:.2f}" for x in rep["weights_pairs"][:4]) or "aucun pour l'instant"),
+              "- Marchés (20 séances) : " + (", ".join(f"{m['label']} {m['niveau']:.2f} ({m['chg20']:+.2f} pt)" if m['points'] else f"{m['label']} {m['niveau']:.2f} ({m['chg20']:+.1%})" for m in rep.get('marches', [])) or "indisponibles"),
               f"- Valeur ajoutée des actualités sur les prix seuls : AUC {gain:+.2f}",
               "Veille informative, pas un conseil en investissement."]
     out = pathlib.Path(out_dir)

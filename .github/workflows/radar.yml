@@ -20,11 +20,31 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -r requirements.txt
+      - name: Récupérer la base (release « base »)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p data
+          if gh release view base >/dev/null 2>&1; then
+            gh release download base -p radar.db -D data --clobber || { echo "Base illisible : arrêt pour ne pas repartir d'un journal vide"; exit 1; }
+          elif [ -f data/radar.db ]; then
+            gh release create base data/radar.db -t "Base du radar" -n "Base SQLite du radar, remplacée chaque soir, sauvegarde chaque vendredi. Ne pas supprimer."
+          else
+            echo "Ni release ni base : arrêt"; exit 1
+          fi
       - run: python run.py --mode live
+      - name: Sauvegarder la base
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python -c "import sqlite3;c=sqlite3.connect('data/radar.db');assert c.execute('PRAGMA integrity_check').fetchone()[0]=='ok';assert c.execute('SELECT COUNT(*) FROM predictions').fetchone()[0]>0"
+          gh release upload base data/radar.db --clobber
+          if [ "$(date -u +%u)" = "5" ]; then f="data/radar-$(date -u +%G-S%V).db"; cp data/radar.db "$f"; gh release upload base "$f" --clobber; fi
       - name: Sauvegarde de la base et des briefs
         run: |
           git config user.name "radar-bot"
           git config user.email "radar-bot@users.noreply.github.com"
+          git rm -q --cached --ignore-unmatch data/radar.db
           git add data dashboard.html
           git commit -m "Radar $(date -u +%F)" || echo "rien à enregistrer"
           for i in 1 2 3; do git pull --rebase -q origin main && git push && exit 0; sleep 15; done

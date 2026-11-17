@@ -253,3 +253,25 @@ def collect_earnings_live(cfg, con):
     if ko:
         errs.append(f"calendrier des résultats : {len(ko)} valeurs en échec sur {len(todo)} (reprise au prochain passage)")
     return {"rafraichies": ok, "sans_donnees": len(vides)}, errs
+
+
+def collect_macro_live(cfg, con):
+    """Indicateurs de marché (VIX, taux, pétrole, dollar, or). Ne lève jamais."""
+    syms = cfg.get("marches", {})
+    if not syms:
+        return 0, []
+    try:
+        import yfinance as yf
+        data = yf.download(list(syms.values()), period="3y", auto_adjust=True, progress=False, group_by="column", threads=False)
+        close = data["Close"]
+    except Exception as e:
+        return 0, [f"indicateurs de marché : {type(e).__name__}"]
+    today, rows, missing = _open_day(), [], []
+    for lab, s in syms.items():
+        if s not in close or close[s].dropna().empty:
+            missing.append(lab)
+            continue
+        rows += [(s, d.strftime("%Y-%m-%d"), float(v)) for d, v in close[s].dropna().items() if d.strftime("%Y-%m-%d") < today]
+    con.executemany("INSERT OR REPLACE INTO macro VALUES (?,?,?)", rows)
+    con.commit()
+    return len(syms) - len(missing), ([f"indicateurs indisponibles : {', '.join(missing)}"] if missing else [])

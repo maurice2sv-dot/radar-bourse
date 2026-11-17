@@ -78,6 +78,8 @@ def run(cfg, root=".", do_replay=True):
         try:
             log["resultats"], e = collect.collect_earnings_live(cfg, con)
             errs += e
+            log["marches"], e = collect.collect_macro_live(cfg, con)
+            errs += e
         except Exception as ex:
             errs.append(f"calendrier des résultats : {type(ex).__name__}")
         try:
@@ -103,26 +105,29 @@ def run(cfg, root=".", do_replay=True):
 
     # 1. Backtest honnête : poids neutres (les poids appris utilisent des rendements qui seraient « futurs »)
     cal = {"earn": features.load_earnings(con), "cb": cfg.get("calendrier", {}).get("banques_centrales", {})}
-    df0 = features.build_features(close, volume, scores, wl, hz, cal=cal)
+    macro = features.load_macro(con)
+    df0 = features.build_features(close, volume, scores, wl, hz, cal=cal, macro=macro)
     bt = model.run_backtests(df0, hz, main)
 
     # 2. Journal : rejeu point-in-time puis résolution
     if do_replay:
         log["rejeu"] = replay(con, df0, features.ALL_FEATS, cfg)
     log["resolues"] = journal.resolve(con, close)
+    log["signalees_resolues"] = journal.resolve_watch(con, close, h=main)
 
     # 3. Apprentissage : poids des sources et des couples catégorie x secteur, avec test de signification
     n_tests, n_sig = journal.learn_weights(con, close, scores, wl, h=main)
     wsrc, wcs = db.get_weights(con, "source"), db.get_weights(con, "catsec")
 
     # 4. Prédiction du jour avec les poids appris
-    df = features.build_features(close, volume, scores, wl, hz, wsrc, wcs, cal=cal)
+    df = features.build_features(close, volume, scores, wl, hz, wsrc, wcs, cal=cal, macro=macro)
     preds, last = model.predict_latest(df, features.ALL_FEATS, hz)
     stats = journal.live_stats(con)
     k, n_res, hit = journal.shrink_factor(stats, main)
     preds["p_up"] = 0.5 + k * (preds["p_raw"] - 0.5)
-    rep = analysis.analyze(df, scores, close, dict(cfg, watchlist=wl), preds, wcs, cal)
+    rep = analysis.analyze(df, scores, close, dict(cfg, watchlist=wl), preds, wcs, cal, macro)
     run_date = last.strftime("%Y-%m-%d")
+    journal.log_watch(con, run_date, [w["ticker"] for w in rep["watch"][:3]], [w["p"][str(main)] for w in rep["watch"][:3]])
     journal.log_predictions(con, run_date, [(r.ticker, int(r.h), r.p_up, r.p_raw, rep["drivers"][r.ticker])
                                             for r in preds.itertuples()], "live")
 
@@ -137,7 +142,7 @@ def run(cfg, root=".", do_replay=True):
     today = dt.datetime.now(dt.timezone.utc).replace(tzinfo=None)
     rep.update({"mode": cfg["mode"], "backtest": bt, "main_horizon": main, "horizons": hz,
                 "weights_source": w("source"), "weights_pairs": pairs, "n_tests": n_tests, "n_sig": n_sig,
-                "journal": stats.to_dict("records"), "shrink": k, "n_resolved": n_res, "live_hit": hit,
+                "suivi": journal.watch_stats(con), "journal": stats.to_dict("records"), "shrink": k, "n_resolved": n_res, "live_hit": hit,
                 "n_articles": int(len(scores)), "n_gdelt": int((scores["source"] == "GDELT").sum()) if len(scores) else 0,
                 "generated_utc": today.strftime("%Y-%m-%d %H:%M"), "stale_days": int((today.date() - last.date()).days),
                 "errors": errs, "log": log})

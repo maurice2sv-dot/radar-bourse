@@ -10,7 +10,8 @@ PRICE_FEATS = ["ret1", "ret5", "ret20", "rel5", "rel20", "vol20", "volratio", "d
                "mkt_ret5", "mkt_ret20", "sec_id"]
 NEWS_FEATS = [f"n_{c}" for c in CATS] + ["news_comp", "co_sent", "co_mentions"]
 CAL_FEATS = ["earn_next", "earn_since", "earn_surprise", "cb_next"]
-ALL_FEATS = PRICE_FEATS + NEWS_FEATS + CAL_FEATS
+MACRO_FEATS = ["vix_rel", "vix_chg5", "taux_chg20", "petrole_ret20", "dollar_ret20", "or_ret20"]
+ALL_FEATS = PRICE_FEATS + NEWS_FEATS + CAL_FEATS + MACRO_FEATS
 
 
 def load_prices(con, wl, min_rows=120):
@@ -59,11 +60,32 @@ def _to_next(ev, iv, cap):
     return np.clip(np.where(j < len(ev), d, cap), 0, cap)
 
 
-def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None, cal=None):
+def load_macro(con):
+    m = pd.read_sql("SELECT symbol,date,close FROM macro", con, parse_dates=["date"])
+    return m.pivot(index="date", columns="symbol", values="close").sort_index() if len(m) else pd.DataFrame()
+
+
+def macro_frame(macro, idx):
+    """Variables de marché communes à toutes les valeurs. Absentes : NaN (le modèle sait les ignorer)."""
+    m = macro.reindex(macro.index.union(idx)).ffill(limit=5).reindex(idx) if macro is not None and len(macro) else pd.DataFrame(index=idx)
+    g = lambda s: m[s] if s in m else pd.Series(np.nan, index=idx)
+    vix = g("^VIX")
+    out = pd.DataFrame(index=idx)
+    out["vix_rel"] = vix / vix.rolling(252, min_periods=60).median()
+    out["vix_chg5"] = vix.pct_change(5, fill_method=None)
+    out["taux_chg20"] = g("^TNX").diff(20)
+    out["petrole_ret20"] = g("CL=F").pct_change(20, fill_method=None)
+    out["dollar_ret20"] = g("DX-Y.NYB").pct_change(20, fill_method=None)
+    out["or_ret20"] = g("GC=F").pct_change(20, fill_method=None)
+    return out
+
+
+def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None, cal=None, macro=None):
     wsrc, wcs = wsrc or {}, wcs or {}
     idx, n = close.index, len(close)
     iv = idx.values.astype("datetime64[ns]")
     cb_next = _to_next(_cb_dates(cal), iv, 15) / 15
+    mf = macro_frame(macro, idx)
     earn = (cal or {}).get("earn")
     earn_by = {t: g for t, g in earn.groupby("ticker")} if earn is not None and len(earn) else {}
     xr = rel_exposure(wl)
@@ -105,6 +127,8 @@ def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None, cal
         sur = g["surprise"].values.astype(float) if g is not None else np.zeros(0)
         f["earn_surprise"] = np.clip(np.nan_to_num(np.where(j >= 0, sur[np.maximum(j, 0)], 0.0)), -0.5, 0.5) if len(ev) else 0.0
         f["cb_next"] = cb_next
+        for k in MACRO_FEATS:
+            f[k] = mf[k].values
         f["sec_id"] = SECTORS.index(sector)  # sans lui, les actualités serviraient surtout à reconnaître le secteur
         comp = 0
         for k in CATS:

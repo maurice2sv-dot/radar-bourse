@@ -19,7 +19,7 @@ def _z(s):
     return (s - s.mean()) / (sd if sd and not np.isnan(sd) else 1.0)
 
 
-def analyze(df, scores, close, cfg, preds, wcs, cal=None):
+def analyze(df, scores, close, cfg, preds, wcs, cal=None, macro=None):
     wl, main = cfg["watchlist"], cfg["main_horizon"]
     last_date = df["date"].max()
     last = df[df["date"] == last_date].set_index("ticker")
@@ -121,5 +121,25 @@ def analyze(df, scores, close, cfg, preds, wcs, cal=None):
         if nxt:
             agenda.append({"d": nxt[0], "date": nxt[0].strftime("%d/%m"), "label": f"décision {name}"})
     agenda = [{k: v for k, v in a.items() if k != "d"} for a in sorted(agenda, key=lambda a: a["d"])]
-    return {"agenda": agenda, "calib_days": int(max(0, MIN_HIST - hist_rss)), "as_of": last_date.strftime("%Y-%m-%d"), "sectors": sectors, "techs": techs, "heat": heat,
+    # Indicateurs de marché : niveau, variation sur 20 séances, alertes de risque
+    marches, alertes = [], []
+    if macro is not None and len(macro):
+        m = macro[macro.index <= last_date]
+        for lab, s in cfg.get("marches", {}).items():
+            if s not in m or m[s].dropna().size < 25:
+                continue
+            v = m[s].dropna()
+            lvl, chg20 = float(v.iloc[-1]), (float(v.iloc[-1] - v.iloc[-21]) if s == "^TNX" else float(v.iloc[-1] / v.iloc[-21] - 1))
+            marches.append({"label": lab, "niveau": lvl, "chg20": chg20, "points": s == "^TNX", "date": v.index[-1].strftime("%d/%m")})
+            if s in ("^VIX", "^V2TX"):
+                chg5 = float(v.iloc[-1] / v.iloc[-6] - 1)
+                if lvl >= 25 or chg5 >= 0.30:
+                    alertes.append(f"tension de marché, {lab} à {lvl:.1f} ({chg5 * 100:+.0f} % sur 5 séances)")
+            elif s == "CL=F" and abs(chg20) >= 0.15:
+                alertes.append(f"pétrole {chg20 * 100:+.0f} % sur 20 séances")
+            elif s == "DX-Y.NYB" and abs(chg20) >= 0.04:
+                alertes.append(f"dollar {chg20 * 100:+.1f} % sur 20 séances")
+            elif s == "^TNX" and abs(chg20) >= 0.40:
+                alertes.append(f"taux US à 10 ans {chg20:+.2f} point sur 20 séances")
+    return {"marches": marches, "alertes_marche": alertes, "agenda": agenda, "calib_days": int(max(0, MIN_HIST - hist_rss)), "as_of": last_date.strftime("%Y-%m-%d"), "sectors": sectors, "techs": techs, "heat": heat,
             "watch": watch, "drivers": {t: driver(t)[0] for t in last.index}, "all_p5": sorted(allp, key=lambda x: -x["p5"]), "events": ev}

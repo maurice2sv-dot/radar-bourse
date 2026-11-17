@@ -90,6 +90,8 @@ def render(rep, path):
           (f'{gain:+.2f}', "AUC apporté par les actualités"),
           (pct(b["acc_conf"]), f'Précision si confiance forte (n={b["n_conf"]})'),
           (pct(jmain["hit"]) if jmain else "n/d", f'Réussite journal à {main} j (n={jmain["n"] if jmain else 0})'),
+          (pct(rep["suivi"]["beat"]) if rep.get("suivi", {}).get("n") else "en cours",
+           f'Valeurs signalées battant le marché à {main} j (n={rep.get("suivi", {}).get("n", 0)})'),
           (f'{rep["shrink"]:.2f}', "Coefficient de confiance (0,1 à 1)")]
     out.append('<div class="kpis">' + "".join(f'<div class="kpi"><b>{v}</b><span>{e(t)}</span></div>' for v, t in kp) + '</div>')
 
@@ -133,6 +135,7 @@ def render(rep, path):
                   f'<td class="n">{bt[str(h)]["acc_conf"] * 100:.1f} % ({bt[str(h)]["n_conf"]})</td></tr>' for h in hz)
     po = bt["price_only"]
     sc_txt = f" Sans le calendrier : AUC {bt['sans_calendrier']['auc']:.3f}." if "sans_calendrier" in bt else ""
+    sc_txt += f" Sans les indicateurs de marché : AUC {bt['sans_marches']['auc']:.3f}." if "sans_marches" in bt else ""
     out.append('<section class="card"><h2>Fiabilité du modèle (backtest sans fuite)</h2><p class="sub">Entraînement sur le passé seul, test sur 5 périodes successives, écart de h jours entre les deux. '
                'Cible : battre la moyenne des valeurs suivies. Poids neutres (les poids appris utilisent des résultats futurs). Les rendements se chevauchent : lire les chiffres comme des ordres de grandeur.</p>'
                '<div style="overflow-x:auto"><table><thead><tr><th>Horizon</th><th class="n">Précision</th><th class="n">Référence (toujours la même direction)</th><th class="n">AUC</th><th class="n">Brier</th><th class="n">Précision si confiance forte (n)</th></tr></thead><tbody>'
@@ -140,6 +143,13 @@ def render(rep, path):
 
     # Événements
     ev = "".join(f'<li><b>{e(x["date"])}</b> · {e(x["source"])} · {e(x["title"])} <span class="pill">{e(", ".join(x["cats"]))}</span></li>' for x in rep["events"])
+    mk = "".join(f'<tr><td>{e(x["label"])}</td><td class="n">{x["niveau"]:.2f}</td><td class="n">'
+                 + (f'{x["chg20"]:+.2f} pt' if x["points"] else f'{x["chg20"] * 100:+.1f} %') + f'</td><td class="n mute">{e(x["date"])}</td></tr>'
+                 for x in rep.get("marches", []))
+    if mk:
+        al = ('<p class="sub"><b>Alertes : ' + e(" ; ".join(rep["alertes_marche"])) + '</b></p>') if rep.get("alertes_marche") else ''
+        out.append('<section class="card"><h2>Marchés</h2><p class="sub">Niveau et variation sur 20 séances. Alerte si VIX au-dessus de 25 ou en hausse de 30 % en 5 séances, pétrole ±15 %, dollar ±4 %, taux ±0,40 point.</p>'
+                   + al + '<table><thead><tr><th>Indicateur</th><th class="n">Niveau</th><th class="n">20 séances</th><th class="n">Au</th></tr></thead><tbody>' + mk + '</tbody></table></section>')
     ag = "".join(f'<li><b>{e(a["date"])}</b> · {e(a["label"])}</li>' for a in rep.get("agenda", []))
     out.append('<section class="card"><h2>Agenda</h2><p class="sub">Résultats des 7 prochains jours et décisions de la Fed et de la BCE des 14 prochains jours.</p>'
                + (f'<ul>{ag}</ul>' if ag else '<p class="mute">Rien d\'inscrit pour l\'instant.</p>') + '</section>')

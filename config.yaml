@@ -25,6 +25,14 @@ feeds:                  # mode live
   bbc_world: https://feeds.bbci.co.uk/news/world/rss.xml
   bbc_business: https://feeds.bbci.co.uk/news/business/rss.xml
   france24: https://www.france24.com/fr/rss
+marches:                # indicateurs de marché (yfinance) : contexte des secteurs et alertes de risque
+  VIX: ^VIX
+  VSTOXX: ^V2TX
+  Taux US 10 ans: ^TNX
+  Pétrole WTI: CL=F
+  Dollar: DX-Y.NYB
+  Or: GC=F
+  EUR/USD: EURUSD=X
 calendrier:
   max_par_passage: 70   # valeurs dont on rafraîchit les dates de résultats à chaque passage (cycle d'une semaine)
   banques_centrales:    # dates de décision. Sources : federalreserve.gov (2027 révisé le 12/11/2026), ecb.europa.eu

@@ -19,6 +19,7 @@ Mode `demo` (défaut) : données synthétiques, pour tester la mécanique. Pour 
 6. **Prudence** : probabilités rapprochées de 50 % tant que le taux de réussite réel n'est pas prouvé ; le backtest compare avec et sans actualités.
 
 ## Robustesse
+- La base `radar.db` n'est plus dans l'historique Git : elle vit dans la release GitHub « base » (copie du soir, plus une sauvegarde chaque vendredi). Le passage s'arrête s'il ne peut pas la récupérer, pour ne jamais repartir d'un journal vide.
 - Chaque source est isolée : une panne est notée dans `data/status.json` et dans le brief, sans bloquer.
 - Une base par mode (`radar_demo.db` et `radar.db`) : la démo ne contamine jamais le réel.
 - GDELT : collecte horaire séparée (`.github/workflows/gdelt.yml`, `run_gdelt.py`), 3 séries au plus par heure, arrêt au premier refus. Séries stockées en CSV dans `data/gdelt/`, état dans `data/gdelt/_etat.json`. Le passage du soir ne fait que les importer.

@@ -118,3 +118,34 @@ def learn_weights(con, close, scores, wl, h=5):
     con.executemany("INSERT INTO weights VALUES (?,?,?,?,?,?)", out)
     con.commit()
     return sum(1 for o in out if o[0] == "catsec"), int(sig)
+
+
+def log_watch(con, run_date, tickers, p5):
+    """Enregistre les valeurs signalées dans le brief (ce que l'utilisateur lit réellement)."""
+    con.execute("DELETE FROM watch_log WHERE run_date=? AND resolved=0", (run_date,))
+    con.executemany("INSERT OR REPLACE INTO watch_log(run_date,rank,ticker,p5) VALUES (?,?,?,?)",
+                    [(run_date, i + 1, t, p) for i, (t, p) in enumerate(zip(tickers, p5))])
+    con.commit()
+
+
+def resolve_watch(con, close, h=5):
+    """Après h séances : la valeur signalée a-t-elle battu la moyenne des valeurs suivies ?"""
+    idx, upd = close.index, []
+    for run_date, rank, t in con.execute("SELECT run_date,rank,ticker FROM watch_log WHERE resolved=0").fetchall():
+        pos = idx.searchsorted(pd.Timestamp(run_date), side="right") - 1
+        if pos < 0 or pos + h >= len(idx) or t not in close:
+            continue
+        r = close.iloc[pos + h] / close.iloc[pos] - 1
+        x = float(r[t] - r.mean())
+        if x == x:
+            upd.append((x, int(x > 0), run_date, rank))
+    con.executemany("UPDATE watch_log SET resolved=1, excess=?, beat=? WHERE run_date=? AND rank=?", upd)
+    con.commit()
+    return len(upd)
+
+
+def watch_stats(con):
+    n, beat, ex = con.execute("SELECT COUNT(*), AVG(beat), AVG(excess) FROM watch_log WHERE resolved=1").fetchone()
+    days = con.execute("SELECT COUNT(DISTINCT run_date) FROM watch_log WHERE resolved=1").fetchone()[0]
+    pending = con.execute("SELECT COUNT(DISTINCT run_date) FROM watch_log WHERE resolved=0").fetchone()[0]
+    return {"n": int(n), "jours": int(days), "beat": beat, "excess": ex, "en_attente": int(pending)}

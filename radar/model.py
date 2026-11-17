@@ -4,7 +4,12 @@ import pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.metrics import brier_score_loss, roc_auc_score
 
-from .features import ALL_FEATS, NEWS_FEATS, PRICE_FEATS
+from .features import ALL_FEATS, MACRO_FEATS, NEWS_FEATS, PRICE_FEATS
+
+
+def _usable(tr, feats):
+    """Écarte les variables sans aucune valeur (source absente) : le modèle ne sait pas les découper."""
+    return [f for f in feats if tr[f].notna().any()]
 
 
 def make_model(iters=120):
@@ -33,8 +38,9 @@ def backtest(df, feats, h, n_folds=5, start_frac=0.4):
         train_end = dates[max(i0 - h - 1, 0)]  # écart de h jours : aucune fuite de la cible
         tr = d[d["date"] <= train_end]
         te = d[(d["date"] >= fd[0]) & (d["date"] <= fd[-1])]
-        m = make_model().fit(tr[feats], (tr[f"x{h}"] > 0).astype(int))
-        out.append(pd.DataFrame({"p": m.predict_proba(te[feats])[:, 1],
+        fu = _usable(tr, feats)
+        m = make_model().fit(tr[fu], (tr[f"x{h}"] > 0).astype(int))
+        out.append(pd.DataFrame({"p": m.predict_proba(te[fu])[:, 1],
                                  "y": (te[f"x{h}"] > 0).astype(int).values}))
     return _metrics(pd.concat(out))
 
@@ -43,6 +49,7 @@ def run_backtests(df, horizons, main):
     res = {str(h): backtest(df, ALL_FEATS, h) for h in horizons}
     res["price_only"] = backtest(df, PRICE_FEATS, main)  # test de valeur ajoutée des actualités
     res["sans_calendrier"] = backtest(df, PRICE_FEATS + NEWS_FEATS, main)  # valeur ajoutée du calendrier
+    res["sans_marches"] = backtest(df, [f for f in ALL_FEATS if f not in MACRO_FEATS], main)  # valeur ajoutée des indicateurs
     return res
 
 
@@ -52,8 +59,9 @@ def predict_at(df, date, feats, h, iters=120):
     i = np.searchsorted(dates, date)
     tr = df[(df["date"] <= dates[max(i - h, 0)])].dropna(subset=[f"x{h}"])
     cur = df[df["date"] == date]
-    m = make_model(iters).fit(tr[feats], (tr[f"x{h}"] > 0).astype(int))
-    return cur["ticker"].values, m.predict_proba(cur[feats])[:, 1]
+    fu = _usable(tr, feats)
+    m = make_model(iters).fit(tr[fu], (tr[f"x{h}"] > 0).astype(int))
+    return cur["ticker"].values, m.predict_proba(cur[fu])[:, 1]
 
 
 def predict_latest(df, feats, horizons):
@@ -62,7 +70,8 @@ def predict_latest(df, feats, horizons):
     for h in horizons:
         tr = df.dropna(subset=[f"x{h}"])
         cur = df[df["date"] == last]
-        m = make_model().fit(tr[feats], (tr[f"x{h}"] > 0).astype(int))
-        for t, p in zip(cur["ticker"], m.predict_proba(cur[feats])[:, 1]):
+        fu = _usable(tr, feats)
+        m = make_model().fit(tr[fu], (tr[f"x{h}"] > 0).astype(int))
+        for t, p in zip(cur["ticker"], m.predict_proba(cur[fu])[:, 1]):
             rows.append({"ticker": t, "h": h, "p_raw": float(p)})
     return pd.DataFrame(rows), last
