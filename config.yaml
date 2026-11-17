@@ -21,8 +21,12 @@ demo:
     Presse_B: 0.80
     Blog_C: 0.50
     Reseaux_D: 0.30
-gdelt:                  # historique mondial d'actualités, collecté par le workflow horaire (run_gdelt.py)
+gdelt_events:           # plan B : fichiers d'export d'événements GDELT (militaire, sécuritaire, politique, protestations, religieux)
   enabled: true
+  annees: 3             # profondeur d'historique reconstituée à rebours
+  budget_s: 900         # temps maximal par passage
+gdelt:                  # ancienne collecte par l'interface de recherche : arrêtée (limite de débit) ; séries déjà acquises conservées
+  enabled: false
   years: 3
   pause: 10             # secondes entre requêtes (limite GDELT : 5 s, adresses partagées sur GitHub)
   per_run: 3            # séries au plus par passage horaire ; arrêt au premier refus

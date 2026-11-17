@@ -151,7 +151,10 @@ def import_csv(cfg, con, root):
     keys = series(cfg)
     lim = (_now() - dt.timedelta(days=2)).strftime("%Y-%m-%d")
     rows, n, fresh = [], 0, 0
+    ev_keys = {"militaire", "securitaire", "politique", "media", "religieux"} if cfg.get("gdelt_events", {}).get("enabled") else set()
     for kind, key, _ in keys:
+        if kind == "cat" and key in ev_keys:
+            continue  # remplacée par les fichiers d'événements
         d = read(path(root, kind, key))
         if d:
             n += 1
@@ -160,7 +163,7 @@ def import_csv(cfg, con, root):
     con.executemany("INSERT OR REPLACE INTO gdelt VALUES (?,?,?,?,?)", rows)
     con.commit()
     errs = []
-    if fresh < len(keys):
+    if cfg.get("gdelt", {}).get("enabled", True) and fresh < len(keys):
         ep = path(root, "x", "x").parent / "_etat.json"
         e = json.loads(ep.read_text()) if ep.exists() else {}
         errs.append(f"GDELT : {fresh} séries à jour sur {len(keys)} ({n} avec historique), collecte horaire en cours"

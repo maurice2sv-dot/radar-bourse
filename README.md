@@ -30,7 +30,7 @@ Mode `demo` (défaut) : données synthétiques, pour tester la mécanique. Pour 
 - La base `radar.db` n'est plus dans l'historique Git : elle vit dans la release GitHub « base » (copie du soir, plus une sauvegarde chaque vendredi). Le passage s'arrête s'il ne peut pas la récupérer, pour ne jamais repartir d'un journal vide.
 - Chaque source est isolée : une panne est notée dans `data/status.json` et dans le brief, sans bloquer.
 - Une base par mode (`radar_demo.db` et `radar.db`) : la démo ne contamine jamais le réel.
-- GDELT : collecte horaire séparée (`.github/workflows/gdelt.yml`, `run_gdelt.py`), 3 séries au plus par heure, arrêt au premier refus. Séries stockées en CSV dans `data/gdelt/`, état dans `data/gdelt/_etat.json`. Le passage du soir ne fait que les importer.
+- GDELT : fichiers d'export d'événements (`radar/gdelt_events.py`), téléchargés directement chaque soir, sans limite de débit : part des mentions et ton par catégorie (militaire, sécuritaire, politique, protestations, religieux). Fichier quotidien 1.0, ou à défaut les 96 fichiers de 15 minutes de GDELT 2.0. Historique reconstitué à rebours dans un budget de 15 minutes par soir. L'ancienne collecte par l'interface de recherche est arrêtée ; ses 4 séries sont conservées.
 - En cas d'échec complet, le workflow écrit un brief d'échec.
 
 ## Limites connues

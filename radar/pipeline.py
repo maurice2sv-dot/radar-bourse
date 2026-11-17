@@ -5,7 +5,7 @@ import pathlib
 
 import pandas as pd
 
-from . import analysis, collect, db, events, features, gdelt, journal, model
+from . import analysis, collect, db, events, features, gdelt, gdelt_events, journal, model
 
 
 def score_new(con, cfg):
@@ -115,6 +115,8 @@ def run(cfg, root=".", do_replay=True):
             errs.append(f"flux RSS : {type(ex).__name__}")
         try:
             log["gdelt_series"], e = gdelt.import_csv(cfg, con, root)
+            errs += e
+            log["gdelt_evenements"], e = gdelt_events.collect(cfg, con)  # après l'import : prime sur les anciennes séries
             errs += e
             log["gdelt_signaux"] = gdelt_to_scores(con)
         except Exception as ex:
