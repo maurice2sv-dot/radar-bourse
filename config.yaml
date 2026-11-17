@@ -2,6 +2,15 @@ mode: demo              # demo = données synthétiques | live = yfinance + flux
 db_path: data/radar.db
 horizons: [1, 5, 20]    # en jours de bourse
 main_horizon: 5
+historique_ans: 10      # profondeur de l'historique de cours (lot 1)
+evaluation:             # lots 2 à 4
+  test_reserve_debut: 2025-11-17   # période de test réservée : ne sert à AUCUN choix ; ne pas déplacer
+  cout_bps: 10          # frais par sens (achat ou vente), en points de base
+  gain_min_ic: 0.003    # gain d'IC exigé (sur la période de développement) pour garder un groupe de variables
+  reselection_jours: 7  # fréquence de la sélection des groupes de variables
+fondamentaux:           # lot 5 : comptes officiels des sociétés américaines (SEC, base EDGAR)
+  user_agent: "radar-bourse maurice2sv-dot@users.noreply.github.com"   # la SEC exige un contact ; remplaçable
+  max_par_passage: 25
 replay_dates: 20        # points de rejeu point-in-time pour amorcer le journal
 demo:
   seed: 7

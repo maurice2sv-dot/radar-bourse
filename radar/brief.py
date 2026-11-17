@@ -9,8 +9,9 @@ def _p(x):
 def generate(rep, out_dir):
     demo = rep["mode"] == "demo"
     main = str(rep["main_horizon"])
-    bt = rep["backtest"][main]
-    gain = bt["auc"] - rep["backtest"]["price_only"]["auc"]
+    evl = rep["eval"]
+    rs = evl.get("reserve") or {}
+    grp = " + ".join(["prix"] + [{"actualites": "actualités", "marches": "marchés"}.get(g, g) for g in evl["groupes"]])
     tag = " (DÉMO, données synthétiques)" if demo else ""
 
     w = rep["watch"][:3]
@@ -26,8 +27,9 @@ def generate(rep, out_dir):
         alerte += f". Événement marquant : {ev['title']} ({ev['source']})"
     if rep.get("agenda"):
         alerte += ". À venir : " + " ; ".join(f"{a['label']} le {a['date']}" for a in rep["agenda"][:4])
-    fiab = (f"AUC backtest {bt['auc']:.2f} (apport des actualités {gain:+.2f}), coefficient de confiance {rep['shrink']:.2f}, "
-            f"{rep['n_resolved']} prévisions résolues")
+    fiab = (f"test réservé depuis le {evl['reserve_debut']} : IC {rs.get('ic', float('nan')):+.3f} (t = {rs.get('t', float('nan')):.1f} ; 0 = hasard), "
+            f"20 % les mieux classées {rs.get('net', float('nan')) * 100:+.2f} % par {main} j contre la moyenne après frais ; variables retenues : {grp} ; "
+            f"coefficient de confiance {rep['shrink']:.2f}, {rep['n_resolved']} prévisions résolues")
     if rep.get("live_hit") is not None:
         fiab += f", {_p(rep['live_hit'])} justes"
     sv = rep.get("suivi") or {}
@@ -40,7 +42,7 @@ def generate(rep, out_dir):
     etat = ("ANOMALIES : " + " ; ".join(anomalies[:3]) + plus) if anomalies else "toutes les sources ont répondu"
     daily = [f"Radar bourse, cours au {rep['as_of']}, généré le {rep.get('generated_utc', '')} UTC{tag}",
              "- Valeurs à surveiller : " + " ; ".join(
-                 f"{x['name']} ({_p(x['p'][main])} de chances de battre le marché à {main} j, pilote {x['driver']})" for x in w),
+                 f"{x['name']} ({_p(x['p'][main])} de chances de faire mieux que son secteur à {main} j, pilote {x['driver']})" for x in w),
              "- Technologie à veiller : " + (f"{t['tech']} ({t['status']}, {t['m7']} mentions sur 7 j)" if t else
                                             f"en calibrage, encore {rep['calib_days']} jours de bourse" if rep.get("calib_days") else "aucune hausse notable"),
              f"- Alerte : {alerte}",
@@ -59,7 +61,10 @@ def generate(rep, out_dir):
               f"- Liens événement × secteur validés ({rep['n_sig']} significatifs sur {rep['n_tests']} testés) : "
               + (", ".join(f"{x['key']} {x['value']:.2f}" for x in rep["weights_pairs"][:4]) or "aucun pour l'instant"),
               "- Marchés (20 séances) : " + (", ".join(f"{m['label']} {m['niveau']:.2f} ({m['chg20']:+.2f} pt)" if m['points'] else f"{m['label']} {m['niveau']:.2f} ({m['chg20']:+.1%})" for m in rep.get('marches', [])) or "indisponibles"),
-              f"- Valeur ajoutée des actualités sur les prix seuls : AUC {gain:+.2f}",
+              "- Sélection des variables (développement, IC) : " + ", ".join(
+                  f"{x['groupe']} {x['ic']:+.3f}{'' if x['garde'] else ' (écarté)'}" if x.get("ic") is not None else f"{x['groupe']} (aucune donnée)" for x in evl["trace"]),
+              f"- Test réservé depuis le {evl['reserve_debut']} : IC {rs.get('ic', float('nan')):+.3f}, t = {rs.get('t', float('nan')):.1f}, "
+              f"net de frais {rs.get('net', float('nan')) * 100:+.2f} % par {main} j, ratio d'information net {rs.get('ir_net', float('nan')):.2f}",
               "Veille informative, pas un conseil en investissement."]
     out = pathlib.Path(out_dir)
     (out / "brief.md").write_text("\n".join(daily) + "\n", encoding="utf-8")

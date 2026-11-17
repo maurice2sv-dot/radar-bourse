@@ -14,17 +14,19 @@ def log_predictions(con, run_date, rows, kind):
     con.commit()
 
 
-def resolve(con, close):
-    """Compare les prédictions échues au réel : rendement de la valeur moins celui du marché suivi."""
+def resolve(con, close, wl=None):
+    """Compare les prédictions échues au réel : rendement de la valeur moins celui de son secteur (ou du marché)."""
     idx = close.index
     upd, mkt = [], {}
     for run_date, t, h, p in con.execute("SELECT run_date,ticker,horizon,p_up FROM predictions WHERE resolved=0").fetchall():
         pos = idx.searchsorted(pd.Timestamp(run_date), side="right") - 1
         if pos < 0 or pos + h >= len(idx) or t not in close:
             continue
-        if (pos, h) not in mkt:
-            mkt[(pos, h)] = float((close.iloc[pos + h] / close.iloc[pos] - 1).mean())
-        r = float(close[t].iloc[pos + h] / close[t].iloc[pos] - 1) - mkt[(pos, h)]
+        peers = [u for u in close.columns if wl and wl.get(u, {}).get("sector") == wl.get(t, {}).get("sector")] or list(close.columns)
+        key = (pos, h, wl.get(t, {}).get("sector") if wl else None)
+        if key not in mkt:
+            mkt[key] = float((close[peers].iloc[pos + h] / close[peers].iloc[pos] - 1).mean())
+        r = float(close[t].iloc[pos + h] / close[t].iloc[pos] - 1) - mkt[key]
         if r != r:
             continue
         upd.append((r, int((p > 0.5) == (r > 0)), run_date, t, h))

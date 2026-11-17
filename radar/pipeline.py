@@ -65,6 +65,26 @@ def replay(con, df, feats, cfg):
     return len(pts)
 
 
+def evaluation(con, d, cfg, h):
+    """Sélection des groupes de variables (hebdomadaire, période de développement seulement),
+    puis mesure sur la période de test réservée avec les groupes retenus."""
+    debut = str(cfg["evaluation"]["test_reserve_debut"])
+    sel = db.meta_get(con, "selection")
+    today = dt.date.today()
+    stale = (sel is None or sel.get("reserve_debut") != debut or sel.get("version") != 2
+             or (today - dt.date.fromisoformat(sel["date"])).days >= cfg["evaluation"].get("reselection_jours", 7))
+    if stale:
+        groups, trace, dev = model.select_groups(d, cfg, h)
+        sel = {"version": 2, "date": today.isoformat(), "reserve_debut": debut, "groupes": groups, "trace": trace, "dev": dev}
+        db.meta_set(con, "selection", sel)
+    res = model.evaluate_reserve(d, cfg, h, sel["groupes"])
+    opened = db.meta_get(con, "reserve_ouverte")
+    if opened is None or opened.get("debut") != debut:
+        opened = {"debut": debut, "le": today.isoformat()}
+        db.meta_set(con, "reserve_ouverte", opened)
+    return dict(sel, reserve=res, reserve_ouverte_le=opened["le"], recalcule=stale)
+
+
 def run(cfg, root=".", do_replay=True):
     log, errs = {}, []
     con = db.connect(cfg, root)
@@ -79,6 +99,8 @@ def run(cfg, root=".", do_replay=True):
             log["resultats"], e = collect.collect_earnings_live(cfg, con)
             errs += e
             log["marches"], e = collect.collect_macro_live(cfg, con)
+            errs += e
+            log["fondamentaux"], e = collect.collect_fundamentals_live(cfg, con)
             errs += e
         except Exception as ex:
             errs.append(f"calendrier des résultats : {type(ex).__name__}")
@@ -103,16 +125,17 @@ def run(cfg, root=".", do_replay=True):
     wl = {t: wl[t] for t in close.columns}
     scores = features.load_scores(con)
 
-    # 1. Backtest honnête : poids neutres (les poids appris utilisent des rendements qui seraient « futurs »)
+    # 1. Évaluation honnête : poids neutres (les poids appris utilisent des rendements qui seraient « futurs »)
     cal = {"earn": features.load_earnings(con), "cb": cfg.get("calendrier", {}).get("banques_centrales", {})}
     macro = features.load_macro(con)
-    df0 = features.build_features(close, volume, scores, wl, hz, cal=cal, macro=macro)
-    bt = model.run_backtests(df0, hz, main)
+    fund = features.load_fundamentals(con)
+    df0 = features.build_features(close, volume, scores, wl, hz, cal=cal, macro=macro, fund=fund)
+    ev = evaluation(con, df0.dropna(subset=["ret20"]), cfg, main)
 
     # 2. Journal : rejeu point-in-time puis résolution
     if do_replay:
         log["rejeu"] = replay(con, df0, features.ALL_FEATS, cfg)
-    log["resolues"] = journal.resolve(con, close)
+    log["resolues"] = journal.resolve(con, close, wl)
     log["signalees_resolues"] = journal.resolve_watch(con, close, h=main)
 
     # 3. Apprentissage : poids des sources et des couples catégorie x secteur, avec test de signification
@@ -120,8 +143,8 @@ def run(cfg, root=".", do_replay=True):
     wsrc, wcs = db.get_weights(con, "source"), db.get_weights(con, "catsec")
 
     # 4. Prédiction du jour avec les poids appris
-    df = features.build_features(close, volume, scores, wl, hz, wsrc, wcs, cal=cal, macro=macro)
-    preds, last = model.predict_latest(df, features.ALL_FEATS, hz)
+    df = features.build_features(close, volume, scores, wl, hz, wsrc, wcs, cal=cal, macro=macro, fund=fund)
+    preds, last = model.predict_latest(df.dropna(subset=["ret20"]), model.feats_for(ev["groupes"]), hz)
     stats = journal.live_stats(con)
     k, n_res, hit = journal.shrink_factor(stats, main)
     preds["p_up"] = 0.5 + k * (preds["p_raw"] - 0.5)
@@ -140,9 +163,9 @@ def run(cfg, root=".", do_replay=True):
         c, s = x["key"].split("|")
         pairs.append(dict(x, key=f"{analysis.CAT_FR[c]} × {analysis.SEC_FR[s]}"))
     today = dt.datetime.now(dt.timezone.utc).replace(tzinfo=None)
-    rep.update({"mode": cfg["mode"], "backtest": bt, "main_horizon": main, "horizons": hz,
+    rep.update({"mode": cfg["mode"], "eval": ev, "main_horizon": main, "horizons": hz,
                 "weights_source": w("source"), "weights_pairs": pairs, "n_tests": n_tests, "n_sig": n_sig,
-                "suivi": journal.watch_stats(con), "journal": stats.to_dict("records"), "shrink": k, "n_resolved": n_res, "live_hit": hit,
+                "suivi": journal.watch_stats(con), "cout_bps": cfg["evaluation"].get("cout_bps", 10), "gain_min_ic": cfg["evaluation"].get("gain_min_ic", 0.003), "journal": stats.to_dict("records"), "shrink": k, "n_resolved": n_res, "live_hit": hit,
                 "n_articles": int(len(scores)), "n_gdelt": int((scores["source"] == "GDELT").sum()) if len(scores) else 0,
                 "generated_utc": today.strftime("%Y-%m-%d %H:%M"), "stale_days": int((today.date() - last.date()).days),
                 "errors": errs, "log": log})

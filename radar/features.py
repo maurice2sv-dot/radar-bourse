@@ -11,7 +11,8 @@ PRICE_FEATS = ["ret1", "ret5", "ret20", "rel5", "rel20", "vol20", "volratio", "d
 NEWS_FEATS = [f"n_{c}" for c in CATS] + ["news_comp", "co_sent", "co_mentions"]
 CAL_FEATS = ["earn_next", "earn_since", "earn_surprise", "cb_next"]
 MACRO_FEATS = ["vix_rel", "vix_chg5", "taux_chg20", "petrole_ret20", "dollar_ret20", "or_ret20"]
-ALL_FEATS = PRICE_FEATS + NEWS_FEATS + CAL_FEATS + MACRO_FEATS
+FUND_FEATS = ["f_ey", "f_bm", "f_roe", "f_croissance", "f_levier"]
+ALL_FEATS = PRICE_FEATS + NEWS_FEATS + CAL_FEATS + MACRO_FEATS + FUND_FEATS
 
 
 def load_prices(con, wl, min_rows=120):
@@ -80,7 +81,59 @@ def macro_frame(macro, idx):
     return out
 
 
-def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None, cal=None, macro=None):
+def load_fundamentals(con):
+    f = pd.read_sql("SELECT ticker,concept,start,end,filed,val FROM fundamentals", con)
+    if f.empty:
+        return {}
+    for c in ("start", "end", "filed"):
+        f[c] = pd.to_datetime(f[c], errors="coerce")
+    return {t: g for t, g in f.groupby("ticker")}
+
+
+def fund_frame(fu, idx, price):
+    """Ratios connus à chaque date (date de dépôt + 1 jour) : rendement bénéficiaire, valeur comptable / cours,
+    rentabilité des capitaux propres, croissance du chiffre d'affaires, endettement."""
+    out = pd.DataFrame(np.nan, index=idx, columns=FUND_FEATS)
+    if fu is None or fu.empty:
+        return out
+
+    def pick(concepts, annual):
+        a = fu[fu["concept"].isin(concepts)]
+        if annual:
+            dur = (a["end"] - a["start"]).dt.days
+            a = a[(dur >= 330) & (dur <= 400)]
+        else:
+            a = a[a["start"].isna()]
+        if a.empty:
+            return None
+        a = a.assign(prio=a["concept"].map({c: i for i, c in enumerate(concepts)}))
+        return a.sort_values(["end", "prio", "filed"]).drop_duplicates("end")[["end", "filed", "val"]].sort_values("end")
+
+    def asof(s, col="val"):
+        if s is None or s.empty:
+            return pd.Series(np.nan, index=idx)
+        s = s.sort_values("filed")
+        s = s[s["end"] == s["end"].cummax()]  # à chaque dépôt, la période la plus récente connue
+        m = pd.merge_asof(pd.DataFrame({"date": idx}), s[["filed", col]].rename(columns={"filed": "date"}),
+                          on="date", direction="backward", allow_exact_matches=False)
+        return pd.Series(m[col].values, index=idx)
+
+    ni = pick(["NetIncomeLoss"], True)
+    rev = pick(["Revenues", "RevenueFromContractWithCustomerExcludingAssessedTax", "SalesRevenueNet"], True)
+    if rev is not None:
+        gap = rev["end"].diff().dt.days
+        rev = rev.assign(g=np.where(gap.between(330, 400), rev["val"] / rev["val"].shift(1) - 1, np.nan))
+    NI, EQ = asof(ni), asof(pick(["StockholdersEquity"], False))
+    mcap = asof(pick(["EntityCommonStockSharesOutstanding"], False)) * price.values
+    out["f_ey"] = NI / mcap
+    out["f_bm"] = EQ / mcap
+    out["f_roe"] = NI / EQ.where(EQ > 0)
+    out["f_croissance"] = asof(rev, "g") if rev is not None else np.nan
+    out["f_levier"] = asof(pick(["Liabilities"], False)) / asof(pick(["Assets"], False))
+    return out.replace([np.inf, -np.inf], np.nan)
+
+
+def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None, cal=None, macro=None, fund=None):
     wsrc, wcs = wsrc or {}, wcs or {}
     idx, n = close.index, len(close)
     iv = idx.values.astype("datetime64[ns]")
@@ -129,6 +182,9 @@ def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None, cal
         f["cb_next"] = cb_next
         for k in MACRO_FEATS:
             f[k] = mf[k].values
+        ff = fund_frame((fund or {}).get(t), idx, c)
+        for k in FUND_FEATS:
+            f[k] = ff[k].values
         f["sec_id"] = SECTORS.index(sector)  # sans lui, les actualités serviraient surtout à reconnaître le secteur
         comp = 0
         for k in CATS:
@@ -148,8 +204,12 @@ def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None, cal
         frames.append(f)
     df = pd.concat(frames, ignore_index=True)
     g = df.groupby("date")
-    for h in horizons:  # cible : rendement de la valeur moins celui du marché suivi
-        df[f"x{h}"] = df[f"fwd{h}"] - g[f"fwd{h}"].transform("mean")
+    gs = df.groupby(["date", "sector"])
+    for h in horizons:
+        df[f"m{h}"] = df[f"fwd{h}"] - g[f"fwd{h}"].transform("mean")    # contre la moyenne des valeurs suivies
+        df[f"x{h}"] = df[f"fwd{h}"] - gs[f"fwd{h}"].transform("mean")   # cible : contre la moyenne de son secteur
+    for k in FUND_FEATS:  # comme les professionnels : rang de chaque valeur parmi celles qui publient
+        df[k] = g[k].rank(pct=True)
     df["rel5"] = df["ret5"] - g["ret5"].transform("mean")
     df["rel20"] = df["ret20"] - g["ret20"].transform("mean")
     return df

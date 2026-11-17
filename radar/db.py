@@ -1,3 +1,4 @@
+import json
 import pathlib
 import sqlite3
 
@@ -12,6 +13,11 @@ CREATE TABLE IF NOT EXISTS earnings_fetch(ticker TEXT PRIMARY KEY, fetched TEXT,
 CREATE TABLE IF NOT EXISTS macro(symbol TEXT, date TEXT, close REAL, PRIMARY KEY(symbol,date));
 CREATE TABLE IF NOT EXISTS watch_log(run_date TEXT, rank INTEGER, ticker TEXT, p5 REAL, resolved INTEGER DEFAULT 0,
     excess REAL, beat INTEGER, PRIMARY KEY(run_date,rank));
+CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY, value TEXT);
+CREATE TABLE IF NOT EXISTS sec_cik(ticker TEXT PRIMARY KEY, cik INTEGER);
+CREATE TABLE IF NOT EXISTS fund_fetch(ticker TEXT PRIMARY KEY, fetched TEXT, n INTEGER);
+CREATE TABLE IF NOT EXISTS fundamentals(ticker TEXT, concept TEXT, start TEXT, end TEXT, filed TEXT, form TEXT, val REAL);
+CREATE INDEX IF NOT EXISTS i_fund ON fundamentals(ticker);
 CREATE TABLE IF NOT EXISTS predictions(run_date TEXT, ticker TEXT, horizon INTEGER, p_up REAL, p_raw REAL,
     driver TEXT, kind TEXT, resolved INTEGER DEFAULT 0, realized REAL, hit INTEGER,
     PRIMARY KEY(run_date,ticker,horizon));
@@ -33,3 +39,13 @@ def connect(cfg, root="."):
 
 def get_weights(con, kind):
     return {k: v for k, v in con.execute("SELECT key,value FROM weights WHERE kind=?", (kind,))}
+
+
+def meta_get(con, key, default=None):
+    r = con.execute("SELECT value FROM meta WHERE key=?", (key,)).fetchone()
+    return json.loads(r[0]) if r else default
+
+
+def meta_set(con, key, value):
+    con.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", (key, json.dumps(value, ensure_ascii=False, default=float)))
+    con.commit()

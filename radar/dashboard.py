@@ -69,9 +69,10 @@ def dbar(label, value, vmax, text, tip=""):
 
 
 def render(rep, path):
-    bt, main = rep["backtest"], str(rep["main_horizon"])
-    b = bt[main]
-    gain = b["auc"] - bt["price_only"]["auc"]
+    main = str(rep["main_horizon"])
+    evl = rep["eval"]
+    rs = evl.get("reserve") or {}
+    nan = float("nan")
     demo = rep["mode"] == "demo"
     jr = {(j["horizon"], j["kind"]): j for j in rep["journal"]}
     jmain = jr.get((rep["main_horizon"], "replay")) or jr.get((rep["main_horizon"], "live"))
@@ -86,10 +87,11 @@ def render(rep, path):
         out.append('<div class="banner"><b>Anomalies de collecte :</b> ' + e(" · ".join(msg)) + '</div>')
     out.append('<div class="banner" style="background:var(--surface);border-color:var(--grid)">Outil d\'aide à la veille, pas un conseil en investissement. '
                'Les probabilités sont volontairement rapprochées de 50 % tant que le journal n\'a pas prouvé leur fiabilité.</div>')
-    kp = [(f'{b["auc"]:.2f}', f'AUC backtest à {main} j (0,50 = hasard)'),
-          (f'{gain:+.2f}', "AUC apporté par les actualités"),
-          (pct(b["acc_conf"]), f'Précision si confiance forte (n={b["n_conf"]})'),
-          (pct(jmain["hit"]) if jmain else "n/d", f'Réussite journal à {main} j (n={jmain["n"] if jmain else 0})'),
+    grp = " + ".join(["prix"] + [{"actualites": "actualités", "marches": "marchés"}.get(g, g) for g in evl["groupes"]])
+    kp = [(f'{rs.get("ic", nan):+.3f}', f'IC en test réservé (t = {rs.get("t", nan):.1f} ; 0 = hasard, 0,02 à 0,05 = niveau professionnel)'),
+          (f'{rs.get("net", nan) * 100:+.2f} %', f'20 % les mieux classées contre la moyenne, par {main} j, après frais'),
+          (f'{rs.get("ir_net", nan):.2f}', "Ratio d'information net annualisé (régularité du gain)"),
+          (e(grp), "Variables retenues (choisies hors test réservé)"),
           (pct(rep["suivi"]["beat"]) if rep.get("suivi", {}).get("n") else "en cours",
            f'Valeurs signalées battant le marché à {main} j (n={rep.get("suivi", {}).get("n", 0)})'),
           (f'{rep["shrink"]:.2f}', "Coefficient de confiance (0,1 à 1)")]
@@ -103,7 +105,7 @@ def render(rep, path):
         + f'<td class="h">{spark(w["spark"])}</td><td class="h"><span class="pill">{e(w["driver"])}</span>' + (' <span class="pill">résultats sous 5 j</span>' if w.get("earn") else "") + '</td>'
         f'<td class="n h">{w["mentions"]:.1f}×</td></tr>' for w in rep["watch"])
     out.append('<section class="card"><h2>Valeurs à surveiller</h2><p class="sub">Classées par attention : intensité des actualités, volatilité inhabituelle et conviction du modèle. '
-               'Probabilité de faire mieux que la moyenne des valeurs suivies. Barre bleue = surperformance probable, orange = sous-performance.</p><div style="overflow-x:auto"><table><thead><tr><th>Valeur</th>'
+               'Probabilité de faire mieux que la moyenne de son secteur. Barre bleue = surperformance probable, orange = sous-performance.</p><div style="overflow-x:auto"><table><thead><tr><th>Valeur</th>'
                + "".join(f'<th>Surperf. à {h} j</th>' for h in hz)
                + '<th class="h">60 jours</th><th class="h">Pilote</th><th class="n h">Mentions</th></tr></thead><tbody>' + rows + '</tbody></table></div></section>')
 
@@ -129,17 +131,29 @@ def render(rep, path):
     out.append('<div class="grid2"><section class="card"><h2>Fiabilité apprise des sources</h2><p class="sub">Poids 1,0 = neutre. Un poids ne bouge que si l\'écart au hasard est statistiquement significatif.</p>'
                + ws + '</section><section class="card"><h2>Couples événement × secteur validés</h2><p class="sub">' + f'{rep["n_sig"]} signaux significatifs sur {rep["n_tests"]} testés. ' + 'Au-dessus de 1,0 : le lien se vérifie. En dessous : il joue à l\'envers.</p>' + wc + '</section></div>')
 
-    # Backtest
-    trs = "".join(f'<tr><td>{h} j</td><td class="n">{bt[str(h)]["acc"] * 100:.1f} %</td><td class="n">{bt[str(h)]["base"] * 100:.1f} %</td>'
-                  f'<td class="n">{bt[str(h)]["auc"]:.3f}</td><td class="n">{bt[str(h)]["brier"]:.3f}</td>'
-                  f'<td class="n">{bt[str(h)]["acc_conf"] * 100:.1f} % ({bt[str(h)]["n_conf"]})</td></tr>' for h in hz)
-    po = bt["price_only"]
-    sc_txt = f" Sans le calendrier : AUC {bt['sans_calendrier']['auc']:.3f}." if "sans_calendrier" in bt else ""
-    sc_txt += f" Sans les indicateurs de marché : AUC {bt['sans_marches']['auc']:.3f}." if "sans_marches" in bt else ""
-    out.append('<section class="card"><h2>Fiabilité du modèle (backtest sans fuite)</h2><p class="sub">Entraînement sur le passé seul, test sur 5 périodes successives, écart de h jours entre les deux. '
-               'Cible : battre la moyenne des valeurs suivies. Poids neutres (les poids appris utilisent des résultats futurs). Les rendements se chevauchent : lire les chiffres comme des ordres de grandeur.</p>'
-               '<div style="overflow-x:auto"><table><thead><tr><th>Horizon</th><th class="n">Précision</th><th class="n">Référence (toujours la même direction)</th><th class="n">AUC</th><th class="n">Brier</th><th class="n">Précision si confiance forte (n)</th></tr></thead><tbody>'
-               + trs + f'</tbody></table></div><p class="mute">Sans les actualités (prix seuls, {main} j) : AUC {po["auc"]:.3f}, précision {po["acc"] * 100:.1f} %.{sc_txt}</p></section>')
+    # Évaluation
+    def row(lbl, x):
+        if not x or x.get("ic") is None:
+            return f'<tr><td>{e(lbl)}</td><td colspan="7" class="mute">{e(x.get("note", "non mesuré") if x else "non mesuré")}</td></tr>'
+        return (f'<tr><td>{e(lbl)}</td><td class="n">{x["ic"]:+.3f}</td><td class="n">{x["t"]:.1f}</td><td class="n">{x["ic_pos"] * 100:.0f} %</td>'
+                f'<td class="n">{x["brut"] * 100:+.2f} %</td><td class="n">{x["net"] * 100:+.2f} %</td><td class="n">{x["rotation"] * 100:.0f} %</td>'
+                f'<td class="n">{x["ir_net"]:.2f}</td></tr>')
+    head = ('<table><thead><tr><th></th><th class="n">IC</th><th class="n">t</th><th class="n">IC &gt; 0</th><th class="n">Brut</th>'
+            '<th class="n">Net</th><th class="n">Rotation</th><th class="n">IR net</th></tr></thead><tbody>')
+    sel = "".join(row(("✓ " if x["garde"] else "✗ ") + {"actualites": "+ actualités", "marches": "+ marchés", "prix": "prix"}.get(x["groupe"], "+ " + x["groupe"]), x) for x in evl["trace"])
+    out.append('<section class="card"><h2>Fiabilité, à la manière des professionnels</h2><p class="sub">'
+               f'Cible : faire mieux que la moyenne de son secteur à {main} jours. IC : corrélation de rang, chaque jour, entre classement prédit et classement réel. '
+               f'Brut et net : 20 % les mieux classées contre la moyenne de toutes les valeurs, par période de {main} jours, avant et après frais '
+               f'({e(str(rep.get("cout_bps", 10)))} points de base par sens). t au-delà de 2 : résultat probablement pas dû au hasard.</p>'
+               '<div style="overflow-x:auto">' + head
+               + row(f"Test réservé ({rs.get('debut', '')} à {rs.get('fin', '')})", rs)
+               + row(f"Développement ({(evl.get('dev') or {}).get('debut', '')} à {(evl.get('dev') or {}).get('fin', '')})", evl.get("dev") or {})
+               + '</tbody></table></div>'
+               f'<p class="mute">La période réservée commence le {e(evl["reserve_debut"])} et ne sert à aucun choix (ouverte le {e(evl["reserve_ouverte_le"])}). '
+               'Biais connu : l\'univers est composé des grandes valeurs d\'aujourd\'hui, ce qui avantage le passé (biais du survivant).</p>'
+               '<h2 style="margin-top:16px">Sélection des variables (développement)</h2><p class="sub">'
+               f'Un groupe n\'est gardé que s\'il améliore l\'IC d\'au moins {e(str(rep.get("gain_min_ic", 0.003)))}. Choix refait chaque semaine (dernier : {e(evl["date"])}).</p>'
+               '<div style="overflow-x:auto">' + head + sel + '</tbody></table></div></section>')
 
     # Événements
     ev = "".join(f'<li><b>{e(x["date"])}</b> · {e(x["source"])} · {e(x["title"])} <span class="pill">{e(", ".join(x["cats"]))}</span></li>' for x in rep["events"])

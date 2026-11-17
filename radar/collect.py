@@ -121,9 +121,9 @@ def _stooq_symbol(t):
     return f"{t.lower()}.us"
 
 
-def _prices_yfinance(tickers):
+def _prices_yfinance(tickers, years=10):
     import yfinance as yf
-    data = yf.download(tickers, period="3y", auto_adjust=True, progress=False, group_by="column", threads=False)
+    data = yf.download(tickers, period=f"{years}y", auto_adjust=True, progress=False, group_by="column", threads=False)
     close, vol = data["Close"], data["Volume"]
     rows, today = [], _open_day()
     for t in tickers:
@@ -137,7 +137,7 @@ def _prices_yfinance(tickers):
     return rows
 
 
-def _prices_stooq(tickers):
+def _prices_stooq(tickers, years=10):
     import io
     import requests
     rows, today = [], _open_day()
@@ -149,7 +149,8 @@ def _prices_stooq(tickers):
             df = pd.read_csv(io.StringIO(r.text))
             if "Close" not in df:
                 continue
-            for d, p, v in zip(df["Date"].tail(800), df["Close"].tail(800), df.get("Volume", pd.Series(0, index=df.index)).tail(800)):
+            k = 262 * years
+            for d, p, v in zip(df["Date"].tail(k), df["Close"].tail(k), df.get("Volume", pd.Series(0, index=df.index)).tail(k)):
                 if str(d) < today:
                     rows.append((t, str(d), float(p), float(v) if v == v else 0.0))
         except Exception:
@@ -166,7 +167,7 @@ def collect_prices_live(cfg, con):
         if not missing:
             break
         try:
-            rows = fn(missing)
+            rows = fn(missing, cfg.get("historique_ans", 10))
         except Exception as e:
             errs.append(f"cours {name} : {type(e).__name__} {str(e)[:80]}")
             continue
@@ -262,7 +263,7 @@ def collect_macro_live(cfg, con):
         return 0, []
     try:
         import yfinance as yf
-        data = yf.download(list(syms.values()), period="3y", auto_adjust=True, progress=False, group_by="column", threads=False)
+        data = yf.download(list(syms.values()), period=f"{cfg.get('historique_ans', 10)}y", auto_adjust=True, progress=False, group_by="column", threads=False)
         close = data["Close"]
     except Exception as e:
         return 0, [f"indicateurs de marché : {type(e).__name__}"]
@@ -275,3 +276,66 @@ def collect_macro_live(cfg, con):
     con.executemany("INSERT OR REPLACE INTO macro VALUES (?,?,?)", rows)
     con.commit()
     return len(syms) - len(missing), ([f"indicateurs indisponibles : {', '.join(missing)}"] if missing else [])
+
+
+# ---------------------------------------------------------------- Lot 5 : fondamentaux SEC (EDGAR, données datées)
+SEC_CONCEPTS = {
+    "us-gaap": ["NetIncomeLoss", "Revenues", "RevenueFromContractWithCustomerExcludingAssessedTax", "SalesRevenueNet",
+                "StockholdersEquity", "Liabilities", "Assets"],
+    "dei": ["EntityCommonStockSharesOutstanding"],
+}
+
+
+def collect_fundamentals_live(cfg, con):
+    """Comptes officiels des sociétés américaines. Chaque chiffre garde sa date de dépôt : le modèle ne l'utilise
+    qu'à partir du lendemain (pas de regard vers le futur). Seule la première publication de chaque période est
+    gardée (les retraitements ultérieurs n'étaient pas connus à l'époque). Ne lève jamais."""
+    import time
+    import requests
+    f = cfg.get("fondamentaux", {})
+    H = {"User-Agent": f.get("user_agent", "radar-bourse"), "Accept-Encoding": "gzip, deflate"}
+    us = [t for t in cfg["watchlist"] if "." not in t]
+    if con.execute("SELECT COUNT(*) FROM sec_cik").fetchone()[0] == 0:
+        try:
+            r = requests.get("https://www.sec.gov/files/company_tickers.json", headers=H, timeout=30)
+            r.raise_for_status()
+            con.executemany("INSERT OR REPLACE INTO sec_cik VALUES (?,?)",
+                            [(v["ticker"].upper(), int(v["cik_str"])) for v in r.json().values()])
+            con.commit()
+        except Exception as e:
+            return {"rafraichies": 0}, [f"fondamentaux SEC : {type(e).__name__} {str(e)[:60]}"]
+    cik = dict(con.execute("SELECT ticker, cik FROM sec_cik").fetchall())
+    seen = dict(con.execute("SELECT ticker, fetched FROM fund_fetch").fetchall())
+    now = dt.datetime.now(dt.timezone.utc)
+    lim = (now - dt.timedelta(days=7)).isoformat()
+    todo = sorted([t for t in us if t in cik and seen.get(t, "") < lim], key=lambda t: seen.get(t, ""))[:f.get("max_par_passage", 25)]
+    ok, ko = 0, []
+    for t in todo:
+        time.sleep(0.25)  # la SEC limite à 10 requêtes par seconde
+        try:
+            r = requests.get(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik[t]:010d}.json", headers=H, timeout=60)
+            r.raise_for_status()
+            js = r.json()
+        except Exception:
+            ko.append(t)
+            if len(ko) >= 5 and ok == 0:
+                break
+            continue
+        first = {}
+        for tax, names in SEC_CONCEPTS.items():
+            facts = js.get("facts", {}).get(tax, {})
+            for c in names:
+                for lst in facts.get(c, {}).get("units", {}).values():
+                    for x in lst:
+                        if x.get("filed") and x.get("end") and x.get("val") is not None:
+                            k = (c, x.get("start"), x["end"])
+                            if k not in first or x["filed"] < first[k][1]:
+                                first[k] = (x.get("form", ""), x["filed"], float(x["val"]))
+        con.execute("DELETE FROM fundamentals WHERE ticker=?", (t,))
+        con.executemany("INSERT INTO fundamentals VALUES (?,?,?,?,?,?,?)",
+                        [(t, c, s, e, fl, fo, v) for (c, s, e), (fo, fl, v) in first.items()])
+        con.execute("INSERT OR REPLACE INTO fund_fetch VALUES (?,?,?)", (t, now.isoformat(), len(first)))
+        ok += 1
+    con.commit()
+    errs = [f"fondamentaux SEC : {len(ko)} valeurs en échec sur {len(todo)}"] if ko else []
+    return {"rafraichies": ok, "sans_cik": len([t for t in us if t not in cik])}, errs
