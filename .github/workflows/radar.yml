@@ -33,6 +33,8 @@ jobs:
             echo "Ni release ni base : arrêt"; exit 1
           fi
       - run: python run.py --mode live
+        env:
+          SEC_CONTACT: ${{ secrets.SEC_CONTACT }}
       - name: Sauvegarder la base
         env:
           GH_TOKEN: ${{ github.token }}

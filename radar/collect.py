@@ -293,7 +293,11 @@ def collect_fundamentals_live(cfg, con):
     import time
     import requests
     f = cfg.get("fondamentaux", {})
-    H = {"User-Agent": f.get("user_agent", "radar-bourse"), "Accept-Encoding": "gzip, deflate"}
+    import os
+    ua = os.environ.get("SEC_CONTACT", "").strip()
+    if not ua:
+        return {"rafraichies": 0}, ["fondamentaux SEC : secret SEC_CONTACT absent (contact exigé par la SEC)"]
+    H = {"User-Agent": ua if " " in ua else f"radar-bourse {ua}", "Accept-Encoding": "gzip, deflate"}
     us = [t for t in cfg["watchlist"] if "." not in t]
     if con.execute("SELECT COUNT(*) FROM sec_cik").fetchone()[0] == 0:
         try:

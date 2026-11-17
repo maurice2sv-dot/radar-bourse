@@ -9,7 +9,7 @@ evaluation:             # lots 2 à 4
   gain_min_ic: 0.003    # gain d'IC exigé (sur la période de développement) pour garder un groupe de variables
   reselection_jours: 7  # fréquence de la sélection des groupes de variables
 fondamentaux:           # lot 5 : comptes officiels des sociétés américaines (SEC, base EDGAR)
-  user_agent: "radar-bourse maurice2sv-dot@users.noreply.github.com"   # la SEC exige un contact ; remplaçable
+  # contact exigé par la SEC : fourni par le secret GitHub SEC_CONTACT (jamais écrit dans le dépôt public)
   max_par_passage: 25
 replay_dates: 20        # points de rejeu point-in-time pour amorcer le journal
 demo:
