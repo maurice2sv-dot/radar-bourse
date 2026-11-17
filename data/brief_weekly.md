@@ -6,5 +6,6 @@ Radar bourse, bilan hebdomadaire au 2026-11-16
 - Sources les plus fiables : GDELT 1.00, bbc_business 1.00
 - Liens événement × secteur validés (0 significatifs sur 30 testés) : aucun pour l'instant
 - Marchés (20 séances) : VIX 22.91 (+24.2%), Taux US 10 ans 5.12 (-0.02 pt), Pétrole WTI 85.72 (-17.3%), Dollar 103.55 (+1.5%), Or 3853.00 (-7.4%), EUR/USD 1.10 (-1.8%)
-- Valeur ajoutée des actualités sur les prix seuls : AUC -0.01
+- Sélection des variables (développement, IC) : prix +0.020, actualites +0.021 (écarté), calendrier +0.023, marches +0.022 (écarté), fondamentaux (aucune donnée)
+- Test réservé depuis le 2025-11-17 : IC +0.043, t = 4.0, net de frais +0.11 % par 5 j, ratio d'information net 0.56
 Veille informative, pas un conseil en investissement.

@@ -1,10 +1,10 @@
 {
- "genere_utc": "2026-11-17 15:04",
+ "genere_utc": "2026-11-17 18:03",
  "mode": "live",
  "cours_au": "2026-11-16",
  "jours_de_retard": 1,
  "anomalies": [
-  "indicateurs indisponibles : VSTOXX",
+  "fondamentaux SEC : HTTPError 403 Client Error: Forbidden for url: https://www.sec.gov/fil",
   "GDELT : 4 séries à jour sur 29 (4 avec historique), collecte horaire en cours, dernier refus 2026-11-17 14:19 : AIR.PA : HTTP 429 'Please limit requests to one every 5 seconds or contact kale'"
  ],
  "journal": {
@@ -12,14 +12,16 @@
    "yfinance (138)"
   ],
   "resultats": {
-   "rafraichies": 68,
-   "sans_donnees": 0
+   "rafraichies": 0
   },
   "marches": 6,
+  "fondamentaux": {
+   "rafraichies": 0
+  },
   "flux_ok": 5,
   "gdelt_series": 4,
   "gdelt_signaux": 4126,
-  "nouveaux_articles": 5,
+  "nouveaux_articles": 51,
   "rejeu": 0,
   "resolues": 0,
   "signalees_resolues": 0
