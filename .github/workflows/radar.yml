@@ -1,7 +1,9 @@
 name: radar-bourse
 on:
   schedule:
-    - cron: "37 22 * * 1-5"  # 22h37 UTC, après la clôture de New York. GitHub déclenche souvent avec des heures de retard :
+    - cron: "37 22 * * 1-5"  # 22h37 UTC, après la clôture de New York (envoi de 6 h GMT)
+    - cron: "7 14 * * 1-5"   # 14h07 UTC, rafraîchissement de mi-journée (envoi de 17 h GMT)
+    # GitHub déclenche souvent avec retard : ces horaires laissent de la marge.
                              # lancer la veille au soir garantit un brief prêt le lendemain matin.
   workflow_dispatch: {}
 permissions:
