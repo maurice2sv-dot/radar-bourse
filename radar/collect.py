@@ -245,12 +245,16 @@ def _gdelt_get(query, mode, start, end, pause):
     for attempt in range(4):
         time.sleep(pause)  # limite officielle : une requête toutes les 5 secondes
         r = requests.get(GDELT_URL, params=params, timeout=60, headers={"User-Agent": "radar-bourse/0.2"})
+        last = f"HTTP {r.status_code} {r.text[:60].strip()!r}"
         if r.status_code == 429:
             time.sleep(30 * (attempt + 1))
             continue
         r.raise_for_status()
-        return parse_gdelt_timeline(r.json())
-    raise RuntimeError("limite de débit GDELT")
+        try:
+            return parse_gdelt_timeline(r.json())
+        except ValueError:
+            raise RuntimeError(last)  # GDELT répond en texte quand il refuse une requête
+    raise RuntimeError(last)
 
 
 def collect_gdelt(cfg, con):
@@ -266,7 +270,8 @@ def collect_gdelt(cfg, con):
     for t, v in cfg["watchlist"].items():
         keys.append(("ticker", t, v.get("gdelt") or f'"{v["name"]}"'))
     last = dict(con.execute("SELECT kind||'|'||key, MAX(date) FROM gdelt GROUP BY kind,key").fetchall())
-    keys.sort(key=lambda k: last.get(f"{k[0]}|{k[1]}", ""))  # les séries les plus en retard d'abord
+    rot = now.toordinal() * 7 + now.hour  # les séries les plus en retard d'abord, ordre tournant entre ex æquo
+    keys = [k for _, _, k in sorted((last.get(f"{k[0]}|{k[1]}", ""), (i + rot) % len(keys), k) for i, k in enumerate(keys))]
     t0, done, errs, streak, failed = time.time(), 0, [], 0, []
     for kind, key, query in keys:
         if time.time() - t0 > budget:
@@ -277,7 +282,7 @@ def collect_gdelt(cfg, con):
             vol = _gdelt_get(query, "timelinevol", start, now, pause)
             tone = _gdelt_get(query, "timelinetone", start, now, pause)
         except Exception as e:
-            failed.append(f"{key} ({type(e).__name__})")
+            failed.append(f"{key} ({str(e)[:90] or type(e).__name__})")
             streak += 1
             if streak >= 3:
                 break  # inutile d'insister : la limite de débit se durcit si on force
@@ -292,5 +297,5 @@ def collect_gdelt(cfg, con):
                         ((now - dt.timedelta(days=2)).strftime("%Y-%m-%d"),)).fetchone()[0]
     if fresh < len(keys):
         errs.append(f"GDELT : {fresh} séries à jour sur {len(keys)} ({total} avec historique), {done} acquises à ce passage"
-                    + (f", refus : {', '.join(failed[:3])}" if failed else "") + ". Reprise au prochain passage.")
+                    + (f", refus : {' ; '.join(failed[:2])}" if failed else "") + ". Reprise au prochain passage.")
     return done, errs
