@@ -1,24 +1,20 @@
 {
- "genere_utc": "2026-11-16 13:52",
+ "genere_utc": "2026-11-17 06:36",
  "mode": "live",
  "cours_au": "2026-11-16",
- "jours_de_retard": 0,
+ "jours_de_retard": 1,
  "anomalies": [
-  "GDELT militaire : RuntimeError",
-  "GDELT securitaire : RuntimeError",
-  "GDELT politique : RuntimeError",
-  "GDELT meteo : RuntimeError",
-  "GDELT : abandon (source injoignable)"
+  "GDELT : 3 séries à jour sur 29 (3 avec historique), 2 acquises à ce passage, refus : militaire (RuntimeError), politique (RuntimeError). Reprise au prochain passage."
  ],
  "journal": {
   "cours": [
    "yfinance (20)"
   ],
   "flux_ok": 5,
-  "gdelt_series": 0,
-  "gdelt_signaux": 1033,
-  "nouveaux_articles": 86,
+  "gdelt_series": 2,
+  "gdelt_signaux": 3095,
+  "nouveaux_articles": 91,
   "rejeu": 0,
-  "resolues": 20
+  "resolues": 0
  }
 }
