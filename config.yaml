@@ -12,11 +12,12 @@ demo:
     Presse_B: 0.80
     Blog_C: 0.50
     Reseaux_D: 0.30
-gdelt:                  # mode live : historique mondial d'actualités (volume et ton quotidiens)
+gdelt:                  # historique mondial d'actualités, collecté par le workflow horaire (run_gdelt.py)
   enabled: true
   years: 3
-  pause: 8              # secondes entre requêtes (limite GDELT : 5 s)
-  budget_s: 1200        # temps maximal par exécution ; le reste est repris au passage suivant
+  pause: 10             # secondes entre requêtes (limite GDELT : 5 s, adresses partagées sur GitHub)
+  per_run: 3            # séries au plus par passage horaire ; arrêt au premier refus
+  budget_s: 360
 feeds:                  # mode live 
   lemonde_inter: https://www.lemonde.fr/international/rss_full.xml
   lemonde_eco: https://www.lemonde.fr/economie/rss_full.xml

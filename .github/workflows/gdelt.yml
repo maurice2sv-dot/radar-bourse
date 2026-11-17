@@ -1,0 +1,29 @@
+name: gdelt-horaire
+on:
+  schedule:
+    - cron: "17 0-21,23 * * *"   # toutes les heures sauf 22 h UTC, réservée au passage du soir
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: gdelt
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q pyyaml requests
+      - run: python run_gdelt.py
+      - name: Enregistrer les séries
+        run: |
+          git config user.name "radar-bot"
+          git config user.email "radar-bot@users.noreply.github.com"
+          git add data/gdelt
+          git commit -q -m "GDELT $(date -u '+%F %H:%M')" || exit 0
+          for i in 1 2 3; do git pull --rebase -q origin main && git push -q && exit 0; sleep 15; done
+          exit 1

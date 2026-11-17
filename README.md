@@ -21,7 +21,7 @@ Mode `demo` (défaut) : données synthétiques, pour tester la mécanique. Pour 
 ## Robustesse
 - Chaque source est isolée : une panne est notée dans `data/status.json` et dans le brief, sans bloquer.
 - Une base par mode (`radar_demo.db` et `radar.db`) : la démo ne contamine jamais le réel.
-- GDELT : une requête toutes les 6 secondes, budget de temps borné, reprise incrémentale.
+- GDELT : collecte horaire séparée (`.github/workflows/gdelt.yml`, `run_gdelt.py`), 3 séries au plus par heure, arrêt au premier refus. Séries stockées en CSV dans `data/gdelt/`, état dans `data/gdelt/_etat.json`. Le passage du soir ne fait que les importer.
 - En cas d'échec complet, le workflow écrit un brief d'échec.
 
 ## Limites connues
