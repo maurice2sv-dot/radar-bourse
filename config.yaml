@@ -27,7 +27,6 @@ feeds:                  # mode live
   france24: https://www.france24.com/fr/rss
 marches:                # indicateurs de marché (yfinance) : contexte des secteurs et alertes de risque
   VIX: ^VIX
-  VSTOXX: ^V2TX
   Taux US 10 ans: ^TNX
   Pétrole WTI: CL=F
   Dollar: DX-Y.NYB
