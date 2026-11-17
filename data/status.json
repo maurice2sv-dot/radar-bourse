@@ -1,19 +1,19 @@
 {
- "genere_utc": "2026-11-17 06:36",
+ "genere_utc": "2026-11-17 07:00",
  "mode": "live",
  "cours_au": "2026-11-16",
  "jours_de_retard": 1,
  "anomalies": [
-  "GDELT : 3 séries à jour sur 29 (3 avec historique), 2 acquises à ce passage, refus : militaire (RuntimeError), politique (RuntimeError). Reprise au prochain passage."
+  "GDELT : 4 séries à jour sur 29 (4 avec historique), 1 acquises à ce passage, refus : MSFT (HTTP 429 'Please limit requests to one every 5 seconds or contact kale') ; NVDA (HTTP 429 'Please limit requests to one every 5 seconds or contact kale'). Reprise au prochain passage."
  ],
  "journal": {
   "cours": [
    "yfinance (20)"
   ],
   "flux_ok": 5,
-  "gdelt_series": 2,
-  "gdelt_signaux": 3095,
-  "nouveaux_articles": 91,
+  "gdelt_series": 1,
+  "gdelt_signaux": 4126,
+  "nouveaux_articles": 6,
   "rejeu": 0,
   "resolues": 0
  }
