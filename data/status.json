@@ -1,26 +1,27 @@
 {
- "genere_utc": "2026-11-17 14:40",
+ "genere_utc": "2026-11-17 15:04",
  "mode": "live",
  "cours_au": "2026-11-16",
  "jours_de_retard": 1,
  "anomalies": [
-  "cours non mis à jour : ROG.SW",
-  "GDELT : 4 séries à jour sur 29 (4 avec historique), collecte horaire en cours, dernier refus 2026-11-17 14:19 : AIR.PA : HTTP 429 'Please limit requests to one every 5 seconds or contact kale'",
-  "valeurs écartées faute d'historique : ROG.SW"
+  "indicateurs indisponibles : VSTOXX",
+  "GDELT : 4 séries à jour sur 29 (4 avec historique), collecte horaire en cours, dernier refus 2026-11-17 14:19 : AIR.PA : HTTP 429 'Please limit requests to one every 5 seconds or contact kale'"
  ],
  "journal": {
   "cours": [
    "yfinance (138)"
   ],
   "resultats": {
-   "rafraichies": 70,
+   "rafraichies": 68,
    "sans_donnees": 0
   },
+  "marches": 6,
   "flux_ok": 5,
   "gdelt_series": 4,
   "gdelt_signaux": 4126,
-  "nouveaux_articles": 79,
+  "nouveaux_articles": 5,
   "rejeu": 0,
-  "resolues": 0
+  "resolues": 0,
+  "signalees_resolues": 0
  }
 }
