@@ -1,8 +1,8 @@
 {
- "genere_utc": "2026-11-17 22:16",
+ "genere_utc": "2026-11-18 03:53",
  "mode": "live",
  "cours_au": "2026-11-17",
- "jours_de_retard": 0,
+ "jours_de_retard": 1,
  "anomalies": [],
  "journal": {
   "cours": [
@@ -13,26 +13,26 @@
   },
   "marches": 6,
   "fondamentaux": {
-   "rafraichies": 25,
+   "rafraichies": 22,
    "sans_cik": 0
   },
   "flux_ok": 5,
   "gdelt_series": 3,
   "gdelt_evenements": {
-   "jours_acquis": 1077,
+   "jours_acquis": 1,
    "sources": {
-    "v1": 1077
+    "v2": 1
    },
    "historique": {
-    "jours": 1077,
+    "jours": 1078,
     "du": "2023-11-18",
-    "au": "2026-11-16"
+    "au": "2026-11-17"
    }
   },
-  "gdelt_signaux": 8380,
-  "nouveaux_articles": 0,
+  "gdelt_signaux": 8385,
+  "nouveaux_articles": 25,
   "rejeu": 0,
-  "resolues": 138,
+  "resolues": 0,
   "signalees_resolues": 0
  }
 }
