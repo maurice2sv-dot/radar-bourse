@@ -5,7 +5,7 @@ import pathlib
 
 import pandas as pd
 
-from . import analysis, collect, db, events, features, gdelt, gdelt_events, journal, model, portefeuille
+from . import analysis, collect, db, events, features, gdelt, gdelt_events, journal, model, portefeuille, univers
 
 
 def score_new(con, cfg):
@@ -74,37 +74,58 @@ def evaluation(con, d, cfg, h):
     # couverture de chaque groupe (valeurs ayant des données) : une source qui arrive relance la sélection
     cov = {g: int(d.loc[d[f].notna().any(axis=1), "ticker"].nunique()) for g, f in model.GROUPS.items()}
     grown = sel is not None and any(n > 1.2 * sel.get("couverture", {}).get(g, 0) + 1 for g, n in cov.items())
-    stale = (sel is None or sel.get("reserve_debut") != debut or sel.get("version") != 2 or grown
+    stale = (sel is None or sel.get("reserve_debut") != debut or sel.get("version") != 3 or grown
              or (today - dt.date.fromisoformat(sel["date"])).days >= cfg["evaluation"].get("reselection_jours", 7))
     if stale:
         groups, trace, dev = model.select_groups(d, cfg, h)
-        sel = {"version": 2, "date": today.isoformat(), "reserve_debut": debut, "groupes": groups, "trace": trace, "dev": dev,
+        sel = {"version": 3, "date": today.isoformat(), "reserve_debut": debut, "groupes": groups, "trace": trace, "dev": dev,
                "couverture": cov}
         db.meta_set(con, "selection", sel)
-    res = model.evaluate_reserve(d, cfg, h, sel["groupes"])
+    res = sel.get("reserve_cache") if not stale else None
+    if res is None or sel.get("reserve_groupes") != sel["groupes"]:
+        # recalcul hebdomadaire seulement : le test réservé ne sert plus aux réglages (voir période fraîche)
+        res = model.evaluate_reserve(d, cfg, h, sel["groupes"])
+        sel.update(reserve_cache=res, reserve_groupes=sel["groupes"])
+        db.meta_set(con, "selection", sel)
     opened = db.meta_get(con, "reserve_ouverte")
     if opened is None or opened.get("debut") != debut:
         opened = {"debut": debut, "le": today.isoformat()}
         db.meta_set(con, "reserve_ouverte", opened)
-    return dict(sel, reserve=res, reserve_ouverte_le=opened["le"], recalcule=stale)
+    out = dict(sel, reserve=res, reserve_ouverte_le=opened["le"], recalcule=stale)
+    out.pop("reserve_cache", None)
+    return out
 
 
 def run(cfg, root=".", do_replay=True):
     log, errs = {}, []
     con = db.connect(cfg, root)
-    wl, hz, main = cfg["watchlist"], cfg["horizons"], cfg["main_horizon"]
+    hz, main = cfg["horizons"], cfg["main_horizon"]
+    live = cfg["mode"] == "live"
+    if live:  # univers élargi et appartenance historique (contre le biais du survivant)
+        wl_full, membership, ulog, uerrs = univers.load(cfg, root, live=True)
+        log.update(ulog)
+        errs += uerrs
+    else:
+        wl_full, membership = cfg["watchlist"], {t: [[None, None]] for t in cfg["watchlist"]}
+    actives = {t: v for t, v in wl_full.items() if univers.is_active(membership.get(t, [[None, None]]))}
     if cfg["mode"] == "demo":
         if con.execute("SELECT COUNT(*) FROM prices").fetchone()[0] == 0:
             collect.demo_generate(cfg, con)
     else:  # chaque source est isolée : une panne est signalée, jamais bloquante
-        st, e = collect.collect_prices_live(cfg, con)
+        st, e = collect.collect_prices_live(dict(cfg, watchlist=wl_full), con)
         log["cours"], errs = st["sources"], errs + e
         try:
-            log["resultats"], e = collect.collect_earnings_live(cfg, con)
+            cc, e = collect.cross_check(dict(cfg, watchlist=actives), con)
+            log.update(cc)
+            errs += e
+        except Exception as ex:
+            log["controle_croise"] = f"indisponible ({type(ex).__name__})"
+        try:
+            log["resultats"], e = collect.collect_earnings_live(dict(cfg, watchlist=actives), con)
             errs += e
             log["marches"], e = collect.collect_macro_live(cfg, con)
             errs += e
-            log["fondamentaux"], e = collect.collect_fundamentals_live(cfg, con)
+            log["fondamentaux"], e = collect.collect_fundamentals_live(dict(cfg, watchlist=wl_full), con)
             errs += e
         except Exception as ex:
             errs.append(f"calendrier des résultats : {type(ex).__name__}")
@@ -123,33 +144,41 @@ def run(cfg, root=".", do_replay=True):
             errs.append(f"GDELT : {type(ex).__name__} {str(ex)[:80]}")
     log["nouveaux_articles"] = score_new(con, cfg)
 
-    close, volume, dropped = features.load_prices(con, wl)
+    close, volume, dropped = features.load_prices(con, wl_full)
     if close.shape[1] < 5 or len(close) < 300:
         raise RuntimeError(f"Cours insuffisants ({close.shape[1]} valeurs, {len(close)} jours) : {errs}")
+    dropped = [t for t in dropped if t in actives]
     if dropped:
-        errs.append("valeurs écartées faute d'historique : " + ", ".join(dropped))
-    wl = {t: wl[t] for t in close.columns}
+        errs.append(f"valeurs actives écartées faute d'historique ({len(dropped)}) : " + ", ".join(dropped[:15])
+                    + (" ..." if len(dropped) > 15 else ""))
+    wl = {t: wl_full[t] for t in close.columns}
+    member = univers.mask(membership, close.index, close.columns)
+    close_m = close.where(member)
+    sus = collect.suspicious_moves(close, member)
+    if sus:
+        errs.append("cours suspects (plus de 40 % en une séance, à vérifier) : " + ", ".join(sus[:8]))
+    log["univers_du_jour"] = int(member.iloc[-1].sum())
     scores = features.load_scores(con)
 
     # 1. Évaluation honnête : poids neutres (les poids appris utilisent des rendements qui seraient « futurs »)
     cal = {"earn": features.load_earnings(con), "cb": cfg.get("calendrier", {}).get("banques_centrales", {})}
     macro = features.load_macro(con)
     fund = features.load_fundamentals(con)
-    df0 = features.build_features(close, volume, scores, wl, hz, cal=cal, macro=macro, fund=fund)
+    df0 = features.build_features(close, volume, scores, wl, hz, cal=cal, macro=macro, fund=fund, member=member)
     ev = evaluation(con, df0.dropna(subset=["ret20"]), cfg, main)
 
     # 2. Journal : rejeu point-in-time puis résolution
     if do_replay:
         log["rejeu"] = replay(con, df0, features.ALL_FEATS, cfg)
-    log["resolues"] = journal.resolve(con, close, wl)
-    log["signalees_resolues"] = journal.resolve_watch(con, close, h=main)
+    log["resolues"] = journal.resolve(con, close_m, wl)
+    log["signalees_resolues"] = journal.resolve_watch(con, close_m, h=main)
 
     # 3. Apprentissage : poids des sources et des couples catégorie x secteur, avec test de signification
-    n_tests, n_sig = journal.learn_weights(con, close, scores, wl, h=main)
+    n_tests, n_sig = journal.learn_weights(con, close_m, scores, wl, h=main)
     wsrc, wcs = db.get_weights(con, "source"), db.get_weights(con, "catsec")
 
     # 4. Prédiction du jour avec les poids appris
-    df = features.build_features(close, volume, scores, wl, hz, wsrc, wcs, cal=cal, macro=macro, fund=fund)
+    df = features.build_features(close, volume, scores, wl, hz, wsrc, wcs, cal=cal, macro=macro, fund=fund, member=member)
     preds, last = model.predict_latest(df.dropna(subset=["ret20"]), model.feats_for(ev["groupes"]), hz)
     stats = journal.live_stats(con)
     k, n_res, hit = journal.shrink_factor(stats, main)
@@ -171,7 +200,8 @@ def run(cfg, root=".", do_replay=True):
     today = dt.datetime.now(dt.timezone.utc).replace(tzinfo=None)
     rep.update({"mode": cfg["mode"], "eval": ev, "main_horizon": main, "horizons": hz,
                 "weights_source": w("source"), "weights_pairs": pairs, "n_tests": n_tests, "n_sig": n_sig,
-                "suivi": journal.watch_stats(con), "cout_bps": cfg["evaluation"].get("cout_bps", 10), "gain_min_ic": cfg["evaluation"].get("gain_min_ic", 0.003), "journal": stats.to_dict("records"), "shrink": k, "n_resolved": n_res, "live_hit": hit,
+                "suivi": journal.watch_stats(con),
+                "fraiche": journal.fresh_stats(con, cfg["evaluation"].get("periode_fraiche_debut", run_date), main), "cout_bps": cfg["evaluation"].get("cout_bps", 10), "gain_min_ic": cfg["evaluation"].get("gain_min_ic", 0.003), "journal": stats.to_dict("records"), "shrink": k, "n_resolved": n_res, "live_hit": hit,
                 "n_articles": int(len(scores)), "n_gdelt": int((scores["source"] == "GDELT").sum()) if len(scores) else 0,
                 "generated_utc": today.strftime("%Y-%m-%d %H:%M"), "stale_days": int((today.date() - last.date()).days),
                 "errors": errs, "log": log})
@@ -179,7 +209,8 @@ def run(cfg, root=".", do_replay=True):
     out = pathlib.Path(root) / "data"
     try:  # portefeuille fictif : règle appliquée sans argent réel, état conservé dans data/
         nom = "portefeuille.json" if cfg["mode"] == "live" else "portefeuille_demo.json"
-        rep["portefeuille"] = portefeuille.update(close, rep["all_p5"], run_date, out / nom, rep["cout_bps"])
+        rep["portefeuille"] = portefeuille.update(close, rep["all_p5"], run_date, out / nom, rep["cout_bps"],
+                                                  member=member, macro=macro, refs=cfg.get("references"))
     except Exception as ex:
         errs.append(f"portefeuille fictif : {type(ex).__name__} {str(ex)[:80]}")
     (out / "report.json").write_text(json.dumps(rep, ensure_ascii=False, default=float, indent=1))

@@ -151,3 +151,19 @@ def watch_stats(con):
     days = con.execute("SELECT COUNT(DISTINCT run_date) FROM watch_log WHERE resolved=1").fetchone()[0]
     pending = con.execute("SELECT COUNT(DISTINCT run_date) FROM watch_log WHERE resolved=0").fetchone()[0]
     return {"n": int(n), "jours": int(days), "beat": beat, "excess": ex, "en_attente": int(pending)}
+
+
+def fresh_stats(con, debut, h=5):
+    """Période fraîche : prévisions faites en direct après `debut`, jamais vues pendant la construction ni les réglages.
+    IC par date (corrélation de rang entre probabilité prévue et résultat réel), t sur dates sans chevauchement."""
+    p = pd.read_sql("SELECT run_date, ticker, p_up, realized FROM predictions WHERE kind='live' AND resolved=1 "
+                    "AND horizon=? AND run_date>=?", con, params=(h, str(debut)))
+    out = {"debut": str(debut), "dates": 0, "ic": None, "t": None, "justes": None, "n": int(len(p))}
+    if p.empty:
+        return out
+    ic = p.groupby("run_date").apply(lambda g: g["p_up"].rank().corr(g["realized"].rank()) if len(g) > 5 else np.nan).dropna()
+    icn = ic.iloc[::h]
+    out.update(dates=int(len(ic)), ic=float(ic.mean()) if len(ic) else None,
+               t=float(icn.mean() / icn.std() * np.sqrt(len(icn))) if len(icn) > 2 and icn.std() > 0 else None,
+               justes=float(((p["p_up"] > 0.5) == (p["realized"] > 0)).mean()))
+    return out

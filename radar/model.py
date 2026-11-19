@@ -67,6 +67,7 @@ def evaluate(r, h, cost_bps=10):
     icn = ic.iloc[::h]  # une date sur h : observations sans chevauchement
     t = float(icn.mean() / icn.std() * np.sqrt(len(icn))) if len(icn) > 2 and icn.std() > 0 else float("nan")
     prev, gross, net, turn = set(), [], [], []
+    held, net_m, turn_m = set(), [], []
     for d in sorted(r["date"].unique())[::h]:
         g = r[r["date"] == d]
         k = max(1, len(g) // 5)
@@ -77,6 +78,14 @@ def evaluate(r, h, cost_bps=10):
         net.append(ret - to * 2 * cost_bps / 1e4)
         turn.append(to)
         prev = top
+        # règle de maintien : une valeur détenue reste tant qu'elle figure dans les 40 % les mieux classées
+        order = list(g.sort_values("p", ascending=False)["ticker"])
+        keep = held & set(order[:2 * k])
+        new = keep | set([t for t in order if t not in keep][:k - len(keep)])
+        to_m = 1.0 if not held else len(new - held) / k
+        net_m.append(float(g[g["ticker"].isin(new)][m].mean()) - to_m * 2 * cost_bps / 1e4)
+        turn_m.append(to_m)
+        held = new
     ann = np.sqrt(252 / h)
     ir = lambda s: float(np.mean(s) / np.std(s) * ann) if len(s) > 2 and np.std(s) > 0 else float("nan")
     y = (r[x] > 0).astype(int)
@@ -84,6 +93,8 @@ def evaluate(r, h, cost_bps=10):
             "auc": float(roc_auc_score(y, r["p"])) if y.nunique() > 1 else float("nan"),
             "brut": float(np.mean(gross)), "net": float(np.mean(net)), "rotation": float(np.mean(turn[1:] or [1.0])),
             "ir_brut": ir(gross), "ir_net": ir(net),
+            "net_maintien": float(np.mean(net_m)), "rotation_maintien": float(np.mean(turn_m[1:] or [1.0])),
+            "ir_net_maintien": ir(net_m),
             "debut": str(pd.Timestamp(r["date"].min()).date()), "fin": str(pd.Timestamp(r["date"].max()).date())}
 
 

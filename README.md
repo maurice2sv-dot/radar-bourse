@@ -47,4 +47,20 @@ Mode `demo` (défaut) : données synthétiques, pour tester la mécanique. Pour 
 
 ## Portefeuille fictif
 
-`radar/portefeuille.py` applique chaque jour, sans argent réel, une règle fixée à l'avance : détenir à parts égales les 20 % de valeurs les mieux classées à 5 séances, renouvelées toutes les 5 séances, frais de 10 pb par sens, exécution au cours de clôture du signal. Référence : toutes les valeurs suivies à parts égales. L'état est conservé dans `data/portefeuille.json` (à supprimer pour remettre le compteur à zéro si la règle change). Le résultat figure dans le brief quotidien (bloc 5) et dans le bilan du lundi (partie F).
+`radar/portefeuille.py` applique chaque jour, sans argent réel, deux règles fixées à l'avance et comparées avec les mêmes frais : « radar » (les 20 % de valeurs les mieux classées par le modèle) et « momentum » (les 20 % qui ont le plus monté sur 12 mois hors dernier mois). Revue toutes les 5 séances ; une valeur détenue reste tant qu'elle figure dans les 40 % premières (règle de maintien, qui réduit les frais) ; frais de 10 pb par sens. Références : moyenne de l'univers, S&P 500 (SPY) et Stoxx Europe 600 (EXSA.DE). L'état est dans `data/portefeuille.json` (à supprimer pour remettre le compteur à zéro si une règle change).
+
+## Univers et biais du survivant
+
+`radar/univers.py` élargit l'univers à environ 550 valeurs : composition du S&P 500 lue chaque semaine sur Wikipedia (copie dans `data/univers.json`), plus les valeurs de `config.yaml`. Une valeur ne compte qu'aux dates où elle appartenait à l'indice ; les valeurs sorties depuis 2016 et encore cotées sont gardées sur leur période d'appartenance. Biais résiduels : sociétés radiées sans cours disponibles, valeurs européennes considérées comme membres sur toute la période.
+
+## Mesure honnête : la période fraîche
+
+Le test réservé (depuis le 17/11/2025) a été consulté chaque jour ; il reste affiché pour mémoire et n'est plus recalculé qu'une fois par semaine. La mesure de référence est la période fraîche (`evaluation.periode_fraiche_debut`, 19/11/2026) : prévisions faites en direct après le dernier réglage. Ne pas régler le modèle en regardant ces résultats.
+
+## Tests et contrôles
+
+`python -m pytest -q tests` (lancé avant chaque passage) : absence de regard vers le futur, calcul de l'IC et des frais, règle de maintien, portefeuille, univers, brief. Contrôles de données à chaque passage : variations de plus de 40 % en une séance, contrôle croisé de 15 clôtures avec Stooq, valeurs non mises à jour.
+
+## Charge GitHub Actions
+
+Dépôt public : minutes illimitées sur les machines standard (4 processeurs, 16 Go). Essai hors ligne sur 690 valeurs avec resélection complète des variables (cas le plus lourd) : 4 min 30 de calcul sur 2 processeurs, 4,3 Go de mémoire. Collectes : les valeurs déjà en base ne téléchargent que 3 mois de cours ; historique complet uniquement pour les nouvelles valeurs (300 par passage) ; résultats 120 valeurs et comptes SEC 80 valeurs par passage. Durée attendue : 25 à 35 minutes pour le premier passage élargi, 10 à 20 minutes ensuite, pour une limite fixée à 75 minutes.

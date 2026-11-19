@@ -15,7 +15,7 @@ _GRP = {"actualites": "actualités", "marches": "marchés"}
 
 
 def _p(x):
-    return f"{x * 100:.0f} %"
+    return "?" if x is None or x != x else f"{x * 100:.0f} %"
 
 
 def _n(x, d=1):
@@ -167,10 +167,18 @@ def _bloc_alerte(rep):
 
 def _bloc_fiabilite(rep, main, evl):
     rs = evl.get("reserve") or {}
+    fr = rep.get("fraiche") or {}
     grp = " + ".join(["prix"] + [_GRP.get(g, g) for g in evl["groupes"]])
     ic, t, net = rs.get("ic", float("nan")), rs.get("t", float("nan")), rs.get("net", float("nan"))
-    lignes = [f"  Test réservé depuis le {evl['reserve_debut']} : IC {_sn(ic, 3)} (t = {_n(t)}) ; "
-              f"les 20 % de valeurs les mieux classées font {_sn(net * 100, 2)} % par {main} jours de mieux que la moyenne, frais déduits",
+    if fr.get("dates"):
+        l0 = (f"  Période fraîche depuis le {fr['debut']} (mesure de référence) : IC {_sn(fr['ic'], 3)}"
+              + (f" (t = {_n(fr['t'])})" if fr.get("t") is not None else "") + f" sur {fr['dates']} date{'s' if fr['dates'] > 1 else ''}, "
+              f"{_p(fr['justes'])} de prévisions justes")
+    else:
+        l0 = f"  Période fraîche depuis le {fr.get('debut', '?')} (mesure de référence) : premiers résultats après {main} séances"
+    lignes = [l0,
+              f"  Historique, test réservé depuis le {evl['reserve_debut']} (ne sert plus aux réglages) : IC {_sn(ic, 3)} (t = {_n(t)}) ; "
+              f"les 20 % les mieux classées font {_sn(net * 100, 2)} % par {main} jours de mieux que la moyenne, frais déduits",
               f"  Variables retenues : {grp} ; coefficient de confiance {_n(rep['shrink'], 2)} ; {rep['n_resolved']} prévisions résolues"
               + (f", {_p(rep['live_hit'])} justes" if rep.get("live_hit") is not None else "")]
     sv = rep.get("suivi") or {}
@@ -182,48 +190,60 @@ def _bloc_fiabilite(rep, main, evl):
     clair = ("  En clair : l'IC (coefficient d'information) mesure si le classement prévu ressemble au classement réellement observé. "
              "0 = hasard ; 0,02 à 0,05 = avantage modeste mais réel, niveau courant chez les professionnels. "
              "Le t indique si ce résultat peut être dû à la chance : au-dessus de 2, c'est peu probable. "
-             "Le « test réservé » porte sur une période que le modèle n'a jamais vue pendant sa construction, c'est donc la mesure honnête. "
-             "Un taux de prévisions justes proche de 50 % est normal : l'avantage se joue sur un grand nombre de valeurs, pas sur chacune.")
-    if math.isnan(t) or math.isnan(ic):
+             "La « période fraîche » ne contient que des prévisions faites avant les faits, après le dernier réglage du modèle : "
+             "c'est désormais la seule mesure qui compte. Le test réservé, consulté souvent, reste affiché pour mémoire.")
+    if fr.get("dates", 0) >= 20 and fr.get("t") is not None:
+        app = ("avantage confirmé sur la période fraîche." if fr["t"] >= 2 and fr["ic"] > 0 else
+               "pas d'avantage démontré sur la période fraîche : les signaux restent des pistes de veille.")
+    elif math.isnan(t) or math.isnan(ic):
         app = "mesure indisponible, aucune conclusion possible."
-    elif t >= 2 and net > 0:
-        app = ("avantage statistique faible mais solide sur l'ensemble du classement, rentable après frais. "
-               "Utile pour orienter la veille sur un panier de valeurs ; insuffisant pour décider valeur par valeur.")
-    elif t >= 2:
-        app = "le classement capte quelque chose, mais l'avantage disparaît une fois les frais déduits : intérêt surtout informatif."
     else:
-        app = "pas de preuve que le modèle fasse mieux que le hasard sur la période récente : prudence sur les signaux."
+        app = (f"période fraîche encore trop courte ({fr.get('dates', 0)} date{'s' if fr.get('dates', 0) > 1 else ''} sur 20 au moins) ; "
+               + ("l'historique montre un avantage faible mais significatif, à confirmer." if t >= 2 and net > 0 else
+                  "l'historique ne montre pas d'avantage net de frais."))
     return ["4. Fiabilité du modèle"] + lignes + [clair, f"  Appréciation : {app}"]
+
+
+_REF = {"moyenne": "moyenne de l'univers"}
+
+
+def _perf_line(pf):
+    st, rf = pf["strats"], pf["refs"]
+    parts = [f"radar {_sn(st['radar']['perf'] * 100, 2)} %", f"momentum {_sn(st['momentum']['perf'] * 100, 2)} %"]
+    parts += [f"{_REF.get(k, k)} {_sn(v * 100, 2)} %" for k, v in rf.items()]
+    return " ; ".join(parts)
 
 
 def _bloc_portefeuille(rep):
     pf = rep.get("portefeuille")
     titre = "5. Portefeuille fictif (sans argent réel)"
-    if not pf:
+    if not pf or "strats" not in pf:
         return [titre, "  Indisponible lors de ce passage.", "  Appréciation : aucune mesure possible aujourd'hui."]
-    ecart = (pf["perf"] - pf["indice"]) * 100
+    R, M = pf["strats"]["radar"], pf["strats"]["momentum"]
+    moy = pf["refs"].get("moyenne", 0.0)
+    ecart = (R["perf"] - moy) * 100
+    ecart_m = (R["perf"] - M["perf"]) * 100
     lignes = [f"  Règle : {pf['regle']}",
-              f"  Depuis le {pf['debut']} ({pf['seances']} séance{'s' if pf['seances'] > 1 else ''}) : portefeuille {_sn(pf['perf'] * 100, 2)} %, "
-              f"référence {_sn(pf['indice'] * 100, 2)} %, écart {_sn(ecart, 2)} pt ; pire baisse {_n(pf['pire_baisse'] * 100, 2)} % ; "
-              f"frais payés {_n(pf['frais'] * 100, 2)} %",
-              f"  {pf['n_lignes']} lignes, dont : {', '.join(pf['lignes'])} ; prochain renouvellement dans {pf['prochain_renouvellement']} séance"
-              f"{'s' if pf['prochain_renouvellement'] > 1 else ''}"]
-    clair = ("  En clair : le radar applique chaque jour sa propre règle, sans argent réel, pour mesurer ce qu'elle aurait rapporté. "
-             "La référence est la moyenne de toutes les valeurs suivies, à parts égales : c'est ce que le modèle cherche à battre. "
-             "La pire baisse indique la plus forte chute subie depuis un sommet. Seul un écart positif et durable, sur plusieurs mois, "
-             "permettrait de considérer la règle comme une aide à la décision.")
+              f"  Depuis le {pf['debut']} ({pf['seances']} séance{'s' if pf['seances'] > 1 else ''}) : {_perf_line(pf)}",
+              f"  Radar : pire baisse {_n(R['pire_baisse'] * 100, 2)} %, frais payés {_n(R['frais'] * 100, 2)} % ; "
+              f"{R['n_lignes']} lignes, dont {', '.join(R['lignes'])} ; prochaine revue dans {pf['prochaine_revue']} séance"
+              f"{'s' if pf['prochaine_revue'] > 1 else ''}"]
+    clair = ("  En clair : deux règles sont appliquées sans argent réel, avec les mêmes frais. « Radar » suit le classement du modèle ; "
+             "« momentum » achète simplement ce qui a le plus monté sur 12 mois. Si le radar ne fait pas mieux que cette règle "
+             "naïve, sa complexité ne sert à rien. Les indices réels (S&P 500, Stoxx 600) montrent ce qu'aurait rapporté un simple "
+             "fonds indiciel. Il faut plusieurs mois pour conclure.")
     if pf["seances"] == 0:
-        app = "portefeuille constitué lors de ce passage ; les premiers résultats apparaîtront dès la prochaine séance."
+        app = "portefeuilles constitués lors de ce passage ; premiers résultats dès la prochaine séance."
     elif pf["seances"] < 60:
-        app = (f"tendance provisoire : la règle est {'en avance' if ecart > 0 else 'en retard'} de {_n(abs(ecart), 2)} pt sur la référence, "
-               f"mais il est trop tôt pour conclure ({pf['seances']} séance{'s' if pf['seances'] > 1 else ''} sur au moins 60 nécessaires) ; "
-               "sur quelques semaines, les écarts relèvent surtout du hasard.")
-    elif ecart > 0:
-        app = (f"la règle devance la référence ({pf['periodes_gagnees']} périodes gagnées sur {pf['periodes']}) ; "
+        app = (f"tendance provisoire : le radar est {'en avance' if ecart > 0 else 'en retard'} de {_n(abs(ecart), 2)} pt sur la moyenne "
+               f"et {'en avance' if ecart_m > 0 else 'en retard'} de {_n(abs(ecart_m), 2)} pt sur le momentum ; trop tôt pour conclure "
+               f"({pf['seances']} séance{'s' if pf['seances'] > 1 else ''} sur au moins 60).")
+    elif ecart > 0 and ecart_m > 0:
+        app = (f"le radar devance la moyenne et le momentum ({R['gagnees']} périodes gagnées sur {R['periodes']}) ; "
                "résultat encourageant, à confirmer dans la durée.")
     else:
-        app = (f"la règle reste derrière la référence ({pf['periodes_gagnees']} périodes gagnées sur {pf['periodes']}) ; "
-               "pas d'intérêt démontré à suivre les signaux plutôt que l'ensemble du marché.")
+        app = ("le radar ne bat pas " + ("la moyenne" if ecart <= 0 else "la règle naïve du momentum")
+               + f" ({R['gagnees']} périodes gagnées sur {R['periodes']}) : pas d'intérêt démontré à suivre ses signaux.")
     return [titre] + lignes + [clair, f"  Appréciation : {app}"]
 
 
@@ -307,6 +327,8 @@ def _hebdo(rep, main, evl, hist, tag):
               for x in evl["trace"]),
           f"  Test réservé : IC {_sn(rs.get('ic', float('nan')), 3)}, t = {_n(rs.get('t', float('nan')))}, "
           f"net de frais {_sn(rs.get('net', float('nan')) * 100, 2)} % par {main} j, ratio d'information net {_n(rs.get('ir_net', float('nan')), 2)}",
+          f"  Règle de maintien (garder tant que dans les 40 % premières) : net de frais {_sn(rs.get('net_maintien', float('nan')) * 100, 2)} % par {main} j, "
+          f"rotation {_p(rs.get('rotation_maintien', float('nan')))} contre {_p(rs.get('rotation', float('nan')))} sans maintien",
           f"  Liens événement × secteur validés : {rep['n_sig']} significatifs sur {rep['n_tests']} testés",
           "  En clair : une famille de variables n'est gardée que si elle améliore réellement la prévision. "
           "Le ratio d'information rapporte le gain à sa régularité : au-dessus de 0,5, le résultat est plutôt régulier."]
@@ -317,21 +339,23 @@ def _hebdo(rep, main, evl, hist, tag):
     L.append("")
     pf = rep.get("portefeuille")
     L.append("F. Portefeuille fictif")
-    if pf:
-        ecart = (pf["perf"] - pf["indice"]) * 100
-        if pf.get("semaine"):
-            sm = pf["semaine"]
-            L.append(f"  Sur 5 séances : portefeuille {_sn(sm['pf'] * 100, 2)} %, référence {_sn(sm['ind'] * 100, 2)} % "
-                     f"(écart {_sn((sm['pf'] - sm['ind']) * 100, 2)} pt)")
-        L.append(f"  Depuis le {pf['debut']} : portefeuille {_sn(pf['perf'] * 100, 2)} %, référence {_sn(pf['indice'] * 100, 2)} %, "
-                 f"écart {_sn(ecart, 2)} pt ; pire baisse {_n(pf['pire_baisse'] * 100, 2)} % ; "
-                 f"périodes de 5 séances gagnées : {pf['periodes_gagnees']} sur {pf['periodes']}")
-        L.append("  En clair : une période est « gagnée » quand le portefeuille fait mieux que la référence entre deux renouvellements. "
+    if pf and "strats" in pf:
+        R, M = pf["strats"]["radar"], pf["strats"]["momentum"]
+        for nom, S in (("Radar", R), ("Momentum", M)):
+            if S.get("semaine"):
+                sm = S["semaine"]
+                L.append(f"  {nom} sur 5 séances : {_sn(sm['pf'] * 100, 2)} %, moyenne de l'univers {_sn(sm['moy'] * 100, 2)} %")
+        L.append(f"  Depuis le {pf['debut']} : {_perf_line(pf)}")
+        L.append(f"  Périodes de 5 séances gagnées contre la moyenne : radar {R['gagnees']} sur {R['periodes']}, "
+                 f"momentum {M['gagnees']} sur {M['periodes']} ; frais payés : radar {_n(R['frais'] * 100, 2)} %, "
+                 f"momentum {_n(M['frais'] * 100, 2)} %")
+        L.append("  En clair : une période est « gagnée » quand la règle fait mieux que la moyenne entre deux revues. "
                  "Une règle sans valeur en gagne environ une sur deux.")
-        n = pf["periodes"]
+        n = R["periodes"]
         L.append("  Appréciation : " + ("historique encore trop court, aucune conclusion possible." if n < 4 else
-                                        "la règle gagne nettement plus souvent qu'à pile ou face." if pf["periodes_gagnees"] / n >= 0.6 and ecart > 0 else
-                                        "résultats proches du hasard pour l'instant, la règle n'a pas encore fait ses preuves."))
+                                        "le radar gagne nettement plus souvent qu'à pile ou face et devance le momentum."
+                                        if R["gagnees"] / n >= 0.6 and R["perf"] > M["perf"] else
+                                        "résultats proches du hasard ou inférieurs au momentum : la règle n'a pas encore fait ses preuves."))
     else:
         L.append("  Indisponible lors de ce passage.")
     L.append("")

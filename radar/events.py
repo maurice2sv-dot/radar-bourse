@@ -7,7 +7,7 @@ import hashlib
 import re
 
 SECTORS = ["tech", "conso", "auto", "finance", "energie", "defense", "aero", "luxe", "sante",
-           "distribution", "industrie", "materiaux", "services_publics", "telecom"]
+           "distribution", "industrie", "materiaux", "services_publics", "telecom", "immobilier"]
 
 
 def _U(base, **kw):
@@ -21,7 +21,7 @@ EXPOSURE = {
     "militaire":    _U(0, defense=1.0, aero=0.5, energie=0.4, luxe=-0.3, tech=-0.1, conso=-0.1, finance=-0.1),
     "securitaire":  _U(0, defense=0.8, tech=0.2, luxe=-0.2, aero=-0.1),
     "politique":    _U(0.3, defense=0.1, energie=0.2),
-    "financier":    _U(0.2, finance=0.6, tech=0.4, auto=0.3),
+    "financier":    _U(0.2, finance=0.6, tech=0.4, auto=0.3, immobilier=0.4),
     "meteo":        _U(0, energie=0.5, conso=-0.2, auto=-0.1, aero=-0.2, luxe=-0.1),
     "economique":   _U(0.5, finance=0.7, luxe=0.6, auto=0.6),
     "scientifique": _U(0, tech=0.7, sante=0.7, aero=0.3, auto=0.3, energie=0.2),

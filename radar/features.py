@@ -7,7 +7,7 @@ import pandas as pd
 from .events import CATS, SECTORS, SENSITIVE, rel_exposure
 
 PRICE_FEATS = ["ret1", "ret5", "ret20", "rel5", "rel20", "vol20", "volratio", "dist_ma50", "rsi", "vol_rel",
-               "mkt_ret5", "mkt_ret20", "sec_id"]
+               "mkt_ret5", "mkt_ret20", "sec_id", "mom12_1"]
 NEWS_FEATS = [f"n_{c}" for c in CATS] + ["news_comp", "co_sent", "co_mentions"]
 CAL_FEATS = ["earn_next", "earn_since", "earn_surprise", "cb_next"]
 MACRO_FEATS = ["vix_rel", "vix_chg5", "taux_chg20", "petrole_ret20", "dollar_ret20", "or_ret20"]
@@ -133,7 +133,9 @@ def fund_frame(fu, idx, price):
     return out.replace([np.inf, -np.inf], np.nan)
 
 
-def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None, cal=None, macro=None, fund=None):
+def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None, cal=None, macro=None, fund=None, member=None):
+    """member : tableau booléen dates × valeurs (appartenance historique à l'univers). Les lignes hors univers
+    sont retirées après le calcul des variables propres à chaque valeur, avant toute moyenne de marché ou de secteur."""
     wsrc, wcs = wsrc or {}, wcs or {}
     idx, n = close.index, len(close)
     iv = idx.values.astype("datetime64[ns]")
@@ -155,7 +157,9 @@ def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None, cal
     else:
         cat3 = {c: pd.Series(np.zeros(n), index=idx) for c in CATS}
     rets = close.pct_change(fill_method=None)
-    mkt = rets.mean(axis=1)
+    if member is not None:
+        member = member.reindex(index=idx, columns=close.columns).fillna(False).astype(bool)
+    mkt = (rets.where(member) if member is not None else rets).mean(axis=1)
     frames = []
     for t in close.columns:
         c, r1, v = close[t], rets[t], volume[t]
@@ -168,6 +172,7 @@ def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None, cal
         d = c.diff()
         up, dn = d.clip(lower=0).rolling(14).mean(), (-d.clip(upper=0)).rolling(14).mean()
         f["rsi"] = 100 - 100 / (1 + up / (dn + 1e-9))
+        f["mom12_1"] = c.shift(21) / c.shift(252) - 1  # tendance 12 mois hors dernier mois (facteur classique)
         f["vol_rel"] = v / (v.rolling(20).mean() + 1e-9)
         f["mkt_ret5"] = mkt.rolling(5).sum()
         f["mkt_ret20"] = mkt.rolling(20).sum()
@@ -201,14 +206,17 @@ def build_features(close, volume, scores, wl, horizons, wsrc=None, wcs=None, cal
         for h in horizons:
             f[f"fwd{h}"] = c.shift(-h) / c - 1
         f["ticker"], f["sector"], f["date"] = t, sector, idx
-        frames.append(f)
+        if member is not None:
+            f = f[member[t].values]
+        if len(f):
+            frames.append(f)
     df = pd.concat(frames, ignore_index=True)
     g = df.groupby("date")
     gs = df.groupby(["date", "sector"])
     for h in horizons:
         df[f"m{h}"] = df[f"fwd{h}"] - g[f"fwd{h}"].transform("mean")    # contre la moyenne des valeurs suivies
         df[f"x{h}"] = df[f"fwd{h}"] - gs[f"fwd{h}"].transform("mean")   # cible : contre la moyenne de son secteur
-    for k in FUND_FEATS:  # comme les professionnels : rang de chaque valeur parmi celles qui publient
+    for k in FUND_FEATS + ["mom12_1"]:  # comme les professionnels : rang de chaque valeur parmi celles qui publient
         df[k] = g[k].rank(pct=True)
     df["rel5"] = df["ret5"] - g["ret5"].transform("mean")
     df["rel20"] = df["ret20"] - g["ret20"].transform("mean")

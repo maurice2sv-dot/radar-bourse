@@ -11,7 +11,7 @@ MIN_HIST = 30  # jours actifs exigés sur les 60 jours de référence avant de p
 SEC_FR = {"tech": "Technologie", "conso": "Consommation", "auto": "Automobile", "finance": "Finance",
           "energie": "Énergie", "defense": "Défense", "aero": "Aéronautique", "luxe": "Luxe", "sante": "Santé",
           "distribution": "Grande consommation", "industrie": "Industrie", "materiaux": "Matériaux",
-          "services_publics": "Services publics", "telecom": "Télécoms"}
+          "services_publics": "Services publics", "telecom": "Télécoms", "immobilier": "Immobilier"}
 
 
 def _z(s):

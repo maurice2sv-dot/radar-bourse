@@ -8,9 +8,16 @@ evaluation:             # lots 2 à 4
   cout_bps: 10          # frais par sens (achat ou vente), en points de base
   gain_min_ic: 0.003    # gain d'IC exigé (sur la période de développement) pour garder un groupe de variables
   reselection_jours: 7  # fréquence de la sélection des groupes de variables
+  periode_fraiche_debut: 2026-11-19  # mesure honnête à partir d'ici : aucun réglage ne s'appuie sur ces résultats
+univers:                # environ 500 valeurs : S&P 500 (Wikipedia, rafraîchi chaque semaine) + valeurs de la liste ci-dessous
+  sp500: true           # appartenance historique appliquée (biais du survivant réduit, voir radar/univers.py)
+  nouvelles_par_passage: 300   # valeurs nouvelles dont on télécharge les 10 ans d'historique à chaque passage
+references:             # indices réels pour juger le portefeuille fictif (non utilisés par le modèle)
+  S&P 500: SPY
+  Stoxx 600: EXSA.DE
 fondamentaux:           # lot 5 : comptes officiels des sociétés américaines (SEC, base EDGAR)
   # contact exigé par la SEC : fourni par le secret GitHub SEC_CONTACT (jamais écrit dans le dépôt public)
-  max_par_passage: 25
+  max_par_passage: 80   # environ 450 valeurs américaines : couverture complète en une semaine
 replay_dates: 20        # points de rejeu point-in-time pour amorcer le journal
 demo:
   seed: 7
@@ -46,7 +53,7 @@ marches:                # indicateurs de marché (yfinance) : contexte des secte
   Or: GC=F
   EUR/USD: EURUSD=X
 calendrier:
-  max_par_passage: 70   # valeurs dont on rafraîchit les dates de résultats à chaque passage (cycle d'une semaine)
+  max_par_passage: 120  # valeurs dont on rafraîchit les dates de résultats à chaque passage (cycle d'une semaine)
   banques_centrales:    # dates de décision. Sources : federalreserve.gov (2027 révisé le 12/11/2026), ecb.europa.eu
     Fed: [2023-11-01, 2023-12-13, 2024-01-31, 2024-03-20, 2024-05-01, 2024-06-12, 2024-07-31, 2024-09-18, 2024-11-07, 2024-12-18,
           2025-01-29, 2025-03-19, 2025-05-07, 2025-06-18, 2025-07-30, 2025-09-17, 2025-10-29, 2025-12-10,

@@ -121,53 +121,84 @@ def _stooq_symbol(t):
     return f"{t.lower()}.us"
 
 
-def _prices_yfinance(tickers, years=10):
+def _prices_yfinance(tickers, years=10, period=None, lot=100, pause=2.0):
+    """Téléchargement par lots (limite de débit de Yahoo). period : '3mo' pour une mise à jour, sinon tout l'historique."""
+    import time
     import yfinance as yf
-    data = yf.download(tickers, period=f"{years}y", auto_adjust=True, progress=False, group_by="column", threads=False)
-    close, vol = data["Close"], data["Volume"]
     rows, today = [], _open_day()
-    for t in tickers:
-        if t not in close:
+    for i in range(0, len(tickers), lot):
+        part = tickers[i:i + lot]
+        if i:
+            time.sleep(pause)
+        data = yf.download(part, period=period or f"{years}y", auto_adjust=True, progress=False, group_by="column",
+                           threads=False)
+        if data is None or data.empty:
             continue
-        for d, p in close[t].dropna().items():
-            if d.strftime("%Y-%m-%d") >= today:
-                continue  # séance en cours : cours partiel, écarté
-            v = vol[t].get(d, 0)
-            rows.append((t, d.strftime("%Y-%m-%d"), float(p), float(v) if v == v else 0.0))
+        close, vol = data["Close"], data["Volume"]
+        if isinstance(close, pd.Series):  # une seule valeur demandée
+            close, vol = close.to_frame(part[0]), vol.to_frame(part[0])
+        for t in part:
+            if t not in close:
+                continue
+            for d, p in close[t].dropna().items():
+                if d.strftime("%Y-%m-%d") >= today:
+                    continue  # séance en cours : cours partiel, écarté
+                v = vol[t].get(d, 0)
+                rows.append((t, d.strftime("%Y-%m-%d"), float(p), float(v) if v == v else 0.0))
     return rows
 
 
 def _prices_stooq(tickers, years=10):
     import io
     import requests
-    rows, today = [], _open_day()
+    rows, today, echecs = [], _open_day(), 0
     for t in tickers:
+        if echecs >= 5:
+            break  # source manifestement indisponible : inutile d'insister
         try:
             r = requests.get(f"https://stooq.com/q/d/l/?s={_stooq_symbol(t)}&i=d", timeout=20,
                              headers={"User-Agent": "radar-bourse/0.2"})
             r.raise_for_status()
             df = pd.read_csv(io.StringIO(r.text))
             if "Close" not in df:
+                echecs += 1
                 continue
+            echecs = 0
             k = 262 * years
             for d, p, v in zip(df["Date"].tail(k), df["Close"].tail(k), df.get("Volume", pd.Series(0, index=df.index)).tail(k)):
                 if str(d) < today:
                     rows.append((t, str(d), float(p), float(v) if v == v else 0.0))
         except Exception:
+            echecs += 1
             continue
     return rows
 
 
 def collect_prices_live(cfg, con):
-    """yfinance, puis Stooq en secours pour les valeurs manquantes. Ne lève jamais : renvoie un état."""
-    tickers = list(cfg["watchlist"])
+    """yfinance, puis Stooq en secours pour les valeurs manquantes. Ne lève jamais : renvoie un état.
+    Les valeurs déjà en base ne téléchargent que les 3 derniers mois (charge divisée par 40) ; l'historique
+    complet n'est demandé qu'aux nouvelles valeurs, par lots."""
+    from .db import meta_get, meta_set
+    last = dict(con.execute("SELECT ticker, MAX(date) FROM prices GROUP BY ticker").fetchall())
+    lim = (dt.date.today() - dt.timedelta(days=45)).isoformat()
+    # valeurs sans cours (sorties et radiées) : nouvel essai au plus une fois par mois
+    sans = meta_get(con, "sans_cours", {}) or {}
+    mois = (dt.date.today() - dt.timedelta(days=30)).isoformat()
+    tickers = [t for t in cfg["watchlist"] if sans.get(t, "") < mois]
+    recents = [t for t in tickers if last.get(t, "") >= lim]
     errs, got, src = [], set(), []
     for name, fn in (("yfinance", _prices_yfinance), ("stooq", _prices_stooq)):
         missing = [t for t in tickers if t not in got]
         if not missing:
             break
         try:
-            rows = fn(missing, cfg.get("historique_ans", 10))
+            if name == "yfinance":
+                maj = [t for t in missing if t in recents]
+                neuf = sorted([t for t in missing if t not in recents], key=lambda t: bool(cfg["watchlist"][t].get("sorti")))
+                neuf = neuf[:cfg.get("univers", {}).get("nouvelles_par_passage", 300)]  # valeurs actives d'abord
+                rows = (fn(maj, period="3mo") if maj else []) + (fn(neuf, cfg.get("historique_ans", 10)) if neuf else [])
+            else:
+                rows = fn([t for t in missing if t in recents or cfg["watchlist"][t].get("base")], cfg.get("historique_ans", 10))
         except Exception as e:
             errs.append(f"cours {name} : {type(e).__name__} {str(e)[:80]}")
             continue
@@ -178,9 +209,58 @@ def collect_prices_live(cfg, con):
             got |= new
             src.append(f"{name} ({len(new)})")
     missing = [t for t in tickers if t not in got]
-    if missing:
-        errs.append("cours non mis à jour : " + ", ".join(missing))
-    return {"sources": src, "manquants": missing}, errs
+    for t in missing:
+        if t not in last and cfg["watchlist"][t].get("sorti"):
+            sans[t] = dt.date.today().isoformat()
+    for t in got:
+        sans.pop(t, None)
+    meta_set(con, "sans_cours", sans)
+    # seules comptent comme anomalies les valeurs actives déjà suivies (une valeur sortie peut ne plus être cotée)
+    suivies = [t for t in missing if t in recents and not cfg["watchlist"][t].get("sorti")]
+    if suivies:
+        errs.append(f"cours non mis à jour ({len(suivies)}) : " + ", ".join(suivies[:15]) + (" ..." if len(suivies) > 15 else ""))
+    return {"sources": src, "manquants": len(missing)}, errs
+
+
+def cross_check(cfg, con, n=15):
+    """Contrôle croisé : dernière clôture yfinance comparée à Stooq sur n valeurs tournantes. Ne lève jamais."""
+    tickers = sorted(t for t, v in cfg["watchlist"].items() if not v.get("sorti"))
+    if not tickers:
+        return {}, []
+    k = dt.date.today().toordinal() % max(1, len(tickers) // n + 1)
+    lot = tickers[k * n:(k + 1) * n] or tickers[:n]
+    try:
+        alt = _prices_stooq(lot, years=1)
+    except Exception:
+        alt = []
+    if not alt:
+        return {"controle_croise": "Stooq indisponible"}, []
+    a = pd.DataFrame(alt, columns=["ticker", "date", "close", "volume"])
+    a = a.sort_values("date").groupby("ticker").tail(1)
+    ecarts, vus = [], 0
+    for t, d, c in zip(a["ticker"], a["date"], a["close"]):
+        r = con.execute("SELECT close FROM prices WHERE ticker=? AND date=?", (t, d)).fetchone()
+        if not r or not r[0]:
+            continue
+        vus += 1
+        e = c / r[0] - 1
+        if abs(e) > 0.03:  # au-delà des écarts d'ajustement des dividendes récents
+            ecarts.append(f"{t} {e:+.0%}")
+    errs = [f"contrôle croisé des cours : écart avec Stooq pour {', '.join(ecarts)}"] if ecarts else []
+    return {"controle_croise": f"{vus} valeurs comparées, {len(ecarts)} écart(s)"}, errs
+
+
+def suspicious_moves(close, member=None, days=5, seuil=0.4):
+    """Variations de plus de 40 % en une séance sur les derniers jours : erreur de données probable à vérifier."""
+    r = close.pct_change(fill_method=None).tail(days)
+    if member is not None:
+        r = r.where(member.reindex(index=r.index, columns=r.columns).fillna(False).astype(bool))
+    out = []
+    for t in r.columns:
+        s = r[t].dropna()
+        s = s[s.abs() > seuil]
+        out += [f"{t} {v:+.0%} le {d.strftime('%d/%m')}" for d, v in s.items()]
+    return out
 
 
 def collect_news_live(cfg, con):
@@ -258,7 +338,7 @@ def collect_earnings_live(cfg, con):
 
 def collect_macro_live(cfg, con):
     """Indicateurs de marché (VIX, taux, pétrole, dollar, or). Ne lève jamais."""
-    syms = cfg.get("marches", {})
+    syms = dict(cfg.get("marches", {}), **cfg.get("references", {}))
     if not syms:
         return 0, []
     try:
@@ -312,7 +392,8 @@ def collect_fundamentals_live(cfg, con):
     seen = dict(con.execute("SELECT ticker, fetched FROM fund_fetch").fetchall())
     now = dt.datetime.now(dt.timezone.utc)
     lim = (now - dt.timedelta(days=7)).isoformat()
-    todo = sorted([t for t in us if t in cik and seen.get(t, "") < lim], key=lambda t: seen.get(t, ""))[:f.get("max_par_passage", 25)]
+    sorti = lambda t: bool(cfg["watchlist"][t].get("sorti"))  # valeurs actives d'abord
+    todo = sorted([t for t in us if t in cik and seen.get(t, "") < lim], key=lambda t: (sorti(t), seen.get(t, "")))[:f.get("max_par_passage", 25)]
     ok, ko = 0, []
     for t in todo:
         time.sleep(0.25)  # la SEC limite à 10 requêtes par seconde
