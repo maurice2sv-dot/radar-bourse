@@ -39,6 +39,7 @@ jobs:
       - run: python run.py --mode live
         env:
           SEC_CONTACT: ${{ secrets.SEC_CONTACT }}
+          GH_TOKEN: ${{ github.token }}  # lecture du dépôt public fja05680/sp500 (composition historique)
       - name: Sauvegarder la base
         env:
           GH_TOKEN: ${{ github.token }}

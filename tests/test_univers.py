@@ -46,3 +46,33 @@ def test_changements_en_tete_simple():
 <tr><td>March 1, 2024</td><td>T1</td><td>Co 1</td><td>OLD</td><td>Old Co</td><td>x</td></tr></table>"""
     _, chg = univers.parse_wikipedia(html)
     assert chg == [{"date": "2024-03-01", "ajout": "T1", "retrait": "OLD", "nom_retrait": "Old Co"}]
+
+
+def test_historique_fja(monkeypatch):
+    import types
+    csv = "date,tickers\n2015-06-01,\"AAA,BBB,CCC\"\n2017-03-01,\"AAA,BBB,DDD\"\n2020-01-02,\"AAA,DDD,BRK.B\"\n"
+
+    class R:
+        def __init__(self, js=None, text=""):
+            self._js, self.text = js, text
+
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return self._js
+
+    def get(url, headers=None, timeout=None):
+        if url == univers.FJA:
+            return R([{"name": "S&P 500 Historical Components & Changes(01-17-2026).csv", "download_url": "x"},
+                      {"name": "S&P 500 Historical Components & Changes(05-01-2024).csv", "download_url": "y"}])
+        assert url == "x"
+        return R(text=csv)
+
+    monkeypatch.setitem(__import__("sys").modules, "requests", types.SimpleNamespace(get=get))
+    per, fin = univers.historique_fja()
+    assert fin == "2020-01-02"
+    assert per["AAA"] == [[None, None]]
+    assert per["CCC"] == [[None, "2017-03-01"]]
+    assert per["BBB"] == [[None, "2020-01-02"]]
+    assert per["DDD"] == [["2017-03-01", None]] and per["BRK-B"] == [["2020-01-02", None]]

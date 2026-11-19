@@ -106,6 +106,48 @@ def parse_wikipedia(html):
     return membres, changements
 
 
+FJA = "https://api.github.com/repos/fja05680/sp500/contents"
+
+
+def historique_fja(token=None):
+    """Composition historique du S&P 500 tenue dans le dépôt public fja05680/sp500 (une ligne par date de changement,
+    liste complète des membres). Renvoie {symbole: [[début, fin), ...]} depuis 2016 et la dernière date couverte."""
+    import re
+    import requests
+    h = {"Accept": "application/vnd.github+json", **UA}
+    if token:
+        h["Authorization"] = f"Bearer {token}"
+    r = requests.get(FJA, headers=h, timeout=30)
+    r.raise_for_status()
+    def quand(nom):
+        m = re.search(r"\((\d{2})-(\d{2})-(\d{4})\)", nom)
+        return f"{m.group(3)}-{m.group(1)}-{m.group(2)}" if m else ""
+    fichiers = [x for x in r.json() if x["name"].lower().endswith(".csv") and "historical components" in x["name"].lower()]
+    if not fichiers:
+        raise ValueError("aucun fichier de composition historique")
+    f = max(fichiers, key=lambda x: quand(x["name"]))
+    df = pd.read_csv(io.StringIO(requests.get(f["download_url"], headers=UA, timeout=60).text))
+    dcol = next(c for c in df.columns if "date" in c.lower())
+    tcol = next(c for c in df.columns if "ticker" in c.lower())
+    df[dcol] = pd.to_datetime(df[dcol], errors="coerce")
+    df = df.dropna(subset=[dcol]).sort_values(dcol)
+    # point de départ : la composition en vigueur au 1er janvier 2016
+    avant = df[df[dcol] <= pd.Timestamp(DEBUT_SORTIES)]
+    df = pd.concat([avant.tail(1), df[df[dcol] > pd.Timestamp(DEBUT_SORTIES)]])
+    per, ouverts, fin = {}, {}, None
+    for d, tk in zip(df[dcol], df[tcol]):
+        d = d.strftime("%Y-%m-%d")
+        cur = {yahoo_ticker(x) for x in str(tk).split(",") if x.strip()}
+        for t in cur - set(ouverts):
+            ouverts[t] = d if d > DEBUT_SORTIES else None
+        for t in set(ouverts) - cur:
+            per.setdefault(t, []).append([ouverts.pop(t), d])
+        fin = d
+    for t, a in ouverts.items():
+        per.setdefault(t, []).append([a, None])
+    return per, fin
+
+
 def intervalles(membres, changements):
     """Périodes d'appartenance [début, fin) par valeur, reconstruites à rebours depuis la composition actuelle."""
     out, noms = {}, {}
@@ -166,13 +208,10 @@ def load(cfg, root=".", live=True, now=None):
         cache = {}
     now = now or dt.datetime.now(dt.timezone.utc)
     age = (now - dt.datetime.fromisoformat(cache["maj"])).days if cache.get("maj") else 999
-    if live and (age >= REFRESH_JOURS or not cache.get("changements")):
+    if live and age >= REFRESH_JOURS:
         try:
             membres, chg = parse_wikipedia(_fetch_html())
-            if not chg:
-                errs.append("univers S&P 500 : historique des changements illisible, appartenance limitée aux dates d'entrée"
-                            f" (tables lues : {DIAG[:200]})")
-            elif not any(c["retrait"] for c in chg):
+            if chg and not any(c["retrait"] for c in chg):
                 errs.append("univers S&P 500 : aucune sortie lue dans l'historique des changements")
             cache.update({"maj": now.isoformat(), "membres": membres, "changements": chg})
             log["univers"] = f"S&P 500 rafraîchi ({len(membres)} membres, {len(chg)} changements)"
@@ -180,7 +219,29 @@ def load(cfg, root=".", live=True, now=None):
             errs.append(f"univers S&P 500 : {type(e).__name__} {str(e)[:60]} (dernière version connue conservée)")
     if not cache.get("membres"):
         return base, {t: [[None, None]] for t in base}, log, errs
+    if live and not cache.get("changements") and (age >= REFRESH_JOURS or "historique" not in cache):
+        try:
+            import os
+            h, fin = historique_fja(os.environ.get("GH_TOKEN"))
+            cache["historique"] = {"source": "fja05680/sp500", "jusqu_au": fin, "periodes": h}
+            log["historique"] = f"composition historique fja05680/sp500 jusqu'au {fin} ({len(h)} valeurs)"
+        except Exception as e:
+            errs.append(f"composition historique (fja05680/sp500) : {type(e).__name__} {str(e)[:60]}")
     per = intervalles(cache["membres"], cache.get("changements", []))
+    hist = (cache.get("historique") or {}).get("periodes") or {}
+    if not cache.get("changements") and hist:
+        actuels_t = {m["ticker"]: m for m in cache["membres"]}
+        per = {}
+        for t, ps in hist.items():
+            ps = [list(p) for p in ps]
+            if t in actuels_t and ps[-1][1] is not None and ps[-1][1] >= (cache["historique"]["jusqu_au"] or ""):
+                ps[-1][1] = None  # toujours membre aujourd'hui
+            elif t in actuels_t and ps[-1][1] is not None:
+                ps.append([actuels_t[t].get("depuis"), None])  # sorti puis revenu après la date du fichier
+            per[t] = ps
+        for t, m in actuels_t.items():
+            per.setdefault(t, [[m.get("depuis"), None]])  # entrées postérieures au fichier
+        per = {t: ps for t, ps in per.items() if t in actuels_t or any(p[1] is None or p[1] > DEBUT_SORTIES for p in ps)}
     secteurs = cache.setdefault("secteurs_sortis", {})
     actuels = {m["ticker"]: m for m in cache["membres"]}
     sortis = [t for t in per if t not in actuels and t not in base]
