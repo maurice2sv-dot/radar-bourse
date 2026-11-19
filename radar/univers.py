@@ -180,7 +180,7 @@ def _fetch_html():
     return r.text
 
 
-def _secteurs_yahoo(tickers, budget=60):
+def _secteurs_yahoo(tickers, budget=120):
     """Secteur des valeurs sorties de l'indice (absent de Wikipedia), demandé à Yahoo par petits lots."""
     import yfinance as yf
     out = {}
@@ -190,7 +190,7 @@ def _secteurs_yahoo(tickers, budget=60):
             out[t] = YAHOO.get(info.get("sector")) or ""
             out[t + "|nom"] = info.get("shortName") or ""
         except Exception:
-            out[t] = None
+            out[t] = ""  # radiée ou inconnue de Yahoo : pas de nouvel essai (aucun cours ne serait disponible)
     return out
 
 
