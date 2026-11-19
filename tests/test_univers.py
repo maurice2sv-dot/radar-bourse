@@ -36,3 +36,13 @@ def test_masque():
     m = univers.mask({"OLD": [["2020-06-01", "2024-03-01"]]}, idx, ["OLD", "EU"])
     assert not m.loc["2020-05-29", "OLD"] and m.loc["2020-06-01", "OLD"] and not m.loc["2024-03-01", "OLD"]
     assert m["EU"].all()
+
+
+def test_changements_en_tete_simple():
+    rows = "".join(f"<tr><td>T{i}</td><td>Co {i}</td><td>Energy</td><td>Oil</td><td>2001-01-01</td></tr>" for i in range(410))
+    html = f"""<table><tr><th>Symbol</th><th>Security</th><th>GICS Sector</th><th>GICS Sub-Industry</th><th>Date added</th></tr>{rows}</table>
+<table><tr><th>Effective Date</th><th>Added</th><th>Added</th><th>Removed</th><th>Removed</th><th>Reason</th></tr>
+<tr><td></td><td>Ticker</td><td>Security</td><td>Ticker</td><td>Security</td><td></td></tr>
+<tr><td>March 1, 2024</td><td>T1</td><td>Co 1</td><td>OLD</td><td>Old Co</td><td>x</td></tr></table>"""
+    _, chg = univers.parse_wikipedia(html)
+    assert chg == [{"date": "2024-03-01", "ajout": "T1", "retrait": "OLD", "nom_retrait": "Old Co"}]

@@ -22,6 +22,7 @@ import pandas as pd
 WIKI = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 UA = {"User-Agent": "radar-bourse/0.3 (projet personnel de veille ; https://github.com/maurice2sv-dot/radar-bourse)"}
 DEBUT_SORTIES = "2016-01-01"
+DIAG = ""
 REFRESH_JOURS = 7
 
 GICS = {"Information Technology": "tech", "Communication Services": "telecom", "Consumer Discretionary": "conso",
@@ -79,12 +80,17 @@ def parse_wikipedia(html):
     membres = [{"ticker": yahoo_ticker(d[sym]), "name": str(d[nom]), "sector": _sector(str(d[gs]).strip(), d[sub] if sub else ""),
                 "depuis": _date(d[add]) if add else None} for _, d in cur.iterrows()]
     changements = []
-    chg = next((t for t in tables if _find(t.columns, "removed") and _find(t.columns, "added")), None)
+    global DIAG
+    DIAG = " | ".join(",".join(str(c)[:18] for c in list(t.columns)[:6]) for t in tables[1:4])
+    chg = next((t for t in tables if t is not cur and (_find(t.columns, "removed") or _find(t.columns, "added"))), None)
     if chg is not None:
         cd = _find(chg.columns, "date") or chg.columns[0]
         at = _find(chg.columns, "added", "ticker") or _find(chg.columns, "added", "symbol")
         rt = _find(chg.columns, "removed", "ticker") or _find(chg.columns, "removed", "symbol")
         rs = _find(chg.columns, "removed", "secur") or _find(chg.columns, "removed", "compan")
+        if not (at and rt) and chg.shape[1] >= 5:
+            # en-tête sur deux lignes lu comme une seule : ordre standard date, ajout (symbole, nom), retrait (symbole, nom)
+            cd, at, _, rt, rs = list(chg.columns[:5])
         if at and rt:
             for _, r in chg.iterrows():
                 d = _date(r[cd])
@@ -160,11 +166,14 @@ def load(cfg, root=".", live=True, now=None):
         cache = {}
     now = now or dt.datetime.now(dt.timezone.utc)
     age = (now - dt.datetime.fromisoformat(cache["maj"])).days if cache.get("maj") else 999
-    if live and age >= REFRESH_JOURS:
+    if live and (age >= REFRESH_JOURS or not cache.get("changements")):
         try:
             membres, chg = parse_wikipedia(_fetch_html())
             if not chg:
-                errs.append("univers S&P 500 : historique des changements illisible, appartenance limitée aux dates d'entrée")
+                errs.append("univers S&P 500 : historique des changements illisible, appartenance limitée aux dates d'entrée"
+                            f" (tables lues : {DIAG[:200]})")
+            elif not any(c["retrait"] for c in chg):
+                errs.append("univers S&P 500 : aucune sortie lue dans l'historique des changements")
             cache.update({"maj": now.isoformat(), "membres": membres, "changements": chg})
             log["univers"] = f"S&P 500 rafraîchi ({len(membres)} membres, {len(chg)} changements)"
         except Exception as e:

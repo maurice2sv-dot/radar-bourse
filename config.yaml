@@ -11,7 +11,7 @@ evaluation:             # lots 2 à 4
   periode_fraiche_debut: 2026-11-19  # mesure honnête à partir d'ici : aucun réglage ne s'appuie sur ces résultats
 univers:                # environ 500 valeurs : S&P 500 (Wikipedia, rafraîchi chaque semaine) + valeurs de la liste ci-dessous
   sp500: true           # appartenance historique appliquée (biais du survivant réduit, voir radar/univers.py)
-  nouvelles_par_passage: 300   # valeurs nouvelles dont on télécharge les 10 ans d'historique à chaque passage
+  nouvelles_par_passage: 500   # valeurs nouvelles dont on télécharge les 10 ans d'historique à chaque passage
 references:             # indices réels pour juger le portefeuille fictif (non utilisés par le modèle)
   S&P 500: SPY
   Stoxx 600: EXSA.DE
