@@ -1,29 +1,29 @@
 {
- "genere_utc": "2026-11-19 11:23",
+ "genere_utc": "2026-11-19 22:12",
  "mode": "live",
- "cours_au": "2026-11-18",
- "jours_de_retard": 1,
+ "cours_au": "2026-11-19",
+ "jours_de_retard": 0,
  "anomalies": [
-  "valeurs actives écartées faute d'historique (3) : HONA, SNDK, VYLR"
+  "valeurs actives écartées faute d'historique (6) : HONA, SNDK, VYLR, WBD, KVUE, PSKY"
  ],
  "journal": {
   "valeurs": {
-   "actives": 570,
-   "sorties_suivies": 64,
-   "secteur_manquant": 184
+   "actives": 577,
+   "sorties_suivies": 110,
+   "secteur_manquant": 138
   },
   "cours": [
-   "yfinance (634)"
+   "yfinance (680)"
   ],
   "controle_croise": "Stooq indisponible",
   "resultats": {
-   "rafraichies": 72,
+   "rafraichies": 7,
    "sans_donnees": 0
   },
   "marches": 8,
   "fondamentaux": {
    "rafraichies": 80,
-   "sans_cik": 2
+   "sans_cik": 9
   },
   "flux_ok": 5,
   "gdelt_series": 3,
@@ -37,10 +37,10 @@
    }
   },
   "gdelt_signaux": 8390,
-  "nouveaux_articles": 7,
-  "univers_du_jour": 567,
+  "nouveaux_articles": 76,
+  "univers_du_jour": 571,
   "rejeu": 0,
-  "resolues": 0,
+  "resolues": 567,
   "signalees_resolues": 0
  }
 }
