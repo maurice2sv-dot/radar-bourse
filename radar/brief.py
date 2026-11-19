@@ -236,7 +236,8 @@ def _bloc_fiabilite(rep, main, evl):
     else:
         app = (f"période fraîche encore trop courte ({fr.get('dates', 0)} date{'s' if fr.get('dates', 0) > 1 else ''} sur 20 au moins) ; "
                + ("l'historique montre un avantage faible mais significatif, à confirmer." if t >= 2 and net > 0 else
-                  "l'historique ne montre pas d'avantage net de frais."))
+                  "l'historique montre un léger avantage net de frais, mais trop incertain pour écarter le hasard (t inférieur à 2)."
+                  if net > 0 else "l'historique ne montre pas d'avantage net de frais."))
     return ["5. Fiabilité du modèle"] + lignes + [clair, f"  Appréciation : {app}"]
 
 
