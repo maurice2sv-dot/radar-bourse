@@ -5,7 +5,7 @@ import pathlib
 
 import pandas as pd
 
-from . import analysis, collect, db, events, features, gdelt, gdelt_events, journal, model
+from . import analysis, collect, db, events, features, gdelt, gdelt_events, journal, model, portefeuille
 
 
 def score_new(con, cfg):
@@ -177,6 +177,11 @@ def run(cfg, root=".", do_replay=True):
                 "errors": errs, "log": log})
     rep.pop("drivers")
     out = pathlib.Path(root) / "data"
+    try:  # portefeuille fictif : règle appliquée sans argent réel, état conservé dans data/
+        nom = "portefeuille.json" if cfg["mode"] == "live" else "portefeuille_demo.json"
+        rep["portefeuille"] = portefeuille.update(close, rep["all_p5"], run_date, out / nom, rep["cout_bps"])
+    except Exception as ex:
+        errs.append(f"portefeuille fictif : {type(ex).__name__} {str(ex)[:80]}")
     (out / "report.json").write_text(json.dumps(rep, ensure_ascii=False, default=float, indent=1))
     (out / "status.json").write_text(json.dumps({"genere_utc": rep["generated_utc"], "mode": cfg["mode"], "cours_au": run_date,
                                                  "jours_de_retard": rep["stale_days"], "anomalies": errs, "journal": log},

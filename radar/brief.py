@@ -196,13 +196,44 @@ def _bloc_fiabilite(rep, main, evl):
     return ["4. Fiabilité du modèle"] + lignes + [clair, f"  Appréciation : {app}"]
 
 
+def _bloc_portefeuille(rep):
+    pf = rep.get("portefeuille")
+    titre = "5. Portefeuille fictif (sans argent réel)"
+    if not pf:
+        return [titre, "  Indisponible lors de ce passage.", "  Appréciation : aucune mesure possible aujourd'hui."]
+    ecart = (pf["perf"] - pf["indice"]) * 100
+    lignes = [f"  Règle : {pf['regle']}",
+              f"  Depuis le {pf['debut']} ({pf['seances']} séance{'s' if pf['seances'] > 1 else ''}) : portefeuille {_sn(pf['perf'] * 100, 2)} %, "
+              f"référence {_sn(pf['indice'] * 100, 2)} %, écart {_sn(ecart, 2)} pt ; pire baisse {_n(pf['pire_baisse'] * 100, 2)} % ; "
+              f"frais payés {_n(pf['frais'] * 100, 2)} %",
+              f"  {pf['n_lignes']} lignes, dont : {', '.join(pf['lignes'])} ; prochain renouvellement dans {pf['prochain_renouvellement']} séance"
+              f"{'s' if pf['prochain_renouvellement'] > 1 else ''}"]
+    clair = ("  En clair : le radar applique chaque jour sa propre règle, sans argent réel, pour mesurer ce qu'elle aurait rapporté. "
+             "La référence est la moyenne de toutes les valeurs suivies, à parts égales : c'est ce que le modèle cherche à battre. "
+             "La pire baisse indique la plus forte chute subie depuis un sommet. Seul un écart positif et durable, sur plusieurs mois, "
+             "permettrait de considérer la règle comme une aide à la décision.")
+    if pf["seances"] == 0:
+        app = "portefeuille constitué lors de ce passage ; les premiers résultats apparaîtront dès la prochaine séance."
+    elif pf["seances"] < 60:
+        app = (f"tendance provisoire : la règle est {'en avance' if ecart > 0 else 'en retard'} de {_n(abs(ecart), 2)} pt sur la référence, "
+               f"mais il est trop tôt pour conclure ({pf['seances']} séance{'s' if pf['seances'] > 1 else ''} sur au moins 60 nécessaires) ; "
+               "sur quelques semaines, les écarts relèvent surtout du hasard.")
+    elif ecart > 0:
+        app = (f"la règle devance la référence ({pf['periodes_gagnees']} périodes gagnées sur {pf['periodes']}) ; "
+               "résultat encourageant, à confirmer dans la durée.")
+    else:
+        app = (f"la règle reste derrière la référence ({pf['periodes_gagnees']} périodes gagnées sur {pf['periodes']}) ; "
+               "pas d'intérêt démontré à suivre les signaux plutôt que l'ensemble du marché.")
+    return [titre] + lignes + [clair, f"  Appréciation : {app}"]
+
+
 def _bloc_etat(rep):
     anomalies = ([f"cours figés depuis {rep['stale_days']} jours"] if rep.get("stale_days", 0) > 4 else []) + rep.get("errors", [])
     plus = f" (+{len(anomalies) - 3} autres, voir data/status.json)" if len(anomalies) > 3 else ""
     fait = ("  ANOMALIES : " + " ; ".join(anomalies[:3]) + plus) if anomalies else "  Toutes les sources ont répondu"
     app = ("données incomplètes, les blocs ci-dessus sont à lire avec réserve." if anomalies
            else "collecte complète, le brief repose sur des données à jour.")
-    return ["5. État de la collecte", fait, f"  Appréciation : {app}"]
+    return ["6. État de la collecte", fait, f"  Appréciation : {app}"]
 
 
 # ---------- bilan hebdomadaire commenté ----------
@@ -284,6 +315,26 @@ def _hebdo(rep, main, evl, hist, tag):
                                     if not math.isnan(irn) and irn >= 0.5 else "résultat hors échantillon encore irrégulier ; ")
              + ("aucun lien actualité × secteur n'est encore prouvé." if not rep["n_sig"] else f"{rep['n_sig']} liens actualité × secteur confirmés."))
     L.append("")
+    pf = rep.get("portefeuille")
+    L.append("F. Portefeuille fictif")
+    if pf:
+        ecart = (pf["perf"] - pf["indice"]) * 100
+        if pf.get("semaine"):
+            sm = pf["semaine"]
+            L.append(f"  Sur 5 séances : portefeuille {_sn(sm['pf'] * 100, 2)} %, référence {_sn(sm['ind'] * 100, 2)} % "
+                     f"(écart {_sn((sm['pf'] - sm['ind']) * 100, 2)} pt)")
+        L.append(f"  Depuis le {pf['debut']} : portefeuille {_sn(pf['perf'] * 100, 2)} %, référence {_sn(pf['indice'] * 100, 2)} %, "
+                 f"écart {_sn(ecart, 2)} pt ; pire baisse {_n(pf['pire_baisse'] * 100, 2)} % ; "
+                 f"périodes de 5 séances gagnées : {pf['periodes_gagnees']} sur {pf['periodes']}")
+        L.append("  En clair : une période est « gagnée » quand le portefeuille fait mieux que la référence entre deux renouvellements. "
+                 "Une règle sans valeur en gagne environ une sur deux.")
+        n = pf["periodes"]
+        L.append("  Appréciation : " + ("historique encore trop court, aucune conclusion possible." if n < 4 else
+                                        "la règle gagne nettement plus souvent qu'à pile ou face." if pf["periodes_gagnees"] / n >= 0.6 and ecart > 0 else
+                                        "résultats proches du hasard pour l'instant, la règle n'a pas encore fait ses preuves."))
+    else:
+        L.append("  Indisponible lors de ce passage.")
+    L.append("")
     return L
 
 
@@ -297,7 +348,7 @@ def generate(rep, out_dir):
 
     daily = [f"Radar bourse, cours au {rep['as_of']}, généré le {rep.get('generated_utc', '')} UTC{tag}", ""]
     for bloc in (_bloc_valeurs(rep, main, hist), _bloc_techno(rep), _bloc_alerte(rep),
-                 _bloc_fiabilite(rep, main, evl), _bloc_etat(rep)):
+                 _bloc_fiabilite(rep, main, evl), _bloc_portefeuille(rep), _bloc_etat(rep)):
         daily += bloc + [""]
     weekly = _hebdo(rep, main, evl, hist, tag)
     daily.append("Veille informative, pas un conseil en investissement.")

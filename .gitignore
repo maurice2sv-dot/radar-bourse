@@ -2,3 +2,4 @@ data/radar_demo.db
 __pycache__/
 data/radar.db
 data/radar-*.db
+data/portefeuille_demo.json

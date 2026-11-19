@@ -44,3 +44,7 @@ Mode `demo` (défaut) : données synthétiques, pour tester la mécanique. Pour 
 2. Le workflow `.github/workflows/radar.yml` s'exécute du lundi au vendredi vers 6h15 (heure de Paris en hiver), lance `python run.py --mode live` et enregistre `data/radar.db`, `data/brief.md`, `data/brief_weekly.md`, `dashboard.html`.
 3. Le brief matinal lit `data/brief.md` (tous les jours) et `data/brief_weekly.md` (le lundi).
 4. Les premiers jours, le modèle n'a pas d'historique d'actualités (les flux RSS ne remontent pas le passé) : l'apport des actualités reste nul jusqu'à accumulation de plusieurs semaines.
+
+## Portefeuille fictif
+
+`radar/portefeuille.py` applique chaque jour, sans argent réel, une règle fixée à l'avance : détenir à parts égales les 20 % de valeurs les mieux classées à 5 séances, renouvelées toutes les 5 séances, frais de 10 pb par sens, exécution au cours de clôture du signal. Référence : toutes les valeurs suivies à parts égales. L'état est conservé dans `data/portefeuille.json` (à supprimer pour remettre le compteur à zéro si la règle change). Le résultat figure dans le brief quotidien (bloc 5) et dans le bilan du lundi (partie F).
