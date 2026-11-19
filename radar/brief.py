@@ -109,7 +109,9 @@ def _bloc_valeurs(rep, main, hist):
     elif nets:
         fav = sum(1 for f in nets if f[1] == "favorable")
         app = (f"{len(nets)} signa{'ux' if len(nets) > 1 else 'l'} net{'s' if len(nets) > 1 else ''} "
-               f"({fav} favorable{'s' if fav > 1 else ''}, {len(nets) - fav} défavorable{'s' if len(nets) - fav > 1 else ''}) ; "
+               + (f"({fav} favorable{'s' if fav > 1 else ''}, {len(nets) - fav} défavorable{'s' if len(nets) - fav > 1 else ''}) ; "
+                  if 0 < fav < len(nets) else f"{'favorable' if fav else 'défavorable'}{'s' if len(nets) > 1 else ''} ; ")
+               + 
                f"pistes de veille à recouper avec l'actualité, l'avantage statistique restant mince valeur par valeur.")
     else:
         app = "signaux faibles à modérés, aucune valeur ne se détache vraiment : journée sans conviction particulière."
@@ -251,7 +253,10 @@ def _bloc_etat(rep):
     anomalies = ([f"cours figés depuis {rep['stale_days']} jours"] if rep.get("stale_days", 0) > 4 else []) + rep.get("errors", [])
     plus = f" (+{len(anomalies) - 3} autres, voir data/status.json)" if len(anomalies) > 3 else ""
     fait = ("  ANOMALIES : " + " ; ".join(anomalies[:3]) + plus) if anomalies else "  Toutes les sources ont répondu"
-    app = ("données incomplètes, les blocs ci-dessus sont à lire avec réserve." if anomalies
+    mineures = ("faute d'historique", "contrôle croisé", "secteurs des valeurs sorties")
+    graves = [a for a in anomalies if not any(m in a for m in mineures)]
+    app = ("données incomplètes, les blocs ci-dessus sont à lire avec réserve." if graves
+           else "écarts mineurs (valeurs récentes ou contrôles annexes), sans effet notable sur le brief." if anomalies
            else "collecte complète, le brief repose sur des données à jour.")
     return ["6. État de la collecte", fait, f"  Appréciation : {app}"]
 
