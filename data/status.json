@@ -1,21 +1,20 @@
 {
- "genere_utc": "2026-11-19 10:37",
+ "genere_utc": "2026-11-19 10:53",
  "mode": "live",
  "cours_au": "2026-11-18",
  "jours_de_retard": 1,
  "anomalies": [
-  "univers S&P 500 : historique des changements illisible, appartenance limitée aux dates d'entrée (tables lues : vteS&P 500 compani,vteS&P 500 compani)",
   "valeurs actives écartées faute d'historique (3) : HONA, SNDK, VYLR"
  ],
  "journal": {
-  "univers": "S&P 500 rafraîchi (503 membres, 0 changements)",
+  "historique": "composition historique fja05680/sp500 jusqu'au 2026-08-18 (745 valeurs)",
   "valeurs": {
    "actives": 570,
-   "sorties_suivies": 0,
-   "secteur_manquant": 0
+   "sorties_suivies": 19,
+   "secteur_manquant": 229
   },
   "cours": [
-   "yfinance (570)"
+   "yfinance (589)"
   ],
   "controle_croise": "Stooq indisponible",
   "resultats": {
@@ -39,7 +38,7 @@
    }
   },
   "gdelt_signaux": 8390,
-  "nouveaux_articles": 4,
+  "nouveaux_articles": 2,
   "univers_du_jour": 567,
   "rejeu": 0,
   "resolues": 0,

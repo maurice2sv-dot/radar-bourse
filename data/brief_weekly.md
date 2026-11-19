@@ -20,9 +20,9 @@ D. Marchés sur 20 séances
   Appréciation : contexte tendu, les mouvements de plus de 10 % sur 20 séances signalent les marchés à surveiller.
 
 E. Fiabilité et construction du modèle
-  Variables testées (IC en développement) : prix +0,011, actualités +0,011 (écartée), calendrier +0,011 (écartée), marchés +0,012 (écartée), fondamentaux +0,009 (écartée)
-  Test réservé : IC +0,028, t = 2,3, net de frais +0,26 % par 5 j, ratio d'information net 1,10
-  Règle de maintien (garder tant que dans les 40 % premières) : net de frais +0,24 % par 5 j, rotation 36 % contre 58 % sans maintien
+  Variables testées (IC en développement) : prix +0,011, actualités +0,011 (écartée), calendrier +0,013 (écartée), marchés +0,009 (écartée), fondamentaux +0,009 (écartée)
+  Test réservé : IC +0,029, t = 2,2, net de frais +0,20 % par 5 j, ratio d'information net 0,85
+  Règle de maintien (garder tant que dans les 40 % premières) : net de frais +0,21 % par 5 j, rotation 37 % contre 58 % sans maintien
   Liens événement × secteur validés : 0 significatifs sur 37 testés
   En clair : une famille de variables n'est gardée que si elle améliore réellement la prévision. Le ratio d'information rapporte le gain à sa régularité : au-dessus de 0,5, le résultat est plutôt régulier.
   Appréciation : modèle sobre (seuls les prix sont retenus), résultat régulier hors échantillon ; aucun lien actualité × secteur n'est encore prouvé.
