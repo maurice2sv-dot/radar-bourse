@@ -93,7 +93,7 @@ def _bloc_profils(rep):
                  + " ; ".join(f"{x['name']} ({_ord(x['rang'])}, {_n(x['p5'] * 100)} %, bêta {_n(x['beta'], 1)})" for x in g["top"]))
     L.append("  En clair : les valeurs sont réparties en trois tiers selon leur agitation sur un an (volatilité : ampleur habituelle "
              "des variations, en % par an). Le bêta mesure la sensibilité au marché : 1 = suit le marché, 1,5 = amplifie ses "
-             "mouvements de moitié, 0,5 = les amortit. Une valeur dynamique peut gagner ou perdre beaucoup plus qu'une valeur prudente, "
+             "mouvements de moitié, 0,5 = les amortit, négatif = évolue souvent à contre-courant (cas récent du pétrole). Une valeur dynamique peut gagner ou perdre beaucoup plus qu'une valeur prudente, "
              "dans les deux sens. Le risque se mesure bien ; le potentiel, beaucoup moins : le classement reste celui du modèle.")
     tops = {p: (pr.get(p) or {}).get("top") or [] for p in pr}
     meilleur = max(tops, key=lambda p: tops[p][0]["p5"] if tops[p] else 0)
