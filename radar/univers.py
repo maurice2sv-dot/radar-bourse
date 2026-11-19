@@ -51,29 +51,50 @@ def _date(x):
     return None if pd.isna(d) else d.strftime("%Y-%m-%d")
 
 
+def _flat(t):
+    if isinstance(t.columns, pd.MultiIndex):
+        t = t.copy()
+        t.columns = ["_".join(dict.fromkeys(str(x) for x in c if not str(x).startswith("Unnamed"))) for c in t.columns]
+    return t
+
+
+def _find(cols, *keys):
+    return next((c for c in cols if all(k in str(c).lower() for k in keys)), None)
+
+
 def parse_wikipedia(html):
-    """Renvoie (membres actuels, changements). Lève une exception si la page n'a pas la forme attendue."""
-    tables = pd.read_html(io.StringIO(html))
-    cur = next(t for t in tables if "Symbol" in t.columns and "GICS Sector" in t.columns)
-    membres = []
-    sub = next((c for c in cur.columns if str(c).lower().startswith("gics sub")), None)
-    add = next((c for c in cur.columns if str(c).lower().startswith("date added")), None)
-    for _, d in cur.iterrows():
-        sec = _sector(d["GICS Sector"], d[sub] if sub else "")
-        membres.append({"ticker": yahoo_ticker(d["Symbol"]), "name": str(d["Security"]), "sector": sec,
-                        "depuis": _date(d[add]) if add else None})
-    chg = next(t for t in tables if isinstance(t.columns, pd.MultiIndex) and "Removed" in t.columns.get_level_values(0))
-    chg.columns = ["_".join(str(x) for x in c if not str(x).startswith("Unnamed")) for c in chg.columns]
-    col = lambda k: next(c for c in chg.columns if c.lower().startswith(k))
-    cd, at, rt, rs = col("effective date"), col("added_ticker"), col("removed_ticker"), col("removed_security")
+    """Renvoie (membres actuels, changements). Lève une exception explicite si la page n'a pas la forme attendue.
+    Tolérant aux variations de présentation (noms de colonnes, en-têtes sur deux lignes)."""
+    tables = [_flat(t) for t in pd.read_html(io.StringIO(html))]
+    cur = next((t for t in tables if (_find(t.columns, "symbol") or _find(t.columns, "ticker"))
+                and _find(t.columns, "sector") and len(t) >= 400), None)
+    if cur is None:
+        apercu = " | ".join(",".join(str(c)[:15] for c in list(t.columns)[:4]) for t in tables[:3])
+        raise ValueError(f"table des membres introuvable ({len(tables)} tables : {apercu})")
+    sym = _find(cur.columns, "symbol") or _find(cur.columns, "ticker")
+    nom = _find(cur.columns, "security") or _find(cur.columns, "company") or sym
+    gs = _find(cur.columns, "sector")
+    sub = _find(cur.columns, "sub")
+    add = _find(cur.columns, "date", "add")
+    membres = [{"ticker": yahoo_ticker(d[sym]), "name": str(d[nom]), "sector": _sector(str(d[gs]).strip(), d[sub] if sub else ""),
+                "depuis": _date(d[add]) if add else None} for _, d in cur.iterrows()]
     changements = []
-    for _, r in chg.iterrows():
-        d = _date(r[cd])
-        if not d:
-            continue
-        a = yahoo_ticker(r[at]) if isinstance(r[at], str) and r[at].strip() else None
-        x = yahoo_ticker(r[rt]) if isinstance(r[rt], str) and r[rt].strip() else None
-        changements.append({"date": d, "ajout": a, "retrait": x, "nom_retrait": str(r[rs]) if x else None})
+    chg = next((t for t in tables if _find(t.columns, "removed") and _find(t.columns, "added")), None)
+    if chg is not None:
+        cd = _find(chg.columns, "date") or chg.columns[0]
+        at = _find(chg.columns, "added", "ticker") or _find(chg.columns, "added", "symbol")
+        rt = _find(chg.columns, "removed", "ticker") or _find(chg.columns, "removed", "symbol")
+        rs = _find(chg.columns, "removed", "secur") or _find(chg.columns, "removed", "compan")
+        if at and rt:
+            for _, r in chg.iterrows():
+                d = _date(r[cd])
+                if not d:
+                    continue  # ligne d'en-tête répétée ou date illisible
+                ok = lambda v: isinstance(v, str) and v.strip() and v.strip().lower() not in ("ticker", "symbol")
+                a = yahoo_ticker(r[at]) if ok(r[at]) else None
+                x = yahoo_ticker(r[rt]) if ok(r[rt]) else None
+                changements.append({"date": d, "ajout": a, "retrait": x,
+                                    "nom_retrait": str(r[rs]) if x and rs else None})
     if len(membres) < 400:
         raise ValueError(f"composition inattendue ({len(membres)} valeurs)")
     return membres, changements
@@ -142,6 +163,8 @@ def load(cfg, root=".", live=True, now=None):
     if live and age >= REFRESH_JOURS:
         try:
             membres, chg = parse_wikipedia(_fetch_html())
+            if not chg:
+                errs.append("univers S&P 500 : historique des changements illisible, appartenance limitée aux dates d'entrée")
             cache.update({"maj": now.isoformat(), "membres": membres, "changements": chg})
             log["univers"] = f"S&P 500 rafraîchi ({len(membres)} membres, {len(chg)} changements)"
         except Exception as e:
