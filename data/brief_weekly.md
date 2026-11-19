@@ -1,11 +1,36 @@
-Radar bourse, bilan hebdomadaire au 2026-11-18
-- Secteurs porteurs : Défense (militaire), Services publics (sécuritaire), Matériaux (militaire)
-- Secteurs sous pression : Technologie (militaire), Luxe (militaire)
-- Technologies : ia (calibrage), semi-conducteurs (calibrage), quantique (calibrage)
-- Journal des prédictions (taux de réussite) : 1 j (live) 55 % sur 296; 1 j (replay) 53 % sur 400; 5 j (replay) 49 % sur 400; 20 j (replay) 46 % sur 400
-- Sources les plus fiables : GDELT 1.00, bbc_business 1.00
-- Liens événement × secteur validés (0 significatifs sur 34 testés) : aucun pour l'instant
-- Marchés (20 séances) : VIX 24.56 (+47.2%), Taux US 10 ans 5.07 (-0.08 pt), Pétrole WTI 81.95 (-15.6%), Dollar 103.96 (+2.1%), Or 3712.40 (-10.5%), EUR/USD 1.10 (-2.1%)
-- Sélection des variables (développement, IC) : prix +0.021, actualites +0.021 (écarté), calendrier +0.024 (écarté), marches +0.020 (écarté), fondamentaux +0.012 (écarté)
-- Test réservé depuis le 2025-11-17 : IC +0.048, t = 4.2, net de frais +0.15 % par 5 j, ratio d'information net 0.71
+BILAN DE LA SEMAINE au 2026-11-18
+
+A. Secteurs
+  Porteurs : Défense (militaire), Services publics (sécuritaire), Matériaux (militaire)
+  Sous pression : Technologie (militaire), Luxe (militaire)
+  En clair : le score de chaque secteur combine sa performance sur 20 séances et la tonalité de l'actualité qui le concerne ; entre parenthèses, le thème d'actualité qui pèse le plus.
+  Appréciation : écart marqué entre Défense (en tête) et Luxe (en queue), le thème « militaire » structure la semaine.
+
+B. Mouvements du classement sur la semaine
+  Historique en cours de constitution : les comparaisons d'une semaine sur l'autre apparaîtront dès que 5 séances seront enregistrées.
+
+C. Journal des prédictions
+  Taux de réussite : 1 j (en direct) 55 % sur 296; 1 j (rejeu) 53 % sur 400; 5 j (rejeu) 49 % sur 400; 20 j (rejeu) 46 % sur 400
+  En clair : part des prévisions dont le sens s'est révélé juste. « En direct » = prévisions faites avant les faits ; « rejeu » = prévisions recalculées sur le passé récent pour enrichir l'échantillon.
+  Appréciation : meilleur résultat à 1 j (55 %) ; au-dessus de 50 %, le modèle reste un peu meilleur que le hasard sur cet horizon.
+
+D. Marchés sur 20 séances
+  VIX 24,56 (+47,2 %), Taux US 10 ans 5,07 (-0,08 pt), Pétrole WTI 83,26 (-14,3 %), Dollar 103,86 (+2,0 %), Or 3741,90 (-9,8 %), EUR/USD 1,10 (-2,1 %)
+  En clair : VIX = nervosité ; taux 10 ans = coût de l'argent à long terme ; pétrole, or, dollar = thermomètres de l'économie mondiale.
+  Appréciation : contexte tendu, les mouvements de plus de 10 % sur 20 séances signalent les marchés à surveiller.
+
+E. Fiabilité et construction du modèle
+  Variables testées (IC en développement) : prix +0,021, actualités +0,022 (écartée), calendrier +0,023 (écartée), marchés +0,018 (écartée), fondamentaux +0,011 (écartée)
+  Test réservé : IC +0,047, t = 3,7, net de frais +0,28 % par 5 j, ratio d'information net 1,35
+  Règle de maintien (garder tant que dans les 40 % premières) : net de frais +0,18 % par 5 j, rotation 40 % contre 60 % sans maintien
+  Liens événement × secteur validés : 0 significatifs sur 34 testés
+  En clair : une famille de variables n'est gardée que si elle améliore réellement la prévision. Le ratio d'information rapporte le gain à sa régularité : au-dessus de 0,5, le résultat est plutôt régulier.
+  Appréciation : modèle sobre (seuls les prix sont retenus), résultat régulier hors échantillon ; aucun lien actualité × secteur n'est encore prouvé.
+
+F. Portefeuille fictif
+  Depuis le 2026-11-18 : radar -0,10 % ; momentum -0,10 % ; moyenne de l'univers +0,00 % ; S&P 500 +0,00 % ; Stoxx 600 +0,00 %
+  Périodes de 5 séances gagnées contre la moyenne : radar 0 sur 0, momentum 0 sur 0 ; frais payés : radar 0,10 %, momentum 0,10 %
+  En clair : une période est « gagnée » quand la règle fait mieux que la moyenne entre deux revues. Une règle sans valeur en gagne environ une sur deux.
+  Appréciation : historique encore trop court, aucune conclusion possible.
+
 Veille informative, pas un conseil en investissement.

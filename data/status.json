@@ -1,17 +1,20 @@
 {
- "genere_utc": "2026-11-19 03:51",
+ "genere_utc": "2026-11-19 10:12",
  "mode": "live",
  "cours_au": "2026-11-18",
  "jours_de_retard": 1,
- "anomalies": [],
+ "anomalies": [
+  "univers S&P 500 : StopIteration  (dernière version connue conservée)"
+ ],
  "journal": {
   "cours": [
    "yfinance (138)"
   ],
+  "controle_croise": "Stooq indisponible",
   "resultats": {
    "rafraichies": 0
   },
-  "marches": 6,
+  "marches": 8,
   "fondamentaux": {
    "rafraichies": 0,
    "sans_cik": 0
@@ -19,10 +22,8 @@
   "flux_ok": 5,
   "gdelt_series": 3,
   "gdelt_evenements": {
-   "jours_acquis": 1,
-   "sources": {
-    "v2": 1
-   },
+   "jours_acquis": 0,
+   "sources": {},
    "historique": {
     "jours": 1079,
     "du": "2023-11-18",
@@ -30,9 +31,10 @@
    }
   },
   "gdelt_signaux": 8390,
-  "nouveaux_articles": 30,
+  "nouveaux_articles": 66,
+  "univers_du_jour": 138,
   "rejeu": 0,
-  "resolues": 138,
+  "resolues": 0,
   "signalees_resolues": 0
  }
 }
