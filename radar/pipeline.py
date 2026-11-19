@@ -5,7 +5,7 @@ import pathlib
 
 import pandas as pd
 
-from . import analysis, collect, db, events, features, gdelt, gdelt_events, journal, model, portefeuille, univers
+from . import analysis, collect, db, events, features, gdelt, gdelt_events, journal, model, portefeuille, risque, univers
 
 
 def score_new(con, cfg):
@@ -207,10 +207,18 @@ def run(cfg, root=".", do_replay=True):
                 "errors": errs, "log": log})
     rep.pop("drivers")
     out = pathlib.Path(root) / "data"
+    try:  # profil de risque de chaque valeur (volatilité, bêta, pire baisse sur un an)
+        rq = risque.metrics(close, member)
+        rep["risque"] = {t: {k: round(v, 4) if isinstance(v, float) else v for k, v in x.items()} for t, x in rq.items()}
+        rep["profils"] = risque.par_profil(rq, rep["all_p5"])
+    except Exception as ex:
+        rq = {}
+        errs.append(f"profils de risque : {type(ex).__name__} {str(ex)[:80]}")
     try:  # portefeuille fictif : règle appliquée sans argent réel, état conservé dans data/
         nom = "portefeuille.json" if cfg["mode"] == "live" else "portefeuille_demo.json"
         rep["portefeuille"] = portefeuille.update(close, rep["all_p5"], run_date, out / nom, rep["cout_bps"],
-                                                  member=member, macro=macro, refs=cfg.get("references"))
+                                                  member=member, macro=macro, refs=cfg.get("references"),
+                                                  profils={t: x["profil"] for t, x in rq.items()})
     except Exception as ex:
         errs.append(f"portefeuille fictif : {type(ex).__name__} {str(ex)[:80]}")
     (out / "report.json").write_text(json.dumps(rep, ensure_ascii=False, default=float, indent=1))

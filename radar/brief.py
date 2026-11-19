@@ -70,6 +70,39 @@ def _prev(hist, as_of, days_back=1):
 
 # ---------- blocs ----------
 
+def _risque_txt(rep, t):
+    r = (rep.get("risque") or {}).get(t)
+    if not r:
+        return ""
+    return (f" ; profil {r['profil']} (volatilité {_n(r['vol'] * 100, 0)} % par an, bêta {_n(r['beta'], 1)}, "
+            f"pire baisse sur un an {_n(r['dd'] * 100, 0)} %)")
+
+
+def _bloc_profils(rep):
+    pr = rep.get("profils")
+    titre = "2. Par profil de risque"
+    if not pr:
+        return [titre, "  Indisponible lors de ce passage."]
+    noms = {"prudent": "Prudent (peu agité)", "équilibré": "Équilibré", "dynamique": "Dynamique (très agité)"}
+    L = [titre]
+    for p in ("prudent", "équilibré", "dynamique"):
+        g = pr.get(p) or {}
+        if not g.get("top"):
+            continue
+        L.append(f"  {noms[p]}, {g['n']} valeurs, volatilité de {_n(g['vol_min'] * 100, 0)} à {_n(g['vol_max'] * 100, 0)} % par an : "
+                 + " ; ".join(f"{x['name']} ({_ord(x['rang'])}, {_n(x['p5'] * 100)} %, bêta {_n(x['beta'], 1)})" for x in g["top"]))
+    L.append("  En clair : les valeurs sont réparties en trois tiers selon leur agitation sur un an (volatilité : ampleur habituelle "
+             "des variations, en % par an). Le bêta mesure la sensibilité au marché : 1 = suit le marché, 1,5 = amplifie ses "
+             "mouvements de moitié, 0,5 = les amortit. Une valeur dynamique peut gagner ou perdre beaucoup plus qu'une valeur prudente, "
+             "dans les deux sens. Le risque se mesure bien ; le potentiel, beaucoup moins : le classement reste celui du modèle.")
+    tops = {p: (pr.get(p) or {}).get("top") or [] for p in pr}
+    meilleur = max(tops, key=lambda p: tops[p][0]["p5"] if tops[p] else 0)
+    L.append(f"  Appréciation : les signaux les plus marqués se trouvent dans le profil {meilleur} ; "
+             + ("c'est fréquent, les valeurs agitées produisant des écarts plus grands, sans que cela prouve un meilleur potentiel."
+                if meilleur == "dynamique" else "les écarts restent faibles, aucune catégorie de risque n'est nettement favorisée."))
+    return L
+
+
 def _bloc_valeurs(rep, main, hist):
     allp = rep.get("all_p5") or []
     p5 = {x["ticker"]: x["p5"] for x in allp}
@@ -94,7 +127,8 @@ def _bloc_valeurs(rep, main, hist):
             d = prev_ranks[x["ticker"]] - r
             ev = (f", hier {_ord(prev_ranks[x['ticker']])}" + (" (stable)" if d == 0 else f" ({'gagne' if d > 0 else 'perd'} {abs(d)} place{'s' if abs(d) > 1 else ''})"))
         lignes.append(f"  {x['name']} ({x['sector']}) : {rang}{ev} ; signal {force}, {sens} "
-                      f"({_n(p * 100)} %, soit {_sn((p - 0.5) * 100)} pt par rapport à pile ou face) ; thème d'actualité dominant : {x['driver']}")
+                      f"({_n(p * 100)} %, soit {_sn((p - 0.5) * 100)} pt par rapport à pile ou face) ; thème d'actualité dominant : {x['driver']}"
+                      + _risque_txt(rep, x["ticker"]))
 
     ecart_max = max((abs(x["p5"] - 0.5) for x in allp), default=0) * 100
     clair = (f"  En clair : chaque jour, les {n} valeurs suivies sont classées selon leur chance de faire mieux que leur secteur "
@@ -131,7 +165,7 @@ def _bloc_techno(rep):
         app = "aucune technologie ne gagne anormalement en visibilité cette semaine."
     clair = ("  En clair : le radar compte les mentions de chaque technologie (IA, semi-conducteurs, quantique...) dans la presse "
              "et compare les 7 derniers jours à l'habitude. Une hausse inhabituelle précède parfois un intérêt des investisseurs.")
-    return ["2. Technologie à veiller", fait, clair, f"  Appréciation : {app}"]
+    return ["3. Technologie à veiller", fait, clair, f"  Appréciation : {app}"]
 
 
 def _bloc_alerte(rep):
@@ -164,7 +198,7 @@ def _bloc_alerte(rep):
     app = (", ".join(tension) + ".") if tension else "rien de notable."
     if vix and vix["niveau"] >= 20:
         app += " Dans ce contexte, les mouvements de court terme sont plus amples et les signaux du modèle moins lisibles."
-    return ["3. Alerte marchés et actualité"] + lignes + [clair, f"  Appréciation : {app}"]
+    return ["4. Alerte marchés et actualité"] + lignes + [clair, f"  Appréciation : {app}"]
 
 
 def _bloc_fiabilite(rep, main, evl):
@@ -203,7 +237,7 @@ def _bloc_fiabilite(rep, main, evl):
         app = (f"période fraîche encore trop courte ({fr.get('dates', 0)} date{'s' if fr.get('dates', 0) > 1 else ''} sur 20 au moins) ; "
                + ("l'historique montre un avantage faible mais significatif, à confirmer." if t >= 2 and net > 0 else
                   "l'historique ne montre pas d'avantage net de frais."))
-    return ["4. Fiabilité du modèle"] + lignes + [clair, f"  Appréciation : {app}"]
+    return ["5. Fiabilité du modèle"] + lignes + [clair, f"  Appréciation : {app}"]
 
 
 _REF = {"moyenne": "moyenne de l'univers"}
@@ -212,13 +246,13 @@ _REF = {"moyenne": "moyenne de l'univers"}
 def _perf_line(pf):
     st, rf = pf["strats"], pf["refs"]
     parts = [f"radar {_sn(st['radar']['perf'] * 100, 2)} %", f"momentum {_sn(st['momentum']['perf'] * 100, 2)} %"]
-    parts += [f"{_REF.get(k, k)} {_sn(v * 100, 2)} %" for k, v in rf.items()]
+    parts += [f"{_REF.get(k, k)} {_sn(v * 100, 2)} %" for k, v in rf.items() if not k.startswith("moyenne_")]
     return " ; ".join(parts)
 
 
 def _bloc_portefeuille(rep):
     pf = rep.get("portefeuille")
-    titre = "5. Portefeuille fictif (sans argent réel)"
+    titre = "6. Portefeuille fictif (sans argent réel)"
     if not pf or "strats" not in pf:
         return [titre, "  Indisponible lors de ce passage.", "  Appréciation : aucune mesure possible aujourd'hui."]
     R, M = pf["strats"]["radar"], pf["strats"]["momentum"]
@@ -230,10 +264,15 @@ def _bloc_portefeuille(rep):
               f"  Radar : pire baisse {_n(R['pire_baisse'] * 100, 2)} %, frais payés {_n(R['frais'] * 100, 2)} % ; "
               f"{R['n_lignes']} lignes, dont {', '.join(R['lignes'])} ; prochaine revue dans {pf['prochaine_revue']} séance"
               f"{'s' if pf['prochaine_revue'] > 1 else ''}"]
+    pp = [(p, pf["strats"].get(f"radar_{p}")) for p in ("prudent", "équilibré", "dynamique")]
+    if all(x for _, x in pp):
+        lignes.append("  Par profil, radar contre moyenne du profil : " + " ; ".join(
+            f"{p} {_sn(x['perf'] * 100, 2)} % contre {_sn(x['ref'] * 100, 2)} %" for p, x in pp))
     clair = ("  En clair : deux règles sont appliquées sans argent réel, avec les mêmes frais. « Radar » suit le classement du modèle ; "
              "« momentum » achète simplement ce qui a le plus monté sur 12 mois. Si le radar ne fait pas mieux que cette règle "
              "naïve, sa complexité ne sert à rien. Les indices réels (S&P 500, Stoxx 600) montrent ce qu'aurait rapporté un simple "
-             "fonds indiciel. Il faut plusieurs mois pour conclure.")
+             "fonds indiciel. Par profil, la même règle est appliquée dans chaque tiers de risque et jugée contre la "
+             "moyenne de ce tiers. Il faut plusieurs mois pour conclure.")
     if pf["seances"] == 0:
         app = "portefeuilles constitués lors de ce passage ; premiers résultats dès la prochaine séance."
     elif pf["seances"] < 60:
@@ -258,7 +297,7 @@ def _bloc_etat(rep):
     app = ("données incomplètes, les blocs ci-dessus sont à lire avec réserve." if graves
            else "écarts mineurs (valeurs récentes ou contrôles annexes), sans effet notable sur le brief." if anomalies
            else "collecte complète, le brief repose sur des données à jour.")
-    return ["6. État de la collecte", fait, f"  Appréciation : {app}"]
+    return ["7. État de la collecte", fait, f"  Appréciation : {app}"]
 
 
 # ---------- bilan hebdomadaire commenté ----------
@@ -351,6 +390,10 @@ def _hebdo(rep, main, evl, hist, tag):
                 sm = S["semaine"]
                 L.append(f"  {nom} sur 5 séances : {_sn(sm['pf'] * 100, 2)} %, moyenne de l'univers {_sn(sm['moy'] * 100, 2)} %")
         L.append(f"  Depuis le {pf['debut']} : {_perf_line(pf)}")
+        pp = [(p, pf["strats"].get(f"radar_{p}")) for p in ("prudent", "équilibré", "dynamique")]
+        if all(x for _, x in pp):
+            L.append("  Par profil (radar contre moyenne du profil, périodes gagnées) : " + " ; ".join(
+                f"{p} {_sn(x['perf'] * 100, 2)} % contre {_sn(x['ref'] * 100, 2)} %, {x['gagnees']} sur {x['periodes']}" for p, x in pp))
         L.append(f"  Périodes de 5 séances gagnées contre la moyenne : radar {R['gagnees']} sur {R['periodes']}, "
                  f"momentum {M['gagnees']} sur {M['periodes']} ; frais payés : radar {_n(R['frais'] * 100, 2)} %, "
                  f"momentum {_n(M['frais'] * 100, 2)} %")
@@ -376,7 +419,7 @@ def generate(rep, out_dir):
     hist = _save_hist(out, _load_hist(out), rep)
 
     daily = [f"Radar bourse, cours au {rep['as_of']}, généré le {rep.get('generated_utc', '')} UTC{tag}", ""]
-    for bloc in (_bloc_valeurs(rep, main, hist), _bloc_techno(rep), _bloc_alerte(rep),
+    for bloc in (_bloc_valeurs(rep, main, hist), _bloc_profils(rep), _bloc_techno(rep), _bloc_alerte(rep),
                  _bloc_fiabilite(rep, main, evl), _bloc_portefeuille(rep), _bloc_etat(rep)):
         daily += bloc + [""]
     weekly = _hebdo(rep, main, evl, hist, tag)
