@@ -1,10 +1,9 @@
 """Briefs courts (quotidien et hebdomadaire) en texte, prêts à insérer dans un email.
 
 Chaque bloc suit le même schéma : les faits, « En clair » (explication pédagogique),
-puis « Appréciation » (lecture qualitative du bloc). Le jeudi matin, le brief
-quotidien se termine par le bilan hebdomadaire commenté.
+puis « Appréciation » (lecture qualitative du bloc). Le bilan hebdomadaire
+commenté (brief_weekly.md) est joint à l'envoi du lundi matin.
 """
-import datetime as dt
 import json
 import math
 import pathlib
@@ -288,16 +287,6 @@ def _hebdo(rep, main, evl, hist, tag):
     return L
 
 
-def _is_thursday_morning(rep):
-    """Vrai pour le brief de l'envoi du jeudi matin : cours du mercredi, généré avant jeudi midi UTC."""
-    try:
-        asof = dt.date.fromisoformat(rep["as_of"])
-        gen = dt.datetime.strptime(rep.get("generated_utc", ""), "%Y-%m-%d %H:%M")
-    except Exception:
-        return False
-    return asof.weekday() == 2 and not (gen.weekday() == 3 and gen.hour >= 12) and gen.date() <= asof + dt.timedelta(days=1)
-
-
 def generate(rep, out_dir):
     out = pathlib.Path(out_dir)
     demo = rep["mode"] == "demo"
@@ -311,8 +300,6 @@ def generate(rep, out_dir):
                  _bloc_fiabilite(rep, main, evl), _bloc_etat(rep)):
         daily += bloc + [""]
     weekly = _hebdo(rep, main, evl, hist, tag)
-    if _is_thursday_morning(rep):
-        daily += weekly
     daily.append("Veille informative, pas un conseil en investissement.")
     weekly.append("Veille informative, pas un conseil en investissement.")
 
