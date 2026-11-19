@@ -1,10 +1,10 @@
 BILAN DE LA SEMAINE au 2026-11-18
 
 A. Secteurs
-  Porteurs : Défense (militaire), Services publics (sécuritaire), Matériaux (militaire)
-  Sous pression : Technologie (militaire), Luxe (militaire)
+  Porteurs : Défense (militaire), Télécoms (militaire), Services publics (météo)
+  Sous pression : Luxe (militaire), Technologie (militaire)
   En clair : le score de chaque secteur combine sa performance sur 20 séances et la tonalité de l'actualité qui le concerne ; entre parenthèses, le thème d'actualité qui pèse le plus.
-  Appréciation : écart marqué entre Défense (en tête) et Luxe (en queue), le thème « militaire » structure la semaine.
+  Appréciation : écart marqué entre Défense (en tête) et Technologie (en queue), le thème « militaire » structure la semaine.
 
 B. Mouvements du classement sur la semaine
   Historique en cours de constitution : les comparaisons d'une semaine sur l'autre apparaîtront dès que 5 séances seront enregistrées.
@@ -20,10 +20,10 @@ D. Marchés sur 20 séances
   Appréciation : contexte tendu, les mouvements de plus de 10 % sur 20 séances signalent les marchés à surveiller.
 
 E. Fiabilité et construction du modèle
-  Variables testées (IC en développement) : prix +0,021, actualités +0,022 (écartée), calendrier +0,023 (écartée), marchés +0,018 (écartée), fondamentaux +0,011 (écartée)
-  Test réservé : IC +0,047, t = 3,7, net de frais +0,28 % par 5 j, ratio d'information net 1,35
-  Règle de maintien (garder tant que dans les 40 % premières) : net de frais +0,18 % par 5 j, rotation 40 % contre 60 % sans maintien
-  Liens événement × secteur validés : 0 significatifs sur 34 testés
+  Variables testées (IC en développement) : prix +0,012, actualités +0,013 (écartée), calendrier +0,012 (écartée), marchés +0,012 (écartée), fondamentaux +0,011 (écartée)
+  Test réservé : IC +0,031, t = 2,2, net de frais +0,18 % par 5 j, ratio d'information net 0,72
+  Règle de maintien (garder tant que dans les 40 % premières) : net de frais +0,15 % par 5 j, rotation 37 % contre 59 % sans maintien
+  Liens événement × secteur validés : 0 significatifs sur 37 testés
   En clair : une famille de variables n'est gardée que si elle améliore réellement la prévision. Le ratio d'information rapporte le gain à sa régularité : au-dessus de 0,5, le résultat est plutôt régulier.
   Appréciation : modèle sobre (seuls les prix sont retenus), résultat régulier hors échantillon ; aucun lien actualité × secteur n'est encore prouvé.
 

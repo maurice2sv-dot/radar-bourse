@@ -1,22 +1,30 @@
 {
- "genere_utc": "2026-11-19 10:12",
+ "genere_utc": "2026-11-19 10:23",
  "mode": "live",
  "cours_au": "2026-11-18",
  "jours_de_retard": 1,
  "anomalies": [
-  "univers S&P 500 : StopIteration  (dernière version connue conservée)"
+  "univers S&P 500 : historique des changements illisible, appartenance limitée aux dates d'entrée",
+  "valeurs actives écartées faute d'historique (133) : HONA, ON, OKE, OTIS, PCAR, PKG, PLTR, PANW, PH, PAYX, PYPL, PNR, PCG, PM, PSX ..."
  ],
  "journal": {
+  "univers": "S&P 500 rafraîchi (503 membres, 0 changements)",
+  "valeurs": {
+   "actives": 570,
+   "sorties_suivies": 0,
+   "secteur_manquant": 0
+  },
   "cours": [
-   "yfinance (138)"
+   "yfinance (438)"
   ],
   "controle_croise": "Stooq indisponible",
   "resultats": {
-   "rafraichies": 0
+   "rafraichies": 120,
+   "sans_donnees": 0
   },
   "marches": 8,
   "fondamentaux": {
-   "rafraichies": 0,
+   "rafraichies": 80,
    "sans_cik": 0
   },
   "flux_ok": 5,
@@ -31,8 +39,8 @@
    }
   },
   "gdelt_signaux": 8390,
-  "nouveaux_articles": 66,
-  "univers_du_jour": 138,
+  "nouveaux_articles": 9,
+  "univers_du_jour": 437,
   "rejeu": 0,
   "resolues": 0,
   "signalees_resolues": 0
