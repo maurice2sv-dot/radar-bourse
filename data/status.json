@@ -1,5 +1,5 @@
 {
- "genere_utc": "2026-11-20 03:49",
+ "genere_utc": "2026-11-20 21:51",
  "mode": "live",
  "cours_au": "2026-11-19",
  "jours_de_retard": 1,
@@ -21,16 +21,14 @@
   },
   "marches": 8,
   "fondamentaux": {
-   "rafraichies": 80,
+   "rafraichies": 53,
    "sans_cik": 9
   },
   "flux_ok": 5,
   "gdelt_series": 3,
   "gdelt_evenements": {
-   "jours_acquis": 1,
-   "sources": {
-    "v2": 1
-   },
+   "jours_acquis": 0,
+   "sources": {},
    "historique": {
     "jours": 1080,
     "du": "2023-11-18",
@@ -38,7 +36,7 @@
    }
   },
   "gdelt_signaux": 8395,
-  "nouveaux_articles": 29,
+  "nouveaux_articles": 95,
   "univers_du_jour": 571,
   "rejeu": 0,
   "resolues": 0,

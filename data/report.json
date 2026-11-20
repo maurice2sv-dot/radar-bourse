@@ -16,22 +16,22 @@
   },
   {
    "label": "Pétrole WTI",
-   "niveau": 82.62000274658203,
-   "chg20": -0.1693977909654839,
+   "niveau": 83.20999908447266,
+   "chg20": -0.1634663912404397,
    "points": false,
    "date": "19/11"
   },
   {
    "label": "Dollar",
-   "niveau": 103.83999633789062,
-   "chg20": 0.02194661661395436,
+   "niveau": 103.9000015258789,
+   "chg20": 0.022537160729965144,
    "points": false,
    "date": "19/11"
   },
   {
    "label": "Or",
-   "niveau": 3531.699951171875,
-   "chg20": -0.1302088375252639,
+   "niveau": 3685.5,
+   "chg20": -0.09233078301655695,
    "points": false,
    "date": "19/11"
   },
@@ -45,7 +45,7 @@
  ],
  "alertes_marche": [
   "tension de marché, VIX à 28.4 (+52 % sur 5 séances)",
-  "pétrole -17 % sur 20 séances"
+  "pétrole -16 % sur 20 séances"
  ],
  "agenda": [
   {
@@ -107,120 +107,120 @@
   {
    "sector": "Défense",
    "ret20": -0.028946469091572058,
-   "news": 75.11160660526498,
-   "score": 3.014556027358529,
+   "news": 88.61409912023504,
+   "score": 3.0170690712632564,
    "label": "haussière",
    "driver": "militaire"
   },
   {
    "sector": "Aéronautique",
    "ret20": 0.0018271777136954492,
-   "news": 15.948242391969718,
-   "score": 1.2875792058010362,
+   "news": 18.79573490693978,
+   "score": 1.287499077839255,
    "label": "haussière",
    "driver": "militaire"
   },
   {
    "sector": "Services publics",
    "ret20": 0.01018380444083536,
-   "news": -2.6199381611395753,
-   "score": 0.7084739602348187,
+   "news": -3.2724456461695164,
+   "score": 0.7017565533353693,
    "label": "haussière",
    "driver": "sécuritaire"
   },
   {
    "sector": "Industrie",
    "ret20": -0.0029207308092404393,
-   "news": 2.213044885166748,
-   "score": 0.5476635795494966,
+   "news": 2.702204066803475,
+   "score": 0.5512863530911013,
    "label": "haussière",
    "driver": "militaire"
   },
   {
    "sector": "Immobilier",
    "ret20": -0.004728938671995531,
-   "news": -2.3350645268576637,
-   "score": 0.2959284158562543,
+   "news": -2.7125720118876036,
+   "score": 0.29757549200095074,
    "label": "neutre",
    "driver": "sécuritaire"
   },
   {
    "sector": "Consommation",
    "ret20": 0.007219116962485362,
-   "news": -10.493761954293213,
-   "score": 0.2773867554710783,
+   "news": -12.271269439323156,
+   "score": 0.2812650249728419,
    "label": "neutre",
    "driver": "militaire"
   },
   {
    "sector": "Télécoms",
    "ret20": -0.009932516682300996,
-   "news": -0.3168575592424181,
-   "score": 0.23643619647719824,
+   "news": -0.5193650442723581,
+   "score": 0.23113501134969874,
    "label": "neutre",
    "driver": "sécuritaire"
   },
   {
    "sector": "Santé",
    "ret20": -0.008214349854723156,
-   "news": -2.30173119352433,
-   "score": 0.19804469625159288,
+   "news": -2.90423867855427,
+   "score": 0.19106840666346064,
    "label": "neutre",
    "driver": "sécuritaire"
   },
   {
    "sector": "Grande consommation",
    "ret20": 0.0002819543172344967,
-   "news": -9.05341203412017,
-   "score": 0.14304372195623005,
+   "news": -10.85591951915011,
+   "score": 0.13636668048623934,
    "label": "neutre",
    "driver": "militaire"
   },
   {
    "sector": "Finance",
    "ret20": -0.014725843045864127,
-   "news": -6.778412034120168,
-   "score": -0.18461261850387106,
+   "news": -7.7892528524834415,
+   "score": -0.1769292483672747,
    "label": "neutre",
    "driver": "militaire"
   },
   {
    "sector": "Matériaux",
    "ret20": -0.048825016175784476,
-   "news": 8.889725725762588,
-   "score": -0.46694363999566724,
+   "news": 10.578884907399315,
+   "score": -0.46311909564804354,
    "label": "neutre",
    "driver": "militaire"
   },
   {
    "sector": "Automobile",
    "ret20": -0.034135684720770346,
-   "news": -2.9279216697148063,
-   "score": -0.5684005263283994,
+   "news": -3.447095821411413,
+   "score": -0.5680823386244422,
    "label": "baissière",
    "driver": "sécuritaire"
   },
   {
    "sector": "Énergie",
    "ret20": -0.09417450877693244,
-   "news": 22.569840979402368,
-   "score": -1.1574688458526612,
+   "news": 26.557333494372426,
+   "score": -1.1592194238336013,
    "label": "baissière",
    "driver": "militaire"
   },
   {
    "sector": "Luxe",
    "ret20": -0.041266998297117496,
-   "news": -26.623887490888432,
-   "score": -1.8146943367692698,
+   "news": -31.19306164258504,
+   "score": -1.8072935501607077,
    "label": "baissière",
    "driver": "militaire"
   },
   {
    "sector": "Technologie",
    "ret20": -0.1047903673488606,
-   "news": -1.4419980988896801,
-   "score": -2.5169925915063662,
+   "news": -1.7945055839196187,
+   "score": -2.520378014368103,
    "label": "baissière",
    "driver": "militaire"
   }
@@ -229,7 +229,7 @@
   {
    "tech": "ia",
    "z": 0.0,
-   "m7": 67,
+   "m7": 76,
    "related": [
     "AAPL",
     "ADBE",
@@ -308,7 +308,7 @@
   {
    "tech": "drones",
    "z": 0.0,
-   "m7": 20,
+   "m7": 22,
    "related": [
     "HO.PA",
     "LMT",
@@ -322,7 +322,7 @@
   {
    "tech": "cyber",
    "z": 0.0,
-   "m7": 8,
+   "m7": 10,
    "related": [
     "CSCO",
     "HO.PA",
@@ -334,7 +334,7 @@
   {
    "tech": "spatial",
    "z": 0.0,
-   "m7": 4,
+   "m7": 5,
    "related": [
     "AIR.PA",
     "BA",
@@ -382,7 +382,7 @@
   {
    "tech": "cloud",
    "z": 0.0,
-   "m7": 1,
+   "m7": 3,
    "related": [
     "AMZN",
     "CRM",
@@ -395,7 +395,7 @@
   {
    "tech": "nucleaire",
    "z": 0.0,
-   "m7": 7,
+   "m7": 8,
    "related": [
     "RR.L"
    ],
@@ -435,13 +435,13 @@
   },
   {
    "cat": "économique",
-   "s7": 22.5,
+   "s7": 27.0,
    "ratio": null,
    "hist": 17
   },
   {
    "cat": "scientifique",
-   "s7": 14.5,
+   "s7": 17.0,
    "ratio": null,
    "hist": 17
   },
@@ -472,7 +472,7 @@
    "mentions": 0.0,
    "ret5": -0.11869957920407115,
    "volratio": 2.5724478581014476,
-   "attention": 7.611537665200544,
+   "attention": 7.602498929616821,
    "earn": true,
    "spark": [
     1.0,
@@ -550,7 +550,7 @@
    "mentions": 0.0,
    "ret5": -0.020154437667435632,
    "volratio": 1.0673519930354665,
-   "attention": 5.901178661692877,
+   "attention": 5.910189582374987,
    "earn": false,
    "spark": [
     1.0,
@@ -628,7 +628,7 @@
    "mentions": 0.0,
    "ret5": -0.18426182459153462,
    "volratio": 2.157018725618774,
-   "attention": 5.818927473329636,
+   "attention": 5.8283964614987385,
    "earn": false,
    "spark": [
     1.0,
@@ -706,7 +706,7 @@
    "mentions": 0.0,
    "ret5": -0.022141555411644975,
    "volratio": 0.7727994544273773,
-   "attention": 5.794910782388339,
+   "attention": 5.803799875181385,
    "earn": false,
    "spark": [
     1.0,
@@ -784,7 +784,7 @@
    "mentions": 0.0,
    "ret5": -0.0004232176465561732,
    "volratio": 0.6597078374382809,
-   "attention": 5.673702246285023,
+   "attention": 5.682556692406501,
    "earn": false,
    "spark": [
     1.0,
@@ -862,7 +862,7 @@
    "mentions": 0.0,
    "ret5": -0.1874276540621792,
    "volratio": 1.100676376962761,
-   "attention": 5.638266238356157,
+   "attention": 5.641855447703057,
    "earn": false,
    "spark": [
     1.0,
@@ -940,7 +940,7 @@
    "mentions": 0.0,
    "ret5": 0.07762407052156228,
    "volratio": 2.1256876916215415,
-   "attention": 5.595800503259905,
+   "attention": 5.60554871337888,
    "earn": false,
    "spark": [
     1.0,
@@ -1018,7 +1018,7 @@
    "mentions": 0.0,
    "ret5": 0.025224356834390393,
    "volratio": 2.1941323090605915,
-   "attention": 5.288618279291449,
+   "attention": 5.279602028103675,
    "earn": false,
    "spark": [
     1.0,
@@ -1193,7 +1193,7 @@
   {
    "ticker": "GLW",
    "name": "Corning Inc.",
-   "p5": 0.5137586162689436
+   "p5": 0.5138212226291003
   },
   {
    "ticker": "SMCI",
@@ -1511,6 +1511,11 @@
    "p5": 0.5063475508128404
   },
   {
+   "ticker": "SHEL.L",
+   "name": "Shell",
+   "p5": 0.5063322200058918
+  },
+  {
    "ticker": "VRT",
    "name": "Vertiv",
    "p5": 0.5062988012611369
@@ -1519,11 +1524,6 @@
    "ticker": "WDC",
    "name": "Western Digital",
    "p5": 0.5062829725931827
-  },
-  {
-   "ticker": "SHEL.L",
-   "name": "Shell",
-   "p5": 0.5061649805273871
   },
   {
    "ticker": "TRV",
@@ -1786,6 +1786,11 @@
    "p5": 0.5021151969708969
   },
   {
+   "ticker": "ABBV",
+   "name": "AbbVie",
+   "p5": 0.5021126102143061
+  },
+  {
    "ticker": "AMCR",
    "name": "Amcor",
    "p5": 0.5021092090778364
@@ -1804,11 +1809,6 @@
    "ticker": "IBE.MC",
    "name": "Iberdrola",
    "p5": 0.5020022383042905
-  },
-  {
-   "ticker": "ABBV",
-   "name": "AbbVie",
-   "p5": 0.5019978031099647
   },
   {
    "ticker": "LIN",
@@ -2576,6 +2576,11 @@
    "p5": 0.4989967843547345
   },
   {
+   "ticker": "FOXA",
+   "name": "Fox Corporation (Class A)",
+   "p5": 0.49899558858895493
+  },
+  {
    "ticker": "IVZ",
    "name": "Invesco",
    "p5": 0.4989937265100692
@@ -2669,11 +2674,6 @@
    "ticker": "GLE.PA",
    "name": "Société Générale",
    "p5": 0.49871832257726767
-  },
-  {
-   "ticker": "FOXA",
-   "name": "Fox Corporation (Class A)",
-   "p5": 0.4987114573562363
   },
   {
    "ticker": "MCO",
@@ -2776,11 +2776,6 @@
    "p5": 0.49847855041238587
   },
   {
-   "ticker": "F",
-   "name": "Ford Motor Company",
-   "p5": 0.49847659236887104
-  },
-  {
    "ticker": "PRU",
    "name": "Prudential Financial",
    "p5": 0.4984741095900843
@@ -2789,6 +2784,11 @@
    "ticker": "CS.PA",
    "name": "AXA",
    "p5": 0.49844612864508164
+  },
+  {
+   "ticker": "F",
+   "name": "Ford Motor Company",
+   "p5": 0.49844403767500867
   },
   {
    "ticker": "MBG.DE",
@@ -2861,6 +2861,11 @@
    "p5": 0.49828025058192493
   },
   {
+   "ticker": "SOLV",
+   "name": "Solventum",
+   "p5": 0.4982765690720757
+  },
+  {
    "ticker": "COF",
    "name": "Capital One",
    "p5": 0.49827227472571817
@@ -2901,11 +2906,6 @@
    "p5": 0.49820579953484295
   },
   {
-   "ticker": "ULVR.L",
-   "name": "Unilever",
-   "p5": 0.49820579953484295
-  },
-  {
    "ticker": "RNO.PA",
    "name": "Renault",
    "p5": 0.4981992108077453
@@ -2941,9 +2941,9 @@
    "p5": 0.49817929514344605
   },
   {
-   "ticker": "SOLV",
-   "name": "Solventum",
-   "p5": 0.4981723993666252
+   "ticker": "ULVR.L",
+   "name": "Unilever",
+   "p5": 0.49817324717492756
   },
   {
    "ticker": "DECK",
@@ -3091,11 +3091,6 @@
    "p5": 0.49781723857666377
   },
   {
-   "ticker": "AZN.L",
-   "name": "AstraZeneca",
-   "p5": 0.4978061369240389
-  },
-  {
    "ticker": "AI.PA",
    "name": "Air Liquide",
    "p5": 0.4978032564240888
@@ -3104,6 +3099,11 @@
    "ticker": "SBAC",
    "name": "SBA Communications",
    "p5": 0.4977829971456688
+  },
+  {
+   "ticker": "AZN.L",
+   "name": "AstraZeneca",
+   "p5": 0.497773588698153
   },
   {
    "ticker": "AIR.PA",
@@ -3371,6 +3371,11 @@
    "p5": 0.4966362507759346
   },
   {
+   "ticker": "VLTO",
+   "name": "Veralto",
+   "p5": 0.4966159184172169
+  },
+  {
    "ticker": "ALLE",
    "name": "Allegion",
    "p5": 0.4965995758177916
@@ -3434,11 +3439,6 @@
    "ticker": "OTIS",
    "name": "Otis Worldwide",
    "p5": 0.49630655334159635
-  },
-  {
-   "ticker": "VLTO",
-   "name": "Veralto",
-   "p5": 0.4962927757714486
   },
   {
    "ticker": "IBM",
@@ -3943,22 +3943,22 @@
  ],
  "events": [
   {
-   "date": "17/11",
-   "source": "lemonde_inter",
-   "title": "EN DIRECT, guerre en Ukraine | Volodymyr Zelensky appelle ses alliés à livrer des missiles Patriot sans délai à l’Ukraine",
+   "date": "20/11",
+   "source": "france24",
+   "title": "Sommet de Shenzhen, guerre en Ukraine, hostilités dans le Golfe",
    "cats": [
     "militaire",
     "politique"
    ],
-   "pol": -0.75
+   "pol": -0.8
   },
   {
    "date": "17/11",
    "source": "france24",
-   "title": "Deutsche Bank rattrapée par ses vieux démons après la fuite de 15 millions de documents internes",
+   "title": "Guerre en Ukraine : une partie du pont de Crimée s’effondre après des frappes de Kiev",
    "cats": [
-    "politique",
-    "médiatique"
+    "militaire",
+    "politique"
    ],
    "pol": -0.75
   },
@@ -3976,7 +3976,17 @@
   {
    "date": "17/11",
    "source": "france24",
-   "title": "Guerre en Ukraine : une partie du pont de Crimée s’effondre après des frappes de Kiev",
+   "title": "Deutsche Bank rattrapée par ses vieux démons après la fuite de 15 millions de documents internes",
+   "cats": [
+    "politique",
+    "médiatique"
+   ],
+   "pol": -0.75
+  },
+  {
+   "date": "17/11",
+   "source": "lemonde_inter",
+   "title": "EN DIRECT, guerre en Ukraine | Volodymyr Zelensky appelle ses alliés à livrer des missiles Patriot sans délai à l’Ukraine",
    "cats": [
     "militaire",
     "politique"
@@ -3996,15 +4006,6 @@
    "date": "17/11",
    "source": "france24",
    "title": "Ukraine en direct : Moscou accuse la France de \"participation directe\" au conflit",
-   "cats": [
-    "militaire"
-   ],
-   "pol": -0.6666666666666666
-  },
-  {
-   "date": "17/11",
-   "source": "lemonde_inter",
-   "title": "EN DIRECT, guerre en Ukraine : la Russie dénonce une « participation directe » de la France au conflit",
    "cats": [
     "militaire"
    ],
@@ -4166,7 +4167,7 @@
    "fin": "2026-11-12"
   },
   "reserve_ouverte_le": "2026-11-17",
-  "recalcule": true
+  "recalcule": false
  },
  "main_horizon": 5,
  "horizons": [
@@ -4243,9 +4244,9 @@
  "shrink": 0.22499999999999992,
  "n_resolved": 400,
  "live_hit": 0.4875,
- "n_articles": 9242,
+ "n_articles": 9337,
  "n_gdelt": 8395,
- "generated_utc": "2026-11-20 03:49",
+ "generated_utc": "2026-11-20 21:51",
  "stale_days": 1,
  "errors": [
   "valeurs actives écartées faute d'historique (6) : HONA, SNDK, VYLR, WBD, KVUE, PSKY"
@@ -4265,16 +4266,14 @@
   },
   "marches": 8,
   "fondamentaux": {
-   "rafraichies": 80,
+   "rafraichies": 53,
    "sans_cik": 9
   },
   "flux_ok": 5,
   "gdelt_series": 3,
   "gdelt_evenements": {
-   "jours_acquis": 1,
-   "sources": {
-    "v2": 1
-   },
+   "jours_acquis": 0,
+   "sources": {},
    "historique": {
     "jours": 1080,
     "du": "2023-11-18",
@@ -4282,7 +4281,7 @@
    }
   },
   "gdelt_signaux": 8395,
-  "nouveaux_articles": 29,
+  "nouveaux_articles": 95,
   "univers_du_jour": 571,
   "rejeu": 0,
   "resolues": 0,
@@ -7728,7 +7727,7 @@
      "p5": 0.5113537040195689,
      "rang": 41,
      "vol": 0.24621635040964748,
-     "beta": 1.1867363314426695
+     "beta": 1.1867363315010444
     },
     {
      "ticker": "GWW",
@@ -7736,7 +7735,7 @@
      "p5": 0.5091391381273039,
      "rang": 50,
      "vol": 0.24286419016590352,
-     "beta": 0.9666621375530904
+     "beta": 0.9666621345493852
     },
     {
      "ticker": "HST",
@@ -7744,7 +7743,7 @@
      "p5": 0.5089979289718655,
      "rang": 54,
      "vol": 0.24035390660760875,
-     "beta": 1.2348062378348972
+     "beta": 1.2348062375317712
     }
    ]
   },
@@ -7759,7 +7758,7 @@
      "p5": 0.5139829470885462,
      "rang": 20,
      "vol": 0.3634418990781656,
-     "beta": 0.8183951934580723
+     "beta": 0.8183951912872436
     },
     {
      "ticker": "MRK",
@@ -7767,7 +7766,7 @@
      "p5": 0.5131221268136777,
      "rang": 25,
      "vol": 0.2943778159997287,
-     "beta": 0.8916776616764726
+     "beta": 0.891677662469489
     },
     {
      "ticker": "DVN",
@@ -7775,7 +7774,7 @@
      "p5": 0.5119823297055089,
      "rang": 35,
      "vol": 0.36159935733209037,
-     "beta": -0.5830623433515024
+     "beta": -0.5830623436590991
     }
    ]
   },
@@ -7790,7 +7789,7 @@
      "p5": 0.5294399564907954,
      "rang": 1,
      "vol": 0.8494237274181315,
-     "beta": 1.6571513286020336
+     "beta": 1.657151325865028
     },
     {
      "ticker": "DELL",
@@ -7798,7 +7797,7 @@
      "p5": 0.5266670812839209,
      "rang": 2,
      "vol": 0.8027497120026467,
-     "beta": 1.7552588897452346
+     "beta": 1.755258892050897
     },
     {
      "ticker": "BE",
@@ -7806,7 +7805,7 @@
      "p5": 0.525955871256171,
      "rang": 3,
      "vol": 1.095022252611434,
-     "beta": 2.2995196652142824
+     "beta": 2.299519669617845
     }
    ]
   }

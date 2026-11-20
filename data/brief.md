@@ -1,8 +1,8 @@
-Radar bourse, cours au 2026-11-19, généré le 2026-11-20 03:49 UTC
+Radar bourse, cours au 2026-11-19, généré le 2026-11-20 21:51 UTC
 
 1. Valeurs à surveiller
   Williams-Sonoma, Inc. (Consommation) : 56e sur 571, hier 127e (gagne 71 places) ; signal modéré, favorable (50,9 %, soit +0,9 pt par rapport à pile ou face) ; thème d'actualité dominant : militaire ; profil dynamique (volatilité 37 % par an, bêta 2,1, pire baisse sur un an -23 %)
-  Leonardo (Défense) : 461e sur 571, hier 108e (perd 353 places) ; signal faible, défavorable (49,7 %, soit -0,3 pt par rapport à pile ou face) ; thème d'actualité dominant : militaire ; profil dynamique (volatilité 37 % par an, bêta 0,7, pire baisse sur un an -28 %)
+  Leonardo (Défense) : 462e sur 571, hier 108e (perd 354 places) ; signal faible, défavorable (49,7 %, soit -0,3 pt par rapport à pile ou face) ; thème d'actualité dominant : militaire ; profil dynamique (volatilité 37 % par an, bêta 0,7, pire baisse sur un an -28 %)
   UnitedHealth (Santé) : 20e sur 571, hier 98e (gagne 78 places) ; signal net, favorable (51,4 %, soit +1,4 pt par rapport à pile ou face) ; thème d'actualité dominant : sécuritaire ; profil équilibré (volatilité 36 % par an, bêta 0,8, pire baisse sur un an -27 %)
   En clair : chaque jour, les 571 valeurs suivies sont classées selon leur chance de faire mieux que leur secteur sur 5 séances. 50 % équivaut à pile ou face. Les écarts restent toujours petits (aujourd'hui 2,9 pt au plus), c'est donc le rang et la force du signal qui comptent, pas le pourcentage brut. Signal « net » : la valeur se détache nettement des autres (haut ou bas du classement) ; « faible » : elle reste dans le peloton. Ces trois valeurs sont retenues pour l'attention qu'elles suscitent (actualité, volumes, résultats proches), pas parce qu'elles sont en tête : un signal défavorable invite plutôt à la prudence.
   Appréciation : 1 signal net favorable ; pistes de veille à recouper avec l'actualité, l'avantage statistique restant mince valeur par valeur.
@@ -20,9 +20,9 @@ Radar bourse, cours au 2026-11-19, généré le 2026-11-20 03:49 UTC
   Appréciation : pas encore exploitable, l'historique est trop court pour distinguer une vraie montée d'un bruit passager.
 
 4. Alerte marchés et actualité
-  Marchés : tension de marché, VIX à 28.4 (+52 % sur 5 séances) ; pétrole -17 % sur 20 séances
+  Marchés : tension de marché, VIX à 28.4 (+52 % sur 5 séances) ; pétrole -16 % sur 20 séances
   Actualité : aucune pression inhabituelle (thème le plus actif : religieux, ×1,0 la normale)
-  Événement marquant : EN DIRECT, guerre en Ukraine | Volodymyr Zelensky appelle ses alliés à livrer des missiles Patriot sans délai à l’Ukraine (lemonde_inter)
+  Événement marquant : Sommet de Shenzhen, guerre en Ukraine, hostilités dans le Golfe (france24)
   À venir : résultats Hewlett Packard Enterprise le 23/11 ; résultats Agilent Technologies le 23/11 ; résultats Jacobs Solutions le 23/11 ; résultats Autodesk le 24/11
   En clair : le VIX mesure la nervosité attendue sur la bourse américaine (sous 15 : calme ; 15 à 20 : normal ; 20 à 30 : tension ; au-delà de 30 : stress). La pression d'actualité compare le volume d'articles par thème à sa moyenne : ×1 = habituel, ×2 ou plus = inhabituel.
   Appréciation : climat de marché tendu (VIX 28,4), actualité dans la norme, 13 rendez-vous de résultats proches. Dans ce contexte, les mouvements de court terme sont plus amples et les signaux du modèle moins lisibles.

@@ -17,7 +17,7 @@ C. Journal des prédictions
   Appréciation : meilleur résultat à 1 j (53 %) ; au-dessus de 50 %, le modèle reste un peu meilleur que le hasard sur cet horizon.
 
 D. Marchés sur 20 séances
-  VIX 28,44 (+49,4 %), Taux US 10 ans 5,05 (+0,10 pt), Pétrole WTI 82,62 (-16,9 %), Dollar 103,84 (+2,2 %), Or 3531,70 (-13,0 %), EUR/USD 1,10 (-2,3 %)
+  VIX 28,44 (+49,4 %), Taux US 10 ans 5,05 (+0,10 pt), Pétrole WTI 83,21 (-16,3 %), Dollar 103,90 (+2,3 %), Or 3685,50 (-9,2 %), EUR/USD 1,10 (-2,3 %)
   En clair : VIX = nervosité ; taux 10 ans = coût de l'argent à long terme ; pétrole, or, dollar = thermomètres de l'économie mondiale.
   Appréciation : contexte tendu, les mouvements de plus de 10 % sur 20 séances signalent les marchés à surveiller. Sur la semaine, le VIX monte (+3,9 pt).
 
