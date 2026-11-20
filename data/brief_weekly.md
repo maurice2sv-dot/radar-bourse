@@ -7,9 +7,9 @@ A. Secteurs
   Appréciation : écart marqué entre Défense (en tête) et Technologie (en queue), le thème « militaire » structure la semaine.
 
 B. Mouvements du classement sur la semaine
-  Comparaison avec le 2026-11-18. Plus fortes progressions : Becton Dickinson (521e → 206e), Stanley Black & Decker (388e → 76e), Quanta Services (448e → 142e)
-  Plus forts reculs : Axon Enterprise (86e → 551e), Leonardo (108e → 475e), Expeditors International (72e → 433e)
-  Appréciation : 16 % des valeurs ont bougé de 10 places ou moins ; classement très mouvant, les signaux de court terme sont à prendre avec recul.
+  Comparaison avec le 2026-11-18. Plus fortes progressions : Becton Dickinson (521e → 195e), Dexcom (487e → 168e), PPG Industries (495e → 180e)
+  Plus forts reculs : Axon Enterprise (86e → 546e), Expeditors International (72e → 435e), Mosaic Company (The) (201e → 556e)
+  Appréciation : 14 % des valeurs ont bougé de 10 places ou moins ; classement très mouvant, les signaux de court terme sont à prendre avec recul.
 
 C. Journal des prédictions
   Taux de réussite : 1 j (en direct) 52 % sur 863; 1 j (rejeu) 53 % sur 400; 5 j (rejeu) 49 % sur 400; 20 j (rejeu) 46 % sur 400
@@ -17,14 +17,14 @@ C. Journal des prédictions
   Appréciation : meilleur résultat à 1 j (53 %) ; au-dessus de 50 %, le modèle reste un peu meilleur que le hasard sur cet horizon.
 
 D. Marchés sur 20 séances
-  VIX 28,44 (+49,4 %), Taux US 10 ans 5,05 (+0,10 pt), Pétrole WTI 83,16 (-16,4 %), Dollar 103,94 (+2,3 %), Or 3627,90 (-10,7 %), EUR/USD 1,10 (-2,3 %)
+  VIX 28,44 (+49,4 %), Taux US 10 ans 5,05 (+0,10 pt), Pétrole WTI 82,62 (-16,9 %), Dollar 103,84 (+2,2 %), Or 3531,70 (-13,0 %), EUR/USD 1,10 (-2,3 %)
   En clair : VIX = nervosité ; taux 10 ans = coût de l'argent à long terme ; pétrole, or, dollar = thermomètres de l'économie mondiale.
   Appréciation : contexte tendu, les mouvements de plus de 10 % sur 20 séances signalent les marchés à surveiller. Sur la semaine, le VIX monte (+3,9 pt).
 
 E. Fiabilité et construction du modèle
-  Variables testées (IC en développement) : prix +0,010, actualités +0,010 (écartée), calendrier +0,011 (écartée), marchés +0,009 (écartée), fondamentaux +0,009 (écartée)
-  Test réservé : IC +0,026, t = 1,9, net de frais +0,12 % par 5 j, ratio d'information net 0,52
-  Règle de maintien (garder tant que dans les 40 % premières) : net de frais +0,16 % par 5 j, rotation 35 % contre 58 % sans maintien
+  Variables testées (IC en développement) : prix +0,010, actualités +0,010 (écartée), calendrier +0,011 (écartée), marchés +0,006 (écartée), fondamentaux +0,013 (écartée)
+  Test réservé : IC +0,025, t = 1,9, net de frais +0,14 % par 5 j, ratio d'information net 0,60
+  Règle de maintien (garder tant que dans les 40 % premières) : net de frais +0,21 % par 5 j, rotation 36 % contre 58 % sans maintien
   Liens événement × secteur validés : 0 significatifs sur 43 testés
   En clair : une famille de variables n'est gardée que si elle améliore réellement la prévision. Le ratio d'information rapporte le gain à sa régularité : au-dessus de 0,5, le résultat est plutôt régulier.
   Appréciation : modèle sobre (seuls les prix sont retenus), résultat régulier hors échantillon ; aucun lien actualité × secteur n'est encore prouvé.
