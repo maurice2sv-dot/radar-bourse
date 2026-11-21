@@ -1,7 +1,7 @@
 {
- "genere_utc": "2026-11-20 21:51",
+ "genere_utc": "2026-11-21 03:30",
  "mode": "live",
- "cours_au": "2026-11-19",
+ "cours_au": "2026-11-20",
  "jours_de_retard": 1,
  "anomalies": [
   "valeurs actives écartées faute d'historique (6) : HONA, SNDK, VYLR, WBD, KVUE, PSKY"
@@ -21,25 +21,27 @@
   },
   "marches": 8,
   "fondamentaux": {
-   "rafraichies": 53,
+   "rafraichies": 0,
    "sans_cik": 9
   },
   "flux_ok": 5,
   "gdelt_series": 3,
   "gdelt_evenements": {
-   "jours_acquis": 0,
-   "sources": {},
+   "jours_acquis": 1,
+   "sources": {
+    "v2": 1
+   },
    "historique": {
-    "jours": 1080,
+    "jours": 1081,
     "du": "2023-11-18",
-    "au": "2026-11-19"
+    "au": "2026-11-20"
    }
   },
-  "gdelt_signaux": 8395,
-  "nouveaux_articles": 95,
+  "gdelt_signaux": 8400,
+  "nouveaux_articles": 27,
   "univers_du_jour": 571,
   "rejeu": 0,
-  "resolues": 0,
+  "resolues": 591,
   "signalees_resolues": 0
  }
 }
