@@ -11,6 +11,10 @@ Références : moyenne des valeurs de l'univers à parts égales, S&P 500 (SPY) 
 Par profil de risque (tiers de volatilité, voir risque.py) : « radar_prudent », « radar_équilibré »,
 « radar_dynamique », chacune jugée contre la moyenne de son profil (composition figée à chaque revue).
 Les rendements sont pris en devise locale, sans conversion.
+« radar_frein » (radar avec frein anti-krach du momentum, voir regime.py) : identique à « radar » tant que le frein est
+inactif ; frein actif lors d'une revue, les lignes sont choisies par le classement du radar à l'intérieur de chaque
+cinquième de tendance 12 mois (autant de valeurs dans chaque cinquième), si bien que le portefeuille n'est plus penché
+vers les valeurs qui ont le plus monté. Ajoutée le 23/11/2026 : suivie depuis sa propre date de début.
 Toute modification de règle remet le compteur à zéro (supprimer data/portefeuille.json).
 """
 import json
@@ -23,7 +27,7 @@ MAINTIEN = 0.40
 DUREE = 5
 VERSION = 3
 PROFILS = ("prudent", "équilibré", "dynamique")
-STRATS = ("radar", "momentum") + tuple(f"radar_{p}" for p in PROFILS)
+STRATS = ("radar", "momentum") + tuple(f"radar_{p}" for p in PROFILS) + ("radar_frein",)
 # règles par profil : le classement du radar appliqué à l'intérieur de chaque tiers de volatilité,
 # jugé contre la moyenne de ce même tiers (une valeur prudente ne se compare pas à une valeur dynamique)
 
@@ -38,9 +42,27 @@ def _load(path):
 
 def _choix(scores, held, n):
     order = [t for t, _ in sorted(scores.items(), key=lambda x: -x[1])]
-    keep = set(held) & set(order[:int(round(len(order) * MAINTIEN))])
-    new = list(keep) + [t for t in order if t not in keep][:n - len(keep)]
+    keep = [t for t in order[:int(round(len(order) * MAINTIEN))] if t in held][:n]  # jamais plus de n lignes
+    new = keep + [t for t in order if t not in keep][:n - len(keep)]
     return {t: 1.0 / len(new) for t in new} if new else {}
+
+
+def _ref(s):
+    """Référence de chaque règle : moyenne de son profil pour les règles par profil, moyenne de l'univers sinon."""
+    return f"moyenne_{s[6:]}" if s[6:] in PROFILS else "moyenne"
+
+
+def _choix_neutre(scores, mom, held, n, k=5):
+    """Frein actif : classement du radar appliqué dans chaque cinquième de tendance (portefeuille neutre en tendance)."""
+    tk = [t for t in scores if t in mom]
+    if len(tk) < k:
+        return _choix(scores, held, n)
+    rang = {t: i for i, t in enumerate(sorted(tk, key=lambda t: mom[t]))}
+    out = {}
+    for q in range(k):
+        grp = {t: scores[t] for t in tk if rang[t] * k // len(tk) == q}
+        out.update(_choix(grp, held, max(1, round(n / k))))
+    return {t: 1.0 / len(out) for t in out}
 
 
 def momentum_scores(close, member, run_date):
@@ -55,8 +77,9 @@ def momentum_scores(close, member, run_date):
     return {t: float(v) for t, v in m.dropna().items()}
 
 
-def update(close, all_p5, run_date, path, cout_bps=10, member=None, macro=None, refs=None, profils=None):
-    """profils : {ticker: 'prudent' | 'équilibré' | 'dynamique'} à la date du signal."""
+def update(close, all_p5, run_date, path, cout_bps=10, member=None, macro=None, refs=None, profils=None, frein=False):
+    """profils : {ticker: 'prudent' | 'équilibré' | 'dynamique'} à la date du signal ;
+    frein : frein anti-krach du momentum actif à la date du signal (regime.etat)."""
     path = pathlib.Path(path)
     st = _load(path)
     px = close.ffill(limit=3)
@@ -74,6 +97,8 @@ def update(close, all_p5, run_date, path, cout_bps=10, member=None, macro=None, 
               "refs": {"moyenne": 100.0, **{k: 100.0 for k in refs}, **{f"moyenne_{p}": 100.0 for p in PROFILS}},
               "groupes": {},
               "seances_depuis": 0, "historique": []}
+    for s in STRATS:  # règle ajoutée après le démarrage : suivie depuis sa propre date
+        st["strats"].setdefault(s, {"valeur": 100.0, "lignes": {}, "frais": 0.0, "periodes": [], "periode_debut": None, "debut": run_date})
 
     # 1. Faire vivre les positions et les références sur les séances écoulées
     jours = [d for d in keys if st["derniere_date"] < d <= run_date]
@@ -117,24 +142,31 @@ def update(close, all_p5, run_date, path, cout_bps=10, member=None, macro=None, 
 
     # 2. Revue des lignes (premier passage, puis toutes les DUREE séances)
     vide = not any(st["strats"][s]["lignes"] for s in STRATS)
-    if (vide or st["seances_depuis"] >= DUREE) and all_p5:
+    revue = vide or st["seances_depuis"] >= DUREE
+    a_faire = STRATS if revue else tuple(s for s in STRATS if not st["strats"][s]["lignes"])
+    if a_faire and all_p5:
         p5 = {x["ticker"]: x["p5"] for x in all_p5}
-        scores = {"radar": p5, "momentum": momentum_scores(close, member, run_date)}
+        mom = momentum_scores(close, member, run_date)
+        scores = {"radar": p5, "momentum": mom, "radar_frein": p5}
         if profils:
             st["groupes"] = {p: sorted(t for t in p5 if profils.get(t) == p) for p in PROFILS}
             for p in PROFILS:
                 scores[f"radar_{p}"] = {t: p5[t] for t in st["groupes"][p]}
-        for s in STRATS:
+        for s in a_faire:
             S, sc = st["strats"][s], scores.get(s) or {}
             if not sc:
                 continue
-            ref = f"moyenne_{s[6:]}" if s.startswith("radar_") else "moyenne"
+            ref = _ref(s)
             n = max(1, round(len(sc if s.startswith("radar_") else all_p5) * PART))
             if S["periode_debut"]:
                 S["periodes"].append({"debut": S["periode_debut"]["date"], "fin": run_date,
                                       "pf": S["valeur"] / S["periode_debut"]["valeur"] - 1,
                                       "moy": st["refs"][ref] / S["periode_debut"]["moyenne"] - 1})
-            cible = _choix(sc, S["lignes"], n)
+            if s == "radar_frein":
+                S["frein"] = bool(frein and mom)
+                cible = _choix_neutre(sc, mom, S["lignes"], n) if S["frein"] else _choix(sc, S["lignes"], n)
+            else:
+                cible = _choix(sc, S["lignes"], n)
             tk = set(cible) | set(S["lignes"])
             rot = sum(abs(cible.get(t, 0.0) - S["lignes"].get(t, 0.0)) for t in tk)
             S["valeur"] *= 1 - rot * cout_bps / 1e4
@@ -142,7 +174,8 @@ def update(close, all_p5, run_date, path, cout_bps=10, member=None, macro=None, 
             S["lignes"] = cible
             S["rotation"] = round(rot / 2, 3)
             S["periode_debut"] = {"date": run_date, "valeur": S["valeur"], "moyenne": st["refs"][ref]}
-        st["seances_depuis"] = 0
+        if revue:
+            st["seances_depuis"] = 0
         st["noms"] = {x["ticker"]: x["name"] for x in all_p5}
     st["historique"] = st["historique"][-400:]
     path.write_text(json.dumps(st, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -157,9 +190,9 @@ def resume(st):
            "refs": {k: v / 100 - 1 for k, v in st["refs"].items()}, "strats": {}}
     for s in STRATS:
         S = st["strats"][s]
-        vals = np.array([100.0] + [x[s] for x in h])
+        vals = np.array([100.0] + [x[s] for x in h if s in x])
         per = S["periodes"]
-        ref = f"moyenne_{s[6:]}" if s.startswith("radar_") else "moyenne"
+        ref = _ref(s)
         sem = None
         if len(h) >= 6 and s in h[-6] and ref in h[-6]:
             sem = {"pf": h[-1][s] / h[-6][s] - 1, "moy": h[-1][ref] / h[-6][ref] - 1}
@@ -167,5 +200,6 @@ def resume(st):
                             "frais": S["frais"], "n_lignes": len(S["lignes"]), "rotation": S.get("rotation"),
                             "lignes": [noms.get(t, t) for t, _ in sorted(S["lignes"].items(), key=lambda x: -x[1])[:5]],
                             "periodes": len(per), "gagnees": sum(1 for p in per if p["pf"] > p["moy"]), "semaine": sem,
-                            "ref": st["refs"].get(ref, 100.0) / 100 - 1}
+                            "ref": st["refs"].get(ref, 100.0) / 100 - 1, "debut": S.get("debut", st["debut"]),
+                            "frein": S.get("frein")}
     return out

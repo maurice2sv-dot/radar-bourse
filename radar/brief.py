@@ -185,13 +185,21 @@ def _bloc_alerte(rep):
         lignes.append(f"  Événement marquant : {ev['title']} ({ev['source']})")
     if rep.get("agenda"):
         lignes.append("  À venir : " + " ; ".join(f"{a['label']} le {a['date']}" for a in rep["agenda"][:4]))
+    rg = rep.get("regime") or {}
+    if rg.get("niveau"):
+        lignes.append(f"  Régime de marché : {rg['niveau']} (" + " ; ".join(rg["raisons"]) + ")")
+        lignes.append("  Frein anti-krach du momentum : " + (f"actif, {rg['frein_raison']}" if rg.get("frein") else "inactif"))
     vix = next((m for m in rep.get("marches", []) if m["label"] == "VIX"), None)
     clair = ("  En clair : le VIX mesure la nervosité attendue sur la bourse américaine (sous 15 : calme ; 15 à 20 : normal ; "
              "20 à 30 : tension ; au-delà de 30 : stress). La pression d'actualité compare le volume d'articles par thème à sa moyenne : "
              "×1 = habituel, ×2 ou plus = inhabituel."
              + (" Les bourses asiatiques (Tokyo, Hong Kong, Shanghai) ferment avant l'ouverture de l'Europe : une forte variation"
                 " y donne souvent le ton de la séance européenne ; alerte au-delà de 3 % sur une séance ou de 10 % de baisse sur 20 séances."
-                if asie else ""))
+                if asie else "")
+             + (" Régime de marché : calme (VIX sous 20), tension (20 à 30), stress (30 ou plus, ou S&P 500 en baisse de 5 % en 5 séances), "
+                "krach (40 ou plus, ou baisse de 10 % en 5 séances). Le frein anti-krach s'active après un marché baissier agité : "
+                "c'est dans les rebonds qui suivent que les stratégies de tendance subissent leurs pires pertes."
+                if rg.get("niveau") else ""))
     tension = []
     if vix:
         v = vix["niveau"]
@@ -202,9 +210,44 @@ def _bloc_alerte(rep):
     if rep.get("agenda"):
         tension.append(f"{len(rep['agenda'])} rendez-vous de résultats proche{'s' if len(rep['agenda']) > 1 else ''}")
     app = (", ".join(tension) + ".") if tension else "rien de notable."
-    if vix and vix["niveau"] >= 20:
-        app += " Dans ce contexte, les mouvements de court terme sont plus amples et les signaux du modèle moins lisibles."
+    consigne = {"tension": " Dans ce contexte, les mouvements de court terme sont plus amples et les signaux du modèle moins lisibles.",
+                "stress": " Climat de stress : mouvements amples et corrélés, les signaux de court terme sont à lire avec prudence.",
+                "krach": " Climat de krach : les classements de court terme perdent l'essentiel de leur sens, l'observation prime."}
+    niv = rg.get("niveau") or ("tension" if vix and vix["niveau"] >= 20 else None)
+    app += consigne.get(niv, "")
+    hist = _hist_regime(rep.get("eval") or {}, niv)
+    if hist:
+        app += " " + hist
+    if rg.get("frein"):
+        app += " Frein actif : la règle « radar avec frein » du portefeuille fictif ne penche plus vers les valeurs en forte tendance."
     return ["4. Alerte marchés et actualité"] + lignes + [clair, f"  Appréciation : {app}"]
+
+
+def _hist_regime(evl, niv):
+    """Phrase sur la fiabilité historique du classement dans le régime donné."""
+    x = ((evl.get("regimes") or {}).get("regimes") or {}).get(niv) if niv else None
+    if not x or "ic" not in x:
+        return ""
+    ic, t = x["ic"], x["t"]
+    qual = ("avantage net" if t == t and t >= 2 and ic > 0 else "léger avantage, non significatif" if ic > 0 else "aucun avantage")
+    return (f"Historiquement, dans ce climat ({x['dates']} dates), le classement a un IC de {_sn(ic, 3)}"
+            + (f" (t = {_n(t)})" if t == t else "") + f" : {qual}.")
+
+
+def _ligne_regimes(evl):
+    rg = evl.get("regimes") or {}
+    parts = [f"{k} {_sn(x['ic'], 3)} ({x['dates']} dates)" for k, x in (rg.get("regimes") or {}).items() if "ic" in x]
+    eps = [f"{k} {_sn(x['ic'], 3)}" for k, x in (rg.get("episodes") or {}).items() if "ic" in x]
+    if not parts:
+        return []
+    out = ["  Selon le climat de marché (IC hors échantillon) : " + " ; ".join(parts)
+           + ((" ; épisodes de stress : " + " ; ".join(eps)) if eps else "")]
+    fr = rg.get("frein") or {}
+    if fr.get("periodes"):
+        out.append(f"  Frein anti-krach, effet passé ({fr['periodes']} périodes de 5 séances où il aurait été actif) : "
+                   f"radar {_sn(fr['radar'] * 100, 2)} % contre {_sn(fr['neutre'] * 100, 2)} % avec frein, par période, avant frais ; "
+                   f"le frein fait mieux {fr['gagnees']} fois sur {fr['periodes']}")
+    return out
 
 
 def _bloc_fiabilite(rep, main, evl):
@@ -223,6 +266,7 @@ def _bloc_fiabilite(rep, main, evl):
               f"les 20 % les mieux classées font {_sn(net * 100, 2)} % par {main} jours de mieux que la moyenne, frais déduits",
               f"  Variables retenues : {grp} ; coefficient de confiance {_n(rep['shrink'], 2)} ; {rep['n_resolved']} prévisions résolues"
               + (f", {_p(rep['live_hit'])} justes" if rep.get("live_hit") is not None else "")]
+    lignes += _ligne_regimes(evl)
     sv = rep.get("suivi") or {}
     if sv.get("n"):
         lignes.append(f"  Valeurs signalées : {_p(sv['beat'])} ont battu le marché à {main} jours (écart moyen {_sn(sv['excess'] * 100, 2)} %, "
@@ -271,6 +315,10 @@ def _bloc_portefeuille(rep):
               f"  Radar : pire baisse {_n(R['pire_baisse'] * 100, 2)} %, frais payés {_n(R['frais'] * 100, 2)} % ; "
               f"{R['n_lignes']} lignes, dont {', '.join(R['lignes'])} ; prochaine revue dans {pf['prochaine_revue']} séance"
               f"{'s' if pf['prochaine_revue'] > 1 else ''}"]
+    F = pf["strats"].get("radar_frein")
+    if F and F.get("n_lignes"):
+        lignes.append(f"  Radar avec frein anti-krach (depuis le {F['debut']}) : {_sn(F['perf'] * 100, 2)} % ; frein "
+                      + ("actif à la dernière revue, portefeuille neutre en tendance" if F.get("frein") else "inactif, identique au radar"))
     pp = [(p, pf["strats"].get(f"radar_{p}")) for p in ("prudent", "équilibré", "dynamique")]
     if all(x for _, x in pp):
         lignes.append("  Par profil, radar contre moyenne du profil : " + " ; ".join(
@@ -279,7 +327,8 @@ def _bloc_portefeuille(rep):
              "« momentum » achète simplement ce qui a le plus monté sur 12 mois. Si le radar ne fait pas mieux que cette règle "
              "naïve, sa complexité ne sert à rien. Les indices réels (S&P 500, Stoxx 600) montrent ce qu'aurait rapporté un simple "
              "fonds indiciel. Par profil, la même règle est appliquée dans chaque tiers de risque et jugée contre la "
-             "moyenne de ce tiers. Il faut plusieurs mois pour conclure.")
+             "moyenne de ce tiers. « Radar avec frein » répartit ses lignes entre les cinq tranches de tendance quand le frein est actif, "
+             "pour mesurer si ce garde-fou évite les pertes des rebonds. Il faut plusieurs mois pour conclure.")
     if pf["seances"] == 0:
         app = "portefeuilles constitués lors de ce passage ; premiers résultats dès la prochaine séance."
     elif pf["seances"] < 60:

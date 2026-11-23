@@ -143,6 +143,22 @@ def render(rep, path):
                 f'<td class="n">{x["ir_net"]:.2f}</td></tr>')
     head = ('<table><thead><tr><th></th><th class="n">IC</th><th class="n">t</th><th class="n">IC &gt; 0</th><th class="n">Brut</th>'
             '<th class="n">Net</th><th class="n">Rotation</th><th class="n">IR net</th></tr></thead><tbody>')
+    rg = evl.get("regimes") or {}
+
+    def row2(lbl, x):
+        if "ic" not in x:
+            return f'<tr><td>{e(lbl)}</td><td class="n">{x.get("dates", 0)}</td><td colspan="3" class="mute">trop peu de dates</td></tr>'
+        tt = "" if x["t"] != x["t"] else f'{x["t"]:.1f}'
+        return (f'<tr><td>{e(lbl)}</td><td class="n">{x["dates"]}</td><td class="n">{x["ic"]:+.3f}</td><td class="n">{tt}</td>'
+                f'<td class="n">{x["net"] * 100:+.2f} %</td></tr>')
+    regs = ""
+    if rg.get("regimes"):
+        regs = ('<h2 style="margin-top:16px">Selon le climat de marché</h2><p class="sub">Mêmes prévisions hors échantillon (développement et test réservé), '
+                'classées selon le VIX du jour du signal (calme sous 20, tension 20 à 30, stress 30 à 40, krach 40 ou plus) et sur les épisodes de stress connus. '
+                'Le net est approché (dates non consécutives).</p><div style="overflow-x:auto"><table><thead><tr><th></th><th class="n">Dates</th>'
+                '<th class="n">IC</th><th class="n">t</th><th class="n">Net</th></tr></thead><tbody>'
+                + "".join(row2(k, x) for k, x in rg["regimes"].items())
+                + "".join(row2(k, x) for k, x in (rg.get("episodes") or {}).items()) + '</tbody></table></div>')
     sel = "".join(row(("✓ " if x["garde"] else "✗ ") + {"actualites": "+ actualités", "marches": "+ marchés", "prix": "prix"}.get(x["groupe"], "+ " + x["groupe"]), x) for x in evl["trace"])
     out.append('<section class="card"><h2>Fiabilité, à la manière des professionnels</h2><p class="sub">'
                f'Cible : faire mieux que la moyenne de son secteur à {main} jours. IC : corrélation de rang, chaque jour, entre classement prédit et classement réel. '
@@ -154,6 +170,7 @@ def render(rep, path):
                + '</tbody></table></div>'
                f'<p class="mute">La période réservée commence le {e(evl["reserve_debut"])} et ne sert à aucun choix (ouverte le {e(evl["reserve_ouverte_le"])}). '
                'Biais connu : l\'univers est composé des grandes valeurs d\'aujourd\'hui, ce qui avantage le passé (biais du survivant).</p>'
+               + regs +
                '<h2 style="margin-top:16px">Sélection des variables (développement)</h2><p class="sub">'
                f'Un groupe n\'est gardé que s\'il améliore l\'IC d\'au moins {e(str(rep.get("gain_min_ic", 0.003)))}. Choix refait chaque semaine (dernier : {e(evl["date"])}).</p>'
                '<div style="overflow-x:auto">' + head + sel + '</tbody></table></div></section>')
@@ -165,6 +182,10 @@ def render(rep, path):
                  for x in rep.get("marches", []))
     if mk:
         al = ('<p class="sub"><b>Alertes : ' + e(" ; ".join(rep["alertes_marche"])) + '</b></p>') if rep.get("alertes_marche") else ''
+        rgm = rep.get("regime") or {}
+        if rgm.get("niveau"):
+            al += ('<p class="sub"><b>Régime de marché : ' + e(rgm["niveau"]) + '</b> (' + e(" ; ".join(rgm["raisons"])) + ') · frein anti-krach du momentum '
+                   + e(("actif, " + rgm["frein_raison"]) if rgm.get("frein") else "inactif") + '</p>')
         out.append('<section class="card"><h2>Marchés</h2><p class="sub">Niveau et variation sur 20 séances. Alerte si VIX au-dessus de 25 ou en hausse de 30 % en 5 séances, pétrole ±15 %, dollar ±4 %, taux ±0,40 point, indice asiatique ±3 % sur une séance ou -10 % sur 20 séances.</p>'
                    + al + '<table><thead><tr><th>Indicateur</th><th class="n">Niveau</th><th class="n">20 séances</th><th class="n">Au</th></tr></thead><tbody>' + mk + '</tbody></table></section>')
     ag = "".join(f'<li><b>{e(a["date"])}</b> · {e(a["label"])}</li>' for a in rep.get("agenda", []))

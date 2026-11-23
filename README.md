@@ -25,6 +25,9 @@ Mode `demo` (défaut) : données synthétiques, pour tester la mécanique. Pour 
 - Période de test réservée (`evaluation.test_reserve_debut`) : ne sert à aucun choix. Ne pas déplacer cette date.
 - Fondamentaux : comptes officiels SEC (EDGAR) des valeurs américaines, utilisés à partir du lendemain de leur dépôt, première publication seulement.
 - Biais connu : univers des grandes valeurs d'aujourd'hui (biais du survivant), qui flatte le passé.
+- Régime de marché (`radar/regime.py`) : calme, tension, stress ou krach selon le VIX et la baisse du S&P 500 sur 5 séances, affiché dans l'alerte marchés avec une consigne de lecture.
+- Fiabilité selon le climat : chaque semaine, IC et écart net des prévisions hors échantillon classés par régime VIX et sur les épisodes de stress (fin 2018, Covid 2020, rebond 2020, baisse 2022). Analyse descriptive, elle ne sert à aucun réglage.
+- Frein anti-krach du momentum (Daniel et Moskowitz, 2016) : actif si le S&P 500 a baissé sur 24 mois, ou si le VIX dépasse 30 avec un S&P 500 à plus de 10 % sous son plus haut d'un an. Il ne modifie pas le radar : la règle fictive « radar avec frein » le suit à part (sélection répartie entre les cinq tranches de tendance), et son effet passé est mesuré chaque semaine.
 - Bourses asiatiques (Nikkei 225, Hang Seng, Shanghai) : contexte et alertes seulement (±3 % sur une séance, -10 % sur 20 séances), hors modèle tant qu'un test n'a pas montré qu'elles améliorent la prévision.
 
 ## Robustesse

@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 
+from . import regime
 from .events import CATS, TECHS
 
 CAT_FR = {"militaire": "militaire", "securitaire": "sécuritaire", "politique": "politique", "financier": "financier",
@@ -155,5 +156,5 @@ def analyze(df, scores, close, cfg, preds, wcs, cal=None, macro=None):
     agenda = [{k: v for k, v in a.items() if k != "d"} for a in sorted(agenda, key=lambda a: a["d"])]
     # Indicateurs de marché : niveau, variation sur 20 séances, alertes de risque
     marches, alertes = marches_alertes(macro, last_date, cfg)
-    return {"marches": marches, "alertes_marche": alertes, "agenda": agenda, "calib_days": int(max(0, MIN_HIST - hist_rss)), "as_of": last_date.strftime("%Y-%m-%d"), "sectors": sectors, "techs": techs, "heat": heat,
+    return {"marches": marches, "alertes_marche": alertes, "regime": regime.etat(macro, last_date), "agenda": agenda, "calib_days": int(max(0, MIN_HIST - hist_rss)), "as_of": last_date.strftime("%Y-%m-%d"), "sectors": sectors, "techs": techs, "heat": heat,
             "watch": watch, "drivers": {t: driver(t)[0] for t in last.index}, "all_p5": sorted(allp, key=lambda x: -x["p5"]), "events": ev}

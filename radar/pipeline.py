@@ -3,9 +3,10 @@ import datetime as dt
 import json
 import pathlib
 
+import numpy as np
 import pandas as pd
 
-from . import analysis, collect, db, events, features, gdelt, gdelt_events, journal, model, portefeuille, risque, univers
+from . import analysis, collect, db, events, features, gdelt, gdelt_events, journal, model, portefeuille, regime, risque, univers
 
 
 def score_new(con, cfg):
@@ -65,7 +66,7 @@ def replay(con, df, feats, cfg):
     return len(pts)
 
 
-def evaluation(con, d, cfg, h):
+def evaluation(con, d, cfg, h, macro=None):
     """Sélection des groupes de variables (hebdomadaire, période de développement seulement),
     puis mesure sur la période de test réservée avec les groupes retenus."""
     debut = str(cfg["evaluation"]["test_reserve_debut"])
@@ -86,6 +87,18 @@ def evaluation(con, d, cfg, h):
         # recalcul hebdomadaire seulement : le test réservé ne sert plus aux réglages (voir période fraîche)
         res = model.evaluate_reserve(d, cfg, h, sel["groupes"])
         sel.update(reserve_cache=res, reserve_groupes=sel["groupes"])
+        db.meta_set(con, "selection", sel)
+    if stale or "regimes" not in sel or sel.get("regimes_groupes") != sel["groupes"]:
+        # fiabilité selon le climat de marché : mêmes prévisions hors échantillon (développement + test réservé),
+        # classées selon le VIX du jour du signal et sur les épisodes de stress connus (recalcul hebdomadaire)
+        try:
+            dates = np.array(sorted(d["date"].unique()))
+            r = model.walk(d, model.feats_for(sel["groupes"]), h, regime.plis(dates), dates)
+            rg = regime.par_regime(r, h, macro, cfg["evaluation"].get("cout_bps", 10), model.evaluate)
+            rg["frein"] = regime.effet_frein(r, d, h, macro)
+            sel.update(regimes=rg, regimes_groupes=sel["groupes"])
+        except Exception as ex:
+            sel.update(regimes={"erreur": f"{type(ex).__name__} {str(ex)[:80]}"}, regimes_groupes=sel["groupes"])
         db.meta_set(con, "selection", sel)
     opened = db.meta_get(con, "reserve_ouverte")
     if opened is None or opened.get("debut") != debut:
@@ -165,7 +178,7 @@ def run(cfg, root=".", do_replay=True):
     macro = features.load_macro(con)
     fund = features.load_fundamentals(con)
     df0 = features.build_features(close, volume, scores, wl, hz, cal=cal, macro=macro, fund=fund, member=member)
-    ev = evaluation(con, df0.dropna(subset=["ret20"]), cfg, main)
+    ev = evaluation(con, df0.dropna(subset=["ret20"]), cfg, main, macro)
 
     # 2. Journal : rejeu point-in-time puis résolution
     if do_replay:
@@ -218,7 +231,8 @@ def run(cfg, root=".", do_replay=True):
         nom = "portefeuille.json" if cfg["mode"] == "live" else "portefeuille_demo.json"
         rep["portefeuille"] = portefeuille.update(close, rep["all_p5"], run_date, out / nom, rep["cout_bps"],
                                                   member=member, macro=macro, refs=cfg.get("references"),
-                                                  profils={t: x["profil"] for t, x in rq.items()})
+                                                  profils={t: x["profil"] for t, x in rq.items()},
+                                                  frein=bool(rep.get("regime", {}).get("frein")))
     except Exception as ex:
         errs.append(f"portefeuille fictif : {type(ex).__name__} {str(ex)[:80]}")
     (out / "report.json").write_text(json.dumps(rep, ensure_ascii=False, default=float, indent=1))
