@@ -52,6 +52,9 @@ marches:                # indicateurs de marché (yfinance) : contexte des secte
   Dollar: DX-Y.NYB
   Or: GC=F
   EUR/USD: EURUSD=X
+  Nikkei 225: ^N225       # Asie : contexte et alertes seulement (séance asiatique close avant l'ouverture de l'Europe)
+  Hang Seng: ^HSI
+  Shanghai: 000001.SS
 calendrier:
   max_par_passage: 120  # valeurs dont on rafraîchit les dates de résultats à chaque passage (cycle d'une semaine)
   banques_centrales:    # dates de décision. Sources : federalreserve.gov (2027 révisé le 12/11/2026), ecb.europa.eu

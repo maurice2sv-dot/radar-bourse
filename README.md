@@ -25,6 +25,7 @@ Mode `demo` (défaut) : données synthétiques, pour tester la mécanique. Pour 
 - Période de test réservée (`evaluation.test_reserve_debut`) : ne sert à aucun choix. Ne pas déplacer cette date.
 - Fondamentaux : comptes officiels SEC (EDGAR) des valeurs américaines, utilisés à partir du lendemain de leur dépôt, première publication seulement.
 - Biais connu : univers des grandes valeurs d'aujourd'hui (biais du survivant), qui flatte le passé.
+- Bourses asiatiques (Nikkei 225, Hang Seng, Shanghai) : contexte et alertes seulement (±3 % sur une séance, -10 % sur 20 séances), hors modèle tant qu'un test n'a pas montré qu'elles améliorent la prévision.
 
 ## Robustesse
 - La base `radar.db` n'est plus dans l'historique Git : elle vit dans la release GitHub « base » (copie du soir, plus une sauvegarde chaque vendredi). Le passage s'arrête s'il ne peut pas la récupérer, pour ne jamais repartir d'un journal vide.

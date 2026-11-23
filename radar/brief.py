@@ -175,6 +175,9 @@ def _bloc_alerte(rep):
     lignes = []
     if rep.get("alertes_marche"):
         lignes.append("  Marchés : " + " ; ".join(rep["alertes_marche"]))
+    asie = [m for m in rep.get("marches", []) if m.get("asie")]
+    if asie:
+        lignes.append("  Asie (dernière séance close) : " + " ; ".join(f"{m['label']} {_sn(m['chg1'] * 100)} % le {m['date']}" for m in asie))
     lignes.append("  Actualité : " + (f"{h['cat']} à ×{_n(h['ratio'])} la normale" if h and h["ratio"] >= 2 else
                                        f"aucune pression inhabituelle (thème le plus actif : {h['cat']}, ×{_n(h['ratio'])} la normale)" if h else
                                        "en calibrage (historique d'actualités insuffisant)"))
@@ -185,7 +188,10 @@ def _bloc_alerte(rep):
     vix = next((m for m in rep.get("marches", []) if m["label"] == "VIX"), None)
     clair = ("  En clair : le VIX mesure la nervosité attendue sur la bourse américaine (sous 15 : calme ; 15 à 20 : normal ; "
              "20 à 30 : tension ; au-delà de 30 : stress). La pression d'actualité compare le volume d'articles par thème à sa moyenne : "
-             "×1 = habituel, ×2 ou plus = inhabituel.")
+             "×1 = habituel, ×2 ou plus = inhabituel."
+             + (" Les bourses asiatiques (Tokyo, Hong Kong, Shanghai) ferment avant l'ouverture de l'Europe : une forte variation"
+                " y donne souvent le ton de la séance européenne ; alerte au-delà de 3 % sur une séance ou de 10 % de baisse sur 20 séances."
+                if asie else ""))
     tension = []
     if vix:
         v = vix["niveau"]
@@ -354,7 +360,8 @@ def _hebdo(rep, main, evl, hist, tag):
     L += ["D. Marchés sur 20 séances",
           "  " + (", ".join(f"{x['label']} {_n(x['niveau'], 2)} ({_sn(x['chg20'], 2)} pt)" if x["points"] else
                              f"{x['label']} {_n(x['niveau'], 2)} ({_sn(x['chg20'] * 100)} %)" for x in m) or "indisponibles"),
-          "  En clair : VIX = nervosité ; taux 10 ans = coût de l'argent à long terme ; pétrole, or, dollar = thermomètres de l'économie mondiale."]
+          "  En clair : VIX = nervosité ; taux 10 ans = coût de l'argent à long terme ; pétrole, or, dollar = thermomètres de l'économie mondiale ; "
+          "Nikkei, Hang Seng, Shanghai = santé des bourses asiatiques."]
     vix = next((x for x in m if x["label"] == "VIX"), None)
     _, old_v = _prev(hist, rep["as_of"], 5)
     tend = ""

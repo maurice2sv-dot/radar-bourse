@@ -165,7 +165,7 @@ def render(rep, path):
                  for x in rep.get("marches", []))
     if mk:
         al = ('<p class="sub"><b>Alertes : ' + e(" ; ".join(rep["alertes_marche"])) + '</b></p>') if rep.get("alertes_marche") else ''
-        out.append('<section class="card"><h2>Marchés</h2><p class="sub">Niveau et variation sur 20 séances. Alerte si VIX au-dessus de 25 ou en hausse de 30 % en 5 séances, pétrole ±15 %, dollar ±4 %, taux ±0,40 point.</p>'
+        out.append('<section class="card"><h2>Marchés</h2><p class="sub">Niveau et variation sur 20 séances. Alerte si VIX au-dessus de 25 ou en hausse de 30 % en 5 séances, pétrole ±15 %, dollar ±4 %, taux ±0,40 point, indice asiatique ±3 % sur une séance ou -10 % sur 20 séances.</p>'
                    + al + '<table><thead><tr><th>Indicateur</th><th class="n">Niveau</th><th class="n">20 séances</th><th class="n">Au</th></tr></thead><tbody>' + mk + '</tbody></table></section>')
     ag = "".join(f'<li><b>{e(a["date"])}</b> · {e(a["label"])}</li>' for a in rep.get("agenda", []))
     out.append('<section class="card"><h2>Agenda</h2><p class="sub">Résultats des 7 prochains jours et décisions de la Fed et de la BCE des 14 prochains jours.</p>'
