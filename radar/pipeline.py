@@ -75,11 +75,11 @@ def evaluation(con, d, cfg, h, macro=None):
     # couverture de chaque groupe (valeurs ayant des données) : une source qui arrive relance la sélection
     cov = {g: int(d.loc[d[f].notna().any(axis=1), "ticker"].nunique()) for g, f in model.GROUPS.items()}
     grown = sel is not None and any(n > 1.2 * sel.get("couverture", {}).get(g, 0) + 1 for g, n in cov.items())
-    stale = (sel is None or sel.get("reserve_debut") != debut or sel.get("version") != 3 or grown
+    stale = (sel is None or sel.get("reserve_debut") != debut or sel.get("version") != 4 or grown
              or (today - dt.date.fromisoformat(sel["date"])).days >= cfg["evaluation"].get("reselection_jours", 7))
     if stale:
         groups, trace, dev = model.select_groups(d, cfg, h)
-        sel = {"version": 3, "date": today.isoformat(), "reserve_debut": debut, "groupes": groups, "trace": trace, "dev": dev,
+        sel = {"version": 4, "date": today.isoformat(), "reserve_debut": debut, "groupes": groups, "trace": trace, "dev": dev,
                "couverture": cov}
         db.meta_set(con, "selection", sel)
     res = sel.get("reserve_cache") if not stale else None
@@ -133,6 +133,7 @@ def run(cfg, root=".", do_replay=True):
             errs += e
         except Exception as ex:
             log["controle_croise"] = f"indisponible ({type(ex).__name__})"
+            errs.append(f"contrôle croisé des cours indisponible ({type(ex).__name__})")
         try:
             log["resultats"], e = collect.collect_earnings_live(dict(cfg, watchlist=actives), con)
             errs += e
@@ -171,6 +172,11 @@ def run(cfg, root=".", do_replay=True):
     if sus:
         errs.append("cours suspects (plus de 40 % en une séance, à vérifier) : " + ", ".join(sus[:8]))
     log["univers_du_jour"] = int(member.iloc[-1].sum())
+    if live:  # biais du survivant résiduel : part des membres historiques de l'indice dont on a les cours
+        try:
+            log["couverture_indice"] = univers.couverture(root, close)
+        except Exception as ex:
+            log["couverture_indice"] = f"indisponible ({type(ex).__name__})"
     scores = features.load_scores(con)
 
     # 1. Évaluation honnête : poids neutres (les poids appris utilisent des rendements qui seraient « futurs »)

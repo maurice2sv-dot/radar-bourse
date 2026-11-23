@@ -24,6 +24,16 @@ UA = {"User-Agent": "radar-bourse/0.3 (projet personnel de veille ; https://gith
 DEBUT_SORTIES = "2016-01-01"
 DIAG = ""
 REFRESH_JOURS = 7
+# Changements de symbole d'une même société (ancien, nouveau). Le fichier historique liste les symboles de l'époque :
+# sans ce raccord, l'historique de META avant juin 2022 (alors FB) était écarté. Un couple n'est appliqué que si le
+# fichier historique le confirme (fin de l'ancien le jour exact du début du nouveau) et si l'ancien symbole n'a plus
+# de cours chez Yahoo (aucun secteur trouvé) : ses périodes passent alors au nouveau symbole, qui porte l'historique.
+RENOMMAGES = [("FB", "META"), ("UTX", "RTX"), ("ANTM", "ELV"), ("CBS", "VIAC"), ("VIAC", "PARA"), ("HRS", "LHX"),
+              ("COG", "CTRA"), ("FI", "FISV"), ("FISV", "FI"), ("RE", "EG"), ("FLT", "CPAY"), ("PKI", "RVTY"),
+              ("ABC", "COR"), ("WLTW", "WTW"), ("BLL", "BALL"), ("CDAY", "DAY"), ("SYMC", "NLOK"), ("NLOK", "GEN"),
+              ("HCP", "PEAK"), ("PEAK", "DOC"), ("DWDP", "DD"), ("TMK", "GL"), ("BHGE", "BKR"), ("CTL", "LUMN"),
+              ("DISCA", "WBD"), ("MYL", "VTRS"), ("JEC", "J"), ("ARNC", "HWM"), ("PARA", "PSKY"), ("GPS", "GAP"),
+              ("FBHS", "FBIN"), ("KORS", "CPRI"), ("RTN", "RTX")]
 
 GICS = {"Information Technology": "tech", "Communication Services": "telecom", "Consumer Discretionary": "conso",
         "Consumer Staples": "distribution", "Health Care": "sante", "Financials": "finance", "Industrials": "industrie",
@@ -244,6 +254,9 @@ def load(cfg, root=".", live=True, now=None):
         per = {t: ps for t, ps in per.items() if t in actuels_t or any(p[1] is None or p[1] > DEBUT_SORTIES for p in ps)}
     secteurs = cache.setdefault("secteurs_sortis", {})
     actuels = {m["ticker"]: m for m in cache["membres"]}
+    per, faits = raccorder(per, {t for t in per if t not in base and secteurs.get(t) == ""}, actuels)
+    if faits:
+        log["changements_de_symbole"] = len(faits)
     sortis = [t for t in per if t not in actuels and t not in base]
     if live:
         todo = [t for t in sortis if t not in secteurs or secteurs[t] is None]
@@ -280,6 +293,28 @@ def load(cfg, root=".", live=True, now=None):
     return wl, membership, log, errs
 
 
+def raccorder(per, sans_cours, actuels=()):
+    """Applique RENOMMAGES : renvoie (périodes raccordées, liste des couples appliqués)."""
+    per = {t: [list(p) for p in ps] for t, ps in per.items()}
+    faits = []
+    def bascule(o, n):
+        return next((p[1] for p in per.get(o, []) if p[1] and any(q[0] == p[1] for q in per.get(n, []))), None)
+    couples = sorted(((bascule(o, n), o, n) for o, n in RENOMMAGES), key=lambda x: x[0] or "")
+    for d, o, n in couples:
+        if not d or o not in per or n not in per or o in actuels or o not in sans_cours:  # n absent : aller-retour déjà raccordé
+            continue
+        ps = sorted(per.pop(o) + per[n], key=lambda p: p[0] or "")
+        fus = [ps[0]]
+        for a, b in ps[1:]:
+            if fus[-1][1] is not None and (a or "") <= fus[-1][1]:  # périodes jointives : une seule
+                fus[-1][1] = None if b is None else max(fus[-1][1], b)
+            else:
+                fus.append([a, b])
+        per[n] = fus
+        faits.append(f"{o}>{n}")
+    return per, faits
+
+
 def is_active(periods):
     return any(p[1] is None for p in periods)
 
@@ -297,3 +332,23 @@ def mask(membership, index, columns):
                 ok &= iv < pd.Timestamp(b)
             m[:, j] |= ok
     return pd.DataFrame(m, index=index, columns=columns)
+
+
+def couverture(root, close):
+    """Biais du survivant résiduel, mesuré : pour chaque année, part moyenne des membres historiques du S&P 500
+    (fichier fja05680/sp500) qui ont un cours en base ce jour-là. Les sociétés radiées sans cours disponibles chez
+    Yahoo (rachats, faillites) manquent : elles ne peuvent entrer ni dans l'entraînement ni dans l'évaluation."""
+    cache = json.loads((pathlib.Path(root) / "data" / "univers.json").read_text(encoding="utf-8"))
+    per = (cache.get("historique") or {}).get("periodes") or {}
+    if not per:
+        return {}
+    per, _ = raccorder(per, set(per) - set(close.columns))
+    idx = close.index
+    cols = list(per)
+    m = mask(per, idx, cols)
+    px = close.reindex(columns=cols).notna().to_numpy()
+    n_m = m.to_numpy().sum(axis=1)
+    n_ok = (m.to_numpy() & px).sum(axis=1)
+    s = pd.Series(np.where(n_m > 0, n_ok / np.maximum(n_m, 1), np.nan), index=idx)
+    s = s[s.index >= pd.Timestamp(DEBUT_SORTIES)]
+    return {str(y): round(float(v), 3) for y, v in s.groupby(s.index.year).mean().items()}

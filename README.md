@@ -51,11 +51,11 @@ Mode `demo` (défaut) : données synthétiques, pour tester la mécanique. Pour 
 
 ## Portefeuille fictif
 
-`radar/portefeuille.py` applique chaque jour, sans argent réel, deux règles fixées à l'avance et comparées avec les mêmes frais : « radar » (les 20 % de valeurs les mieux classées par le modèle) et « momentum » (les 20 % qui ont le plus monté sur 12 mois hors dernier mois). Revue toutes les 5 séances ; une valeur détenue reste tant qu'elle figure dans les 40 % premières (règle de maintien, qui réduit les frais) ; frais de 10 pb par sens. Références : moyenne de l'univers, S&P 500 (SPY) et Stoxx Europe 600 (EXSA.DE). L'état est dans `data/portefeuille.json` (à supprimer pour remettre le compteur à zéro si une règle change).
+`radar/portefeuille.py` applique chaque jour, sans argent réel, deux règles fixées à l'avance et comparées avec les mêmes frais : « radar » (les 20 % de valeurs les mieux classées par le modèle) et « momentum » (les 20 % qui ont le plus monté sur 12 mois hors dernier mois). Revue toutes les 5 séances ; une valeur détenue reste tant qu'elle figure dans les 50 % premières (règle de maintien, qui réduit les frais ; 40 % jusqu'au 23/11/2026, compteur remis à zéro à ce changement) ; frais de 10 pb par sens. Références : moyenne de l'univers, S&P 500 (SPY) et Stoxx Europe 600 (EXSA.DE). L'état est dans `data/portefeuille.json` (à supprimer pour remettre le compteur à zéro si une règle change).
 
 ## Univers et biais du survivant
 
-`radar/univers.py` élargit l'univers à environ 550 valeurs : composition du S&P 500 lue chaque semaine sur Wikipedia (copie dans `data/univers.json`), plus les valeurs de `config.yaml`. Une valeur ne compte qu'aux dates où elle appartenait à l'indice ; les valeurs sorties depuis 2016 et encore cotées sont gardées sur leur période d'appartenance. Biais résiduels : sociétés radiées sans cours disponibles, valeurs européennes considérées comme membres sur toute la période.
+`radar/univers.py` élargit l'univers à environ 550 valeurs : composition du S&P 500 lue chaque semaine sur Wikipedia (copie dans `data/univers.json`), plus les valeurs de `config.yaml`. Une valeur ne compte qu'aux dates où elle appartenait à l'indice ; les valeurs sorties depuis 2016 et encore cotées sont gardées sur leur période d'appartenance. Changements de symbole d'une même société (FB devenu META, UTX devenu RTX, etc., liste `RENOMMAGES` dans `radar/univers.py`) : l'historique de l'ancien symbole est rattaché au nouveau, seulement si le fichier historique confirme la date. Biais résiduels : sociétés radiées sans cours disponibles chez Yahoo (rachats, faillites), valeurs européennes considérées comme membres sur toute la période. La part des membres historiques couverts par des cours est mesurée chaque passage (`couverture_indice` dans `data/status.json`).
 
 ## Mesure honnête : la période fraîche
 
@@ -63,7 +63,7 @@ Le test réservé (depuis le 17/11/2025) a été consulté chaque jour ; il rest
 
 ## Tests et contrôles
 
-`python -m pytest -q tests` (lancé avant chaque passage) : absence de regard vers le futur, calcul de l'IC et des frais, règle de maintien, portefeuille, univers, brief. Contrôles de données à chaque passage : variations de plus de 40 % en une séance, contrôle croisé de 15 clôtures avec Stooq, valeurs non mises à jour.
+`python -m pytest -q tests` (lancé avant chaque passage) : absence de regard vers le futur, calcul de l'IC et des frais, règle de maintien, portefeuille, univers, brief. Contrôles de données à chaque passage : variations de plus de 40 % en une séance, contrôle croisé de 15 clôtures avec Stooq (clé facultative dans le secret `STOOQ_APIKEY`) ou, à défaut, nasdaq.com pour les valeurs américaines ; si aucune source ne répond, l'absence de contrôle figure dans les anomalies du brief ; valeurs non mises à jour.
 
 ## Charge GitHub Actions
 

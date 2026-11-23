@@ -2,7 +2,9 @@ name: radar-bourse
 on:
   schedule:
     - cron: "37 22 * * 1-5"  # 22h37 UTC, après la clôture de New York (envoi de 6 h GMT)
-    - cron: "7 14 * * 1-5"   # 14h07 UTC, rafraîchissement de mi-journée (envoi de 17 h GMT)
+    - cron: "7 8 * * 1-5"    # 08h07 UTC, passage de jour (envoi de 17 h GMT). Avancé depuis 14h07 le 23/11/2026 :
+                             # GitHub l'avait lancé avec 5 à 8 h de retard (départ vers 22 h). La séance européenne
+                             # en cours est écartée : ce passage reprend la clôture de la veille et l'Asie.
     # GitHub déclenche souvent avec retard : ces horaires laissent de la marge.
                              # lancer la veille au soir garantit un brief prêt le lendemain matin.
   workflow_dispatch: {}
@@ -39,6 +41,7 @@ jobs:
       - run: python run.py --mode live
         env:
           SEC_CONTACT: ${{ secrets.SEC_CONTACT }}
+          STOOQ_APIKEY: ${{ secrets.STOOQ_APIKEY }}  # facultatif : clé Stooq pour le contrôle croisé (sinon nasdaq.com)
           GH_TOKEN: ${{ github.token }}  # lecture du dépôt public fja05680/sp500 (composition historique)
       - name: Sauvegarder la base
         env:

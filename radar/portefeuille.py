@@ -5,7 +5,7 @@ Deux règles suivies côte à côte, mêmes frais et mêmes dates :
 - « momentum » : les 20 % de valeurs qui ont le plus monté sur 12 mois hors dernier mois (règle naïve) ;
   si le modèle ne fait pas mieux que cette règle simple, sa complexité ne sert à rien.
 Mécanique commune : parts égales ; tous les 5 séances, une valeur détenue reste tant qu'elle figure dans les
-40 % les mieux classées (règle de maintien, qui réduit les frais), les places libres vont aux mieux classées ;
+50 % les mieux classées (règle de maintien, qui réduit les frais ; 40 % jusqu'au 23/11/2026), les places libres vont aux mieux classées ;
 frais de 10 points de base par sens sur la part réellement échangée ; exécution au cours de clôture du signal.
 Références : moyenne des valeurs de l'univers à parts égales, S&P 500 (SPY) et Stoxx Europe 600 (EXSA.DE).
 Par profil de risque (tiers de volatilité, voir risque.py) : « radar_prudent », « radar_équilibré »,
@@ -22,10 +22,11 @@ import pathlib
 
 import numpy as np
 
+from .model import MAINTIEN  # même règle que l'évaluation (choix fait sur la période de développement)
+
 PART = 0.20
-MAINTIEN = 0.40
 DUREE = 5
-VERSION = 3
+VERSION = 4  # 4 : maintien porté à 50 % (compteur remis à zéro le 23/11/2026)
 PROFILS = ("prudent", "équilibré", "dynamique")
 STRATS = ("radar", "momentum") + tuple(f"radar_{p}" for p in PROFILS) + ("radar_frein",)
 # règles par profil : le classement du radar appliqué à l'intérieur de chaque tiers de volatilité,

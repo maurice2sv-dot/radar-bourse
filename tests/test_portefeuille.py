@@ -54,3 +54,11 @@ def test_profils(tmp_path):
     for p in risque.PROFILS:
         assert s["strats"][f"radar_{p}"]["n_lignes"] == 4  # 20 % de 20 valeurs
         assert s["strats"][f"radar_{p}"]["periodes"] == 2
+
+
+def test_maintien_a_50_pourcent():
+    from radar import model
+    assert portefeuille.MAINTIEN == model.MAINTIEN == 0.50
+    sc = {f"T{i}": -i for i in range(50)}
+    w = portefeuille._choix(sc, {"T22": 0.1, "T26": 0.1}, 10)  # T22 dans les 50 % premiers, T26 non
+    assert "T22" in w and "T26" not in w and len(w) == 10

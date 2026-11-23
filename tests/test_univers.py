@@ -76,3 +76,21 @@ def test_historique_fja(monkeypatch):
     assert per["CCC"] == [[None, "2017-03-01"]]
     assert per["BBB"] == [[None, "2020-01-02"]]
     assert per["DDD"] == [["2017-03-01", None]] and per["BRK-B"] == [["2020-01-02", None]]
+
+
+def test_changement_de_symbole():
+    per = {"FB": [[None, "2022-06-09"]], "META": [["2022-06-09", None]],
+           "OLD": [[None, "2020-01-02"]], "NEW": [["2020-01-02", None]],
+           "FI": [["2023-06-07", "2025-11-11"]], "FISV": [[None, "2023-06-07"], ["2025-11-11", None]]}
+    out, faits = univers.raccorder(per, sans_cours={"FB", "FI"}, actuels={"META", "FISV"})
+    assert out["META"] == [[None, None]] and "FB" not in out        # historique de FB rattaché à META
+    assert out["FISV"] == [[None, None]] and "FI" not in out        # aller-retour FISV > FI > FISV
+    assert out["NEW"] == [["2020-01-02", None]] and "OLD" in out    # couple absent de la liste : rien ne bouge
+    assert sorted(faits) == ["FB>META", "FI>FISV"]
+    # sans confirmation par les dates (fin de l'ancien = début du nouveau), aucun raccord
+    out, faits = univers.raccorder({"FB": [[None, "2021-01-04"]], "META": [["2022-06-09", None]]}, {"FB"})
+    assert faits == [] and "FB" in out
+    # aller-retour dont les deux symboles sont sans cours : pas d'erreur
+    out, _ = univers.raccorder({"FI": [["2023-06-07", "2025-11-11"]], "FISV": [[None, "2023-06-07"], ["2025-11-11", None]]},
+                               {"FI", "FISV"})
+    assert len(out) == 1

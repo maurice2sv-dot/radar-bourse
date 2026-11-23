@@ -428,7 +428,7 @@ def _hebdo(rep, main, evl, hist, tag):
               for x in evl["trace"]),
           f"  Test réservé : IC {_sn(rs.get('ic', float('nan')), 3)}, t = {_n(rs.get('t', float('nan')))}, "
           f"net de frais {_sn(rs.get('net', float('nan')) * 100, 2)} % par {main} j, ratio d'information net {_n(rs.get('ir_net', float('nan')), 2)}",
-          f"  Règle de maintien (garder tant que dans les 40 % premières) : net de frais {_sn(rs.get('net_maintien', float('nan')) * 100, 2)} % par {main} j, "
+          f"  Règle de maintien (garder tant que dans les 50 % premières) : net de frais {_sn(rs.get('net_maintien', float('nan')) * 100, 2)} % par {main} j, "
           f"rotation {_p(rs.get('rotation_maintien', float('nan')))} contre {_p(rs.get('rotation', float('nan')))} sans maintien",
           f"  Liens événement × secteur validés : {rep['n_sig']} significatifs sur {rep['n_tests']} testés",
           "  En clair : une famille de variables n'est gardée que si elle améliore réellement la prévision. "

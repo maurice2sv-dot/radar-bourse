@@ -14,6 +14,10 @@ from sklearn.metrics import roc_auc_score
 from .features import ALL_FEATS, CAL_FEATS, FUND_FEATS, MACRO_FEATS, NEWS_FEATS, PRICE_FEATS
 
 GROUPS = {"actualites": NEWS_FEATS, "calendrier": CAL_FEATS, "marches": MACRO_FEATS, "fondamentaux": FUND_FEATS}
+# règle de maintien : une valeur détenue reste tant qu'elle figure dans cette part des mieux classées.
+# 50 % retenu le 23/11/2026 sur la seule période de développement (2020-2025, 10 pb) parmi 40, 50 et 60 % et des
+# revues toutes les 5 ou 10 séances : écart net -0,018 % par 5 séances contre -0,041 % à 40 % ; revue à 10 séances moins bonne.
+MAINTIEN = 0.50
 GROUP_FR = {"prix": "prix", "actualites": "actualités", "calendrier": "calendrier", "marches": "marchés",
             "fondamentaux": "fondamentaux"}
 
@@ -78,9 +82,9 @@ def evaluate(r, h, cost_bps=10):
         net.append(ret - to * 2 * cost_bps / 1e4)
         turn.append(to)
         prev = top
-        # règle de maintien : une valeur détenue reste tant qu'elle figure dans les 40 % les mieux classées
+        # règle de maintien : une valeur détenue reste tant qu'elle figure dans les MAINTIEN mieux classées
         order = list(g.sort_values("p", ascending=False)["ticker"])
-        keep = held & set(order[:2 * k])
+        keep = held & set(order[:max(k, int(round(len(order) * MAINTIEN)))])
         new = keep | set([t for t in order if t not in keep][:k - len(keep)])
         to_m = 1.0 if not held else len(new - held) / k
         net_m.append(float(g[g["ticker"].isin(new)][m].mean()) - to_m * 2 * cost_bps / 1e4)

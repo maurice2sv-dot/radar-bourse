@@ -148,30 +148,75 @@ def _prices_yfinance(tickers, years=10, period=None, lot=100, pause=2.0):
     return rows
 
 
+STOOQ_DIAG = {}
+
+
 def _prices_stooq(tickers, years=10):
+    """Cours Stooq. Clé facultative dans la variable d'environnement STOOQ_APIKEY (secret GitHub) : Stooq peut
+    exiger une clé pour le téléchargement. La cause du dernier refus est gardée dans STOOQ_DIAG["raison"]."""
     import io
+    import os
     import requests
     rows, today, echecs = [], _open_day(), 0
+    cle = os.environ.get("STOOQ_APIKEY", "").strip()
+    STOOQ_DIAG.clear()
     for t in tickers:
         if echecs >= 5:
             break  # source manifestement indisponible : inutile d'insister
         try:
-            r = requests.get(f"https://stooq.com/q/d/l/?s={_stooq_symbol(t)}&i=d", timeout=20,
-                             headers={"User-Agent": "radar-bourse/0.2"})
+            url = f"https://stooq.com/q/d/l/?s={_stooq_symbol(t)}&i=d" + (f"&apikey={cle}" if cle else "")
+            r = requests.get(url, timeout=20, headers={"User-Agent": "radar-bourse/0.2"})
             r.raise_for_status()
             df = pd.read_csv(io.StringIO(r.text))
             if "Close" not in df:
                 echecs += 1
+                STOOQ_DIAG["raison"] = "réponse sans cours : " + " ".join(r.text.split())[:60]
                 continue
             echecs = 0
             k = 262 * years
             for d, p, v in zip(df["Date"].tail(k), df["Close"].tail(k), df.get("Volume", pd.Series(0, index=df.index)).tail(k)):
                 if str(d) < today:
                     rows.append((t, str(d), float(p), float(v) if v == v else 0.0))
-        except Exception:
+        except Exception as e:
             echecs += 1
+            STOOQ_DIAG["raison"] = f"{type(e).__name__} {str(e)[:50]}"
             continue
     return rows
+
+
+def _closes_nasdaq(tickers, jours=12):
+    """Clôtures récentes des valeurs américaines sur nasdaq.com (source indépendante de Yahoo, sans clé).
+    Renvoie (lignes, raison du dernier échec)."""
+    import requests
+    fin = dt.date.today()
+    debut = fin - dt.timedelta(days=jours)
+    h = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+         "Accept": "application/json, text/plain, */*", "Accept-Language": "en-US,en;q=0.9",
+         "Origin": "https://www.nasdaq.com", "Referer": "https://www.nasdaq.com/"}
+    rows, echecs, raison, today = [], 0, "", _open_day()
+    for t in tickers:
+        if echecs >= 5:
+            break
+        try:
+            r = requests.get(f"https://api.nasdaq.com/api/quote/{t.replace('-', '.')}/historical",
+                             params={"assetclass": "stocks", "fromdate": debut.isoformat(), "todate": fin.isoformat(),
+                                     "limit": 30}, headers=h, timeout=20)
+            r.raise_for_status()
+            lignes = (((r.json() or {}).get("data") or {}).get("tradesTable") or {}).get("rows") or []
+            if not lignes:
+                echecs += 1
+                raison = "réponse sans cours"
+                continue
+            echecs = 0
+            for x in lignes:
+                d = dt.datetime.strptime(x["date"], "%m/%d/%Y").strftime("%Y-%m-%d")
+                c = float(str(x["close"]).replace("$", "").replace(",", ""))
+                if d < today:
+                    rows.append((t, d, c, 0.0))
+        except Exception as e:
+            echecs += 1
+            raison = f"{type(e).__name__} {str(e)[:50]}"
+    return rows, raison
 
 
 def collect_prices_live(cfg, con):
@@ -223,18 +268,39 @@ def collect_prices_live(cfg, con):
 
 
 def cross_check(cfg, con, n=15):
-    """Contrôle croisé : dernière clôture yfinance comparée à Stooq sur n valeurs tournantes. Ne lève jamais."""
+    """Contrôle croisé : dernière clôture yfinance comparée à une seconde source sur n valeurs tournantes.
+    Stooq d'abord (toutes places), nasdaq.com ensuite (valeurs américaines). Si aucune source ne répond, l'absence
+    de contrôle est signalée comme anomalie (donc dans le brief). Ne lève jamais."""
     tickers = sorted(t for t, v in cfg["watchlist"].items() if not v.get("sorti"))
     if not tickers:
         return {}, []
-    k = dt.date.today().toordinal() % max(1, len(tickers) // n + 1)
-    lot = tickers[k * n:(k + 1) * n] or tickers[:n]
+    k = dt.date.today().toordinal()
+
+    def tour(lst):
+        if not lst:
+            return []
+        j = k % max(1, len(lst) // n + 1)
+        return lst[j * n:(j + 1) * n] or lst[:n]
+
+    raisons = []
     try:
-        alt = _prices_stooq(lot, years=1)
-    except Exception:
-        alt = []
+        alt, source = _prices_stooq(tour(tickers), years=1), "Stooq"
+    except Exception as e:
+        alt, source = [], "Stooq"
+        STOOQ_DIAG["raison"] = type(e).__name__
     if not alt:
-        return {"controle_croise": "Stooq indisponible"}, []
+        raisons.append(f"Stooq : {STOOQ_DIAG.get('raison', 'aucune réponse')}")
+        try:
+            alt, r = _closes_nasdaq(tour([t for t in tickers if "." not in t]))
+            source = "Nasdaq"
+            if not alt:
+                raisons.append(f"Nasdaq : {r or 'aucune réponse'}")
+        except Exception as e:
+            alt = []
+            raisons.append(f"Nasdaq : {type(e).__name__}")
+    if not alt:
+        msg = "contrôle croisé des cours indisponible (" + " ; ".join(raisons) + ")"
+        return {"controle_croise": msg}, [msg]
     a = pd.DataFrame(alt, columns=["ticker", "date", "close", "volume"])
     a = a.sort_values("date").groupby("ticker").tail(1)
     ecarts, vus = [], 0
@@ -246,8 +312,10 @@ def cross_check(cfg, con, n=15):
         e = c / r[0] - 1
         if abs(e) > 0.03:  # au-delà des écarts d'ajustement des dividendes récents
             ecarts.append(f"{t} {e:+.0%}")
-    errs = [f"contrôle croisé des cours : écart avec Stooq pour {', '.join(ecarts)}"] if ecarts else []
-    return {"controle_croise": f"{vus} valeurs comparées, {len(ecarts)} écart(s)"}, errs
+    errs = [f"contrôle croisé des cours : écart avec {source} pour {', '.join(ecarts)}"] if ecarts else []
+    if vus == 0:
+        errs.append(f"contrôle croisé des cours : {source} a répondu mais aucune date commune avec la base")
+    return {"controle_croise": f"{source} : {vus} valeurs comparées, {len(ecarts)} écart(s)"}, errs
 
 
 def suspicious_moves(close, member=None, days=5, seuil=0.4):
