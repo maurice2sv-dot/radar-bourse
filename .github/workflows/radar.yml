@@ -1,12 +1,12 @@
 name: radar-bourse
 on:
   schedule:
-    - cron: "37 22 * * 1-5"  # 22h37 UTC, après la clôture de New York (envoi de 6 h GMT)
-    - cron: "7 8 * * 1-5"    # 08h07 UTC, passage de jour (envoi de 17 h GMT). Avancé depuis 14h07 le 23/11/2026 :
-                             # GitHub l'avait lancé avec 5 à 8 h de retard (départ vers 22 h). La séance européenne
-                             # en cours est écartée : ce passage reprend la clôture de la veille et l'Asie.
-    # GitHub déclenche souvent avec retard : ces horaires laissent de la marge.
-                             # lancer la veille au soir garantit un brief prêt le lendemain matin.
+    # Déclenchement toutes les heures, tous les jours : les horaires planifiés de GitHub ne sont pas garantis
+    # (retards de 5 à 8 h, et passages jamais lancés, comme le lundi 23/11/2026). La garde (radar/passage.py)
+    # ne lance le calcul qu'une fois par créneau : « soir » après 22h UTC (clôture de New York) et « jour »
+    # après 7h UTC (clôture de l'Asie), du lundi au vendredi. Les autres déclenchements s'arrêtent en quelques
+    # secondes. À chaque déclenchement, les flux RSS sont archivés dans data/rss (calibrage des technologies).
+    - cron: "23 * * * *"
   workflow_dispatch: {}
 permissions:
   contents: write
@@ -14,11 +14,38 @@ concurrency:
   group: radar
   cancel-in-progress: false
 jobs:
+  garde:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      go: ${{ steps.garde.outputs.go }}
+      creneau: ${{ steps.garde.outputs.creneau }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Archiver les flux RSS (data/rss)
+        run: python3 -m radar.rss || true
+      - name: Enregistrer l'archive RSS
+        run: |
+          git config user.name "radar-bot"
+          git config user.email "radar-bot@users.noreply.github.com"
+          git add data/rss
+          git commit -q -m "Flux RSS $(date -u '+%F %H:%M')" || exit 0
+          for i in 1 2 3; do git pull --rebase -q origin main && git push -q && exit 0; sleep 10; done
+          echo "archive RSS non poussée (sera reprise au prochain déclenchement)"
+      - id: garde
+        name: Passage dû ?
+        env:
+          RADAR_FORCE: ${{ github.event_name == 'workflow_dispatch' }}
+        run: python3 -m radar.passage
   run:
+    needs: garde
+    if: needs.garde.outputs.go == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -54,6 +81,7 @@ jobs:
         run: |
           git config user.name "radar-bot"
           git config user.email "radar-bot@users.noreply.github.com"
+          RADAR_CRENEAU="${{ needs.garde.outputs.creneau }}" python -m radar.passage noter
           git rm -q --cached --ignore-unmatch data/radar.db
           git add data dashboard.html
           git commit -m "Radar $(date -u +%F)" || echo "rien à enregistrer"

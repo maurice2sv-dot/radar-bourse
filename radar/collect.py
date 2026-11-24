@@ -2,6 +2,7 @@
 import email.utils
 import re
 import datetime as dt
+import pathlib
 
 import numpy as np
 import pandas as pd
@@ -331,33 +332,17 @@ def suspicious_moves(close, member=None, days=5, seuil=0.4):
     return out
 
 
-def collect_news_live(cfg, con):
-    import requests
-    import xml.etree.ElementTree as ET
-    ok, ko = 0, []
-    for name, url in cfg["feeds"].items():
-        try:
-            r = requests.get(url, timeout=20, headers={"User-Agent": "radar-bourse/0.2"})
-            r.raise_for_status()
-            root = ET.fromstring(r.content)
-        except Exception as e:  # une source en panne ne bloque pas le pipeline
-            ko.append(f"flux {name} : {type(e).__name__}")
-            continue
-        rows = []
-        for it in root.iter("item"):
-            title = (it.findtext("title") or "").strip()
-            desc = re.sub(r"<[^>]+>", " ", it.findtext("description") or "").strip()
-            link = it.findtext("link") or ""
-            try:
-                day = email.utils.parsedate_to_datetime(it.findtext("pubDate")).date().isoformat()
-            except Exception:
-                day = dt.date.today().isoformat()
-            if title:
-                rows.append((article_id(name, title, day), day, name, title, desc, link))
-        con.executemany("INSERT OR IGNORE INTO articles VALUES (?,?,?,?,?,?)", rows)
-        ok += 1
+def collect_news_live(cfg, con, root=None):
+    """Flux RSS lus maintenant, ajoutés à data/rss, puis tout data/rss importé dans la base.
+    La collecte horaire (python -m radar.rss) alimente data/rss entre deux passages : rien n'est perdu
+    si un passage manque ou le week-end."""
+    from . import rss
+    root = root or pathlib.Path(__file__).resolve().parents[1]
+    rows, ko = rss.fetch(cfg["feeds"])
+    rss.save(rows, root)
+    con.executemany("INSERT OR IGNORE INTO articles VALUES (?,?,?,?,?,?)", rss.load(root))
     con.commit()
-    return ok, ko
+    return len(cfg["feeds"]) - len(ko), ko
 
 
 def collect_earnings_live(cfg, con):

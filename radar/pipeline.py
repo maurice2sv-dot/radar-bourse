@@ -144,7 +144,7 @@ def run(cfg, root=".", do_replay=True):
         except Exception as ex:
             errs.append(f"calendrier des résultats : {type(ex).__name__}")
         try:
-            log["flux_ok"], ko = collect.collect_news_live(cfg, con)
+            log["flux_ok"], ko = collect.collect_news_live(cfg, con, root)
             errs += ko
         except Exception as ex:
             errs.append(f"flux RSS : {type(ex).__name__}")
