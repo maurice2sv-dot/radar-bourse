@@ -1,25 +1,27 @@
 {
- "genere_utc": "2026-11-21 03:30",
+ "genere_utc": "2026-11-24 05:31",
  "mode": "live",
- "cours_au": "2026-11-20",
+ "cours_au": "2026-11-23",
  "jours_de_retard": 1,
  "anomalies": [
   "valeurs actives écartées faute d'historique (6) : HONA, SNDK, VYLR, WBD, KVUE, PSKY"
  ],
  "journal": {
+  "changements_de_symbole": 27,
   "valeurs": {
    "actives": 577,
    "sorties_suivies": 110,
-   "secteur_manquant": 138
+   "secteur_manquant": 111
   },
   "cours": [
    "yfinance (680)"
   ],
-  "controle_croise": "Stooq indisponible",
+  "controle_croise": "Nasdaq : 15 valeurs comparées, 0 écart(s)",
   "resultats": {
-   "rafraichies": 0
+   "rafraichies": 120,
+   "sans_donnees": 0
   },
-  "marches": 8,
+  "marches": 11,
   "fondamentaux": {
    "rafraichies": 0,
    "sans_cik": 9
@@ -27,21 +29,35 @@
   "flux_ok": 5,
   "gdelt_series": 3,
   "gdelt_evenements": {
-   "jours_acquis": 1,
+   "jours_acquis": 3,
    "sources": {
-    "v2": 1
+    "v2": 1,
+    "v1": 2
    },
    "historique": {
-    "jours": 1081,
+    "jours": 1084,
     "du": "2023-11-18",
-    "au": "2026-11-20"
+    "au": "2026-11-23"
    }
   },
-  "gdelt_signaux": 8400,
-  "nouveaux_articles": 27,
+  "gdelt_signaux": 8415,
+  "nouveaux_articles": 114,
   "univers_du_jour": 571,
+  "couverture_indice": {
+   "2016": 0.767,
+   "2017": 0.828,
+   "2018": 0.85,
+   "2019": 0.875,
+   "2020": 0.896,
+   "2021": 0.912,
+   "2022": 0.932,
+   "2023": 0.95,
+   "2024": 0.958,
+   "2025": 0.97,
+   "2026": 0.984
+  },
   "rejeu": 0,
-  "resolues": 591,
-  "signalees_resolues": 0
+  "resolues": 709,
+  "signalees_resolues": 3
  }
 }
