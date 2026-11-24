@@ -7,9 +7,9 @@ A. Secteurs
   Appréciation : écart marqué entre Défense (en tête) et Technologie (en queue), le thème « militaire » structure la semaine.
 
 B. Mouvements du classement sur la semaine
-  Comparaison avec le 2026-11-18. Plus fortes progressions : American Water Works (546e → 72e), Consolidated Edison (492e → 62e), CrowdStrike (512e → 87e)
-  Plus forts reculs : Western Digital (19e → 568e), Hewlett Packard Enterprise (10e → 557e), Dell Technologies (1re → 545e)
-  Appréciation : 8 % des valeurs ont bougé de 10 places ou moins ; classement très mouvant, les signaux de court terme sont à prendre avec recul.
+  Comparaison avec le 2026-11-18. Plus fortes progressions : American Water Works (546e → 59e), Constellation Brands (488e → 36e), Consolidated Edison (492e → 56e)
+  Plus forts reculs : Intel (4e → 562e), Hewlett Packard Enterprise (10e → 549e), Seagate Technology (18e → 551e)
+  Appréciation : 7 % des valeurs ont bougé de 10 places ou moins ; classement très mouvant, les signaux de court terme sont à prendre avec recul.
 
 C. Journal des prédictions
   Taux de réussite : 1 j (en direct) 55 % sur 2005; 1 j (rejeu) 53 % sur 400; 5 j (en direct) 56 % sur 158; 5 j (rejeu) 49 % sur 400; 20 j (rejeu) 46 % sur 400
