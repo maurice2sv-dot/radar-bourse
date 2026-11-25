@@ -1,7 +1,7 @@
 {
- "genere_utc": "2026-11-24 18:02",
+ "genere_utc": "2026-11-25 02:43",
  "mode": "live",
- "cours_au": "2026-11-23",
+ "cours_au": "2026-11-24",
  "jours_de_retard": 1,
  "anomalies": [
   "valeurs actives écartées faute d'historique (6) : HONA, SNDK, VYLR, WBD, KVUE, PSKY"
@@ -16,29 +16,30 @@
   "cours": [
    "yfinance (680)"
   ],
-  "controle_croise": "Nasdaq : 15 valeurs comparées, 0 écart(s)",
+  "controle_croise": "Nasdaq : 14 valeurs comparées, 0 écart(s)",
   "resultats": {
-   "rafraichies": 18,
-   "sans_donnees": 0
+   "rafraichies": 0
   },
   "marches": 11,
   "fondamentaux": {
-   "rafraichies": 0,
+   "rafraichies": 50,
    "sans_cik": 9
   },
   "flux_ok": 5,
   "gdelt_series": 3,
   "gdelt_evenements": {
-   "jours_acquis": 0,
-   "sources": {},
+   "jours_acquis": 1,
+   "sources": {
+    "v2": 1
+   },
    "historique": {
-    "jours": 1084,
+    "jours": 1085,
     "du": "2023-11-18",
-    "au": "2026-11-23"
+    "au": "2026-11-24"
    }
   },
-  "gdelt_signaux": 8415,
-  "nouveaux_articles": 83,
+  "gdelt_signaux": 8420,
+  "nouveaux_articles": 45,
   "univers_du_jour": 571,
   "couverture_indice": {
    "2016": 0.767,
@@ -54,7 +55,7 @@
    "2026": 0.984
   },
   "rejeu": 0,
-  "resolues": 0,
-  "signalees_resolues": 0
+  "resolues": 709,
+  "signalees_resolues": 3
  }
 }
