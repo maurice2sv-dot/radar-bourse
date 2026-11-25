@@ -7,8 +7,8 @@ A. Secteurs
   Appréciation : écart marqué entre Défense (en tête) et Technologie (en queue), le thème « militaire » structure la semaine.
 
 B. Mouvements du classement sur la semaine
-  Comparaison avec le 2026-11-18. Plus fortes progressions : CrowdStrike (512e → 76e), FirstEnergy (508e → 124e), Jacobs Solutions (449e → 79e)
-  Plus forts reculs : Moderna (14e → 497e), Axon Enterprise (86e → 522e), Gartner (132e → 480e)
+  Comparaison avec le 2026-11-18. Plus fortes progressions : CrowdStrike (512e → 91e), FirstEnergy (508e → 119e), WEC Energy Group (538e → 154e)
+  Plus forts reculs : Moderna (14e → 549e), Axon Enterprise (86e → 523e), Gartner (132e → 485e)
   Appréciation : 12 % des valeurs ont bougé de 10 places ou moins ; classement très mouvant, les signaux de court terme sont à prendre avec recul.
 
 C. Journal des prédictions
@@ -17,7 +17,7 @@ C. Journal des prédictions
   Appréciation : meilleur résultat à 1 j (54 %) ; au-dessus de 50 %, le modèle reste un peu meilleur que le hasard sur cet horizon.
 
 D. Marchés sur 20 séances
-  VIX 26,36 (+50,5 %), Taux US 10 ans 4,90 (-0,09 pt), Pétrole WTI 80,82 (-19,1 %), Dollar 103,84 (+1,5 %), Or 3571,50 (-12,3 %), EUR/USD 1,09 (-2,4 %), Nikkei 225 58644,63 (-6,5 %), Hang Seng 22219,65 (-3,6 %), Shanghai 3548,37 (-2,7 %)
+  VIX 26,36 (+50,5 %), Taux US 10 ans 4,90 (-0,09 pt), Pétrole WTI 82,05 (-17,9 %), Dollar 103,81 (+1,5 %), Or 3561,90 (-12,6 %), EUR/USD 1,09 (-2,4 %), Nikkei 225 58644,63 (-6,5 %), Hang Seng 22219,65 (-3,6 %), Shanghai 3548,37 (-2,7 %)
   En clair : VIX = nervosité ; taux 10 ans = coût de l'argent à long terme ; pétrole, or, dollar = thermomètres de l'économie mondiale ; Nikkei, Hang Seng, Shanghai = santé des bourses asiatiques.
   Appréciation : contexte tendu, les mouvements de plus de 10 % sur 20 séances signalent les marchés à surveiller. Sur la semaine, le VIX monte (+1,8 pt).
 

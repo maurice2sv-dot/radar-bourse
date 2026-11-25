@@ -1,5 +1,5 @@
 {
- "genere_utc": "2026-11-25 02:43",
+ "genere_utc": "2026-11-25 13:19",
  "mode": "live",
  "cours_au": "2026-11-24",
  "jours_de_retard": 1,
@@ -18,20 +18,19 @@
   ],
   "controle_croise": "Nasdaq : 14 valeurs comparées, 0 écart(s)",
   "resultats": {
-   "rafraichies": 0
+   "rafraichies": 120,
+   "sans_donnees": 0
   },
   "marches": 11,
   "fondamentaux": {
-   "rafraichies": 50,
+   "rafraichies": 22,
    "sans_cik": 9
   },
   "flux_ok": 5,
   "gdelt_series": 3,
   "gdelt_evenements": {
-   "jours_acquis": 1,
-   "sources": {
-    "v2": 1
-   },
+   "jours_acquis": 0,
+   "sources": {},
    "historique": {
     "jours": 1085,
     "du": "2023-11-18",
@@ -39,7 +38,7 @@
    }
   },
   "gdelt_signaux": 8420,
-  "nouveaux_articles": 45,
+  "nouveaux_articles": 98,
   "univers_du_jour": 571,
   "couverture_indice": {
    "2016": 0.767,
@@ -55,7 +54,7 @@
    "2026": 0.984
   },
   "rejeu": 0,
-  "resolues": 709,
-  "signalees_resolues": 3
+  "resolues": 0,
+  "signalees_resolues": 0
  }
 }
