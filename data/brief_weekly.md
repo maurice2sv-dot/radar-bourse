@@ -1,4 +1,4 @@
-BILAN DE LA SEMAINE au 2026-11-24
+BILAN DE LA SEMAINE au 2026-11-25
 
 A. Secteurs
   Porteurs : Défense (militaire), Aéronautique (militaire), Télécoms (sécuritaire)
@@ -7,19 +7,19 @@ A. Secteurs
   Appréciation : écart marqué entre Défense (en tête) et Technologie (en queue), le thème « militaire » structure la semaine.
 
 B. Mouvements du classement sur la semaine
-  Comparaison avec le 2026-11-18. Plus fortes progressions : CrowdStrike (512e → 91e), FirstEnergy (508e → 119e), WEC Energy Group (538e → 154e)
-  Plus forts reculs : Moderna (14e → 549e), Axon Enterprise (86e → 523e), Gartner (132e → 485e)
-  Appréciation : 12 % des valeurs ont bougé de 10 places ou moins ; classement très mouvant, les signaux de court terme sont à prendre avec recul.
+  Comparaison avec le 2026-11-18. Plus fortes progressions : CrowdStrike (512e → 30e), Broadcom (548e → 67e), Labcorp (500e → 89e)
+  Plus forts reculs : Axon Enterprise (86e → 568e), Humana (31e → 427e), Gartner (132e → 506e)
+  Appréciation : 8 % des valeurs ont bougé de 10 places ou moins ; classement très mouvant, les signaux de court terme sont à prendre avec recul.
 
 C. Journal des prédictions
-  Taux de réussite : 1 j (en direct) 54 % sur 2576; 1 j (rejeu) 53 % sur 400; 5 j (en direct) 50 % sur 296; 5 j (rejeu) 49 % sur 400; 20 j (rejeu) 46 % sur 400
+  Taux de réussite : 1 j (en direct) 51 % sur 3147; 1 j (rejeu) 53 % sur 400; 5 j (en direct) 39 % sur 863; 5 j (rejeu) 49 % sur 400; 20 j (rejeu) 46 % sur 400
   En clair : part des prévisions dont le sens s'est révélé juste. « En direct » = prévisions faites avant les faits ; « rejeu » = prévisions recalculées sur le passé récent pour enrichir l'échantillon.
-  Appréciation : meilleur résultat à 1 j (54 %) ; au-dessus de 50 %, le modèle reste un peu meilleur que le hasard sur cet horizon.
+  Appréciation : meilleur résultat à 1 j (53 %) ; au-dessus de 50 %, le modèle reste un peu meilleur que le hasard sur cet horizon.
 
 D. Marchés sur 20 séances
-  VIX 26,36 (+50,5 %), Taux US 10 ans 4,90 (-0,09 pt), Pétrole WTI 82,05 (-17,9 %), Dollar 103,81 (+1,5 %), Or 3561,90 (-12,6 %), EUR/USD 1,09 (-2,4 %), Nikkei 225 58644,63 (-6,5 %), Hang Seng 22219,65 (-3,6 %), Shanghai 3548,37 (-2,7 %)
+  VIX 28,29 (+67,3 %), Taux US 10 ans 4,85 (-0,20 pt), Pétrole WTI 84,15 (-18,1 %), Dollar 103,69 (+1,5 %), Or 3617,80 (-10,7 %), EUR/USD 1,10 (-1,3 %), Nikkei 225 58644,63 (-6,5 %), Hang Seng 22219,65 (-3,6 %), Shanghai 3548,37 (-2,7 %)
   En clair : VIX = nervosité ; taux 10 ans = coût de l'argent à long terme ; pétrole, or, dollar = thermomètres de l'économie mondiale ; Nikkei, Hang Seng, Shanghai = santé des bourses asiatiques.
-  Appréciation : contexte tendu, les mouvements de plus de 10 % sur 20 séances signalent les marchés à surveiller. Sur la semaine, le VIX monte (+1,8 pt).
+  Appréciation : contexte tendu, les mouvements de plus de 10 % sur 20 séances signalent les marchés à surveiller. Sur la semaine, le VIX monte (+3,7 pt).
 
 E. Fiabilité et construction du modèle
   Variables testées (IC en développement) : prix +0,009, actualités +0,010 (écartée), calendrier +0,010 (écartée), marchés +0,007 (écartée), fondamentaux +0,009 (écartée)
@@ -30,8 +30,8 @@ E. Fiabilité et construction du modèle
   Appréciation : résultat hors échantillon encore irrégulier ; aucun lien actualité × secteur n'est encore prouvé.
 
 F. Portefeuille fictif
-  Depuis le 2026-11-23 : radar -0,20 % ; momentum -1,70 % ; moyenne de l'univers +0,29 % ; S&P 500 -0,49 % ; Stoxx 600 +0,00 %
-  Par profil (radar contre moyenne du profil, périodes gagnées) : prudent +0,68 % contre +0,90 %, 0 sur 0 ; équilibré +0,53 % contre +1,08 %, 0 sur 0 ; dynamique -1,77 % contre -1,11 %, 0 sur 0
+  Depuis le 2026-11-23 : radar -0,06 % ; momentum -1,60 % ; moyenne de l'univers +0,93 % ; S&P 500 -0,77 % ; Stoxx 600 -1,08 %
+  Par profil (radar contre moyenne du profil, périodes gagnées) : prudent +1,04 % contre +1,61 %, 0 sur 0 ; équilibré +0,70 % contre +1,73 %, 0 sur 0 ; dynamique -1,45 % contre -0,56 %, 0 sur 0
   Périodes de 5 séances gagnées contre la moyenne : radar 0 sur 0, momentum 0 sur 0 ; frais payés : radar 0,10 %, momentum 0,10 %
   En clair : une période est « gagnée » quand la règle fait mieux que la moyenne entre deux revues. Une règle sans valeur en gagne environ une sur deux.
   Appréciation : historique encore trop court, aucune conclusion possible.
