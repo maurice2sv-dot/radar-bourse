@@ -188,6 +188,7 @@ def resume(st):
     noms = st.get("noms", {})
     out = {"debut": st["debut"], "seances": len(h), "regle": st["regle"],
            "prochaine_revue": max(0, DUREE - st["seances_depuis"]),
+           "historique": h,
            "refs": {k: v / 100 - 1 for k, v in st["refs"].items()}, "strats": {}}
     for s in STRATS:
         S = st["strats"][s]
