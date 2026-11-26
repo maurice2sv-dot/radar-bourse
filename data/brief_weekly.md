@@ -7,9 +7,9 @@ A. Secteurs
   Appréciation : écart marqué entre Défense (en tête) et Technologie (en queue), le thème « militaire » structure la semaine.
 
 B. Mouvements du classement sur la semaine
-  Comparaison avec le 2026-11-18. Plus fortes progressions : CrowdStrike (512e → 30e), Broadcom (548e → 67e), Labcorp (500e → 89e)
-  Plus forts reculs : Axon Enterprise (86e → 568e), Humana (31e → 427e), Gartner (132e → 506e)
-  Appréciation : 8 % des valeurs ont bougé de 10 places ou moins ; classement très mouvant, les signaux de court terme sont à prendre avec recul.
+  Comparaison avec le 2026-11-18. Plus fortes progressions : Broadcom (548e → 53e), CrowdStrike (512e → 31e), Labcorp (500e → 82e)
+  Plus forts reculs : Axon Enterprise (86e → 588e), Humana (31e → 425e), Moderna (14e → 404e)
+  Appréciation : 7 % des valeurs ont bougé de 10 places ou moins ; classement très mouvant, les signaux de court terme sont à prendre avec recul.
 
 C. Journal des prédictions
   Taux de réussite : 1 j (en direct) 51 % sur 3147; 1 j (rejeu) 53 % sur 400; 5 j (en direct) 39 % sur 863; 5 j (rejeu) 49 % sur 400; 20 j (rejeu) 46 % sur 400
@@ -17,7 +17,7 @@ C. Journal des prédictions
   Appréciation : meilleur résultat à 1 j (53 %) ; au-dessus de 50 %, le modèle reste un peu meilleur que le hasard sur cet horizon.
 
 D. Marchés sur 20 séances
-  VIX 28,29 (+67,3 %), Taux US 10 ans 4,85 (-0,20 pt), Pétrole WTI 84,15 (-18,1 %), Dollar 103,69 (+1,5 %), Or 3617,80 (-10,7 %), EUR/USD 1,10 (-1,3 %), Nikkei 225 58644,63 (-6,5 %), Hang Seng 22219,65 (-3,6 %), Shanghai 3548,37 (-2,7 %)
+  VIX 28,29 (+67,3 %), Taux US 10 ans 4,85 (-0,20 pt), Pétrole WTI 83,68 (-18,6 %), Dollar 103,67 (+1,4 %), Or 3535,80 (-12,7 %), EUR/USD 1,10 (-1,5 %), CAC 40 7980,57 (+1,2 %), DAX 24702,13 (-3,9 %), Euro Stoxx 50 5894,46 (-4,4 %), FTSE 100 10426,90 (-2,5 %), SMI 14664,92 (+0,6 %), Nikkei 225 57011,62 (-8,3 %), Hang Seng 21966,01 (-4,9 %), Shanghai 3476,47 (-5,6 %)
   En clair : VIX = nervosité ; taux 10 ans = coût de l'argent à long terme ; pétrole, or, dollar = thermomètres de l'économie mondiale ; Nikkei, Hang Seng, Shanghai = santé des bourses asiatiques.
   Appréciation : contexte tendu, les mouvements de plus de 10 % sur 20 séances signalent les marchés à surveiller. Sur la semaine, le VIX monte (+3,7 pt).
 
@@ -30,8 +30,8 @@ E. Fiabilité et construction du modèle
   Appréciation : résultat hors échantillon encore irrégulier ; aucun lien actualité × secteur n'est encore prouvé.
 
 F. Portefeuille fictif
-  Depuis le 2026-11-23 : radar -0,06 % ; momentum -1,60 % ; moyenne de l'univers +0,93 % ; S&P 500 -0,77 % ; Stoxx 600 -1,08 %
-  Par profil (radar contre moyenne du profil, périodes gagnées) : prudent +1,04 % contre +1,61 %, 0 sur 0 ; équilibré +0,70 % contre +1,73 %, 0 sur 0 ; dynamique -1,45 % contre -0,56 %, 0 sur 0
+  Depuis le 2026-11-25 : radar -0,10 % ; momentum -0,10 % ; moyenne de l'univers +0,00 % ; S&P 500 +0,00 % ; Stoxx 600 +0,00 %
+  Par profil (radar contre moyenne du profil, périodes gagnées) : prudent -0,10 % contre +0,00 %, 0 sur 0 ; équilibré -0,10 % contre +0,00 %, 0 sur 0 ; dynamique -0,10 % contre +0,00 %, 0 sur 0
   Périodes de 5 séances gagnées contre la moyenne : radar 0 sur 0, momentum 0 sur 0 ; frais payés : radar 0,10 %, momentum 0,10 %
   En clair : une période est « gagnée » quand la règle fait mieux que la moyenne entre deux revues. Une règle sans valeur en gagne environ une sur deux.
   Appréciation : historique encore trop court, aucune conclusion possible.

@@ -1,5 +1,5 @@
 {
-"maj": "2026-11-19T10:28:24.425200+00:00",
+"maj": "2026-11-26T15:29:27.583000+00:00",
 "membres": [
 {
 "ticker": "MMM",
@@ -3641,6 +3641,12 @@ null,
 "2016-06-21"
 ]
 ],
+"TE": [
+[
+null,
+"2016-07-01"
+]
+],
 "GAS": [
 [
 null,
@@ -3648,12 +3654,6 @@ null,
 ]
 ],
 "CPGX": [
-[
-null,
-"2016-07-01"
-]
-],
-"TE": [
 [
 null,
 "2016-07-01"
@@ -3677,13 +3677,13 @@ null,
 "2016-10-03"
 ]
 ],
-"LM": [
+"OI": [
 [
 null,
 "2016-12-02"
 ]
 ],
-"OI": [
+"LM": [
 [
 null,
 "2016-12-02"
@@ -3725,6 +3725,12 @@ null,
 "2017-03-13"
 ]
 ],
+"FTR": [
+[
+null,
+"2017-03-20"
+]
+],
 "FSLR": [
 [
 null,
@@ -3736,12 +3742,6 @@ null
 ]
 ],
 "URBN": [
-[
-null,
-"2017-03-20"
-]
-],
-"FTR": [
 [
 null,
 "2017-03-20"
@@ -3771,12 +3771,6 @@ null,
 "2017-06-15"
 ]
 ],
-"AABA": [
-[
-null,
-"2017-06-19"
-]
-],
 "TDC": [
 [
 null,
@@ -3789,22 +3783,16 @@ null,
 "2017-06-19"
 ]
 ],
+"AABA": [
+[
+null,
+"2017-06-19"
+]
+],
 "RAI": [
 [
 null,
 "2017-07-25"
-]
-],
-"RIG": [
-[
-null,
-"2017-07-26"
-]
-],
-"BBBY": [
-[
-null,
-"2017-07-26"
 ]
 ],
 "MUR": [
@@ -3813,7 +3801,19 @@ null,
 "2017-07-26"
 ]
 ],
+"RIG": [
+[
+null,
+"2017-07-26"
+]
+],
 "MNK": [
+[
+null,
+"2017-07-26"
+]
+],
+"BBBY": [
 [
 null,
 "2017-07-26"
@@ -3831,16 +3831,6 @@ null,
 "2017-08-28"
 ]
 ],
-"DOW": [
-[
-null,
-"2017-09-01"
-],
-[
-"2019-04-02",
-null
-]
-],
 "DD": [
 [
 null,
@@ -3848,6 +3838,16 @@ null,
 ],
 [
 "2019-06-03",
+null
+]
+],
+"DOW": [
+[
+null,
+"2017-09-01"
+],
+[
+"2019-04-02",
 null
 ]
 ],
@@ -3875,13 +3875,13 @@ null,
 "2018-03-07"
 ]
 ],
-"SIG": [
+"CHK": [
 [
 null,
 "2018-03-19"
 ]
 ],
-"CHK": [
+"SIG": [
 [
 null,
 "2018-03-19"
@@ -3923,15 +3923,15 @@ null,
 "2018-06-15"
 ]
 ],
-"RRC": [
-[
-null,
-"2018-06-18"
-]
-],
 "AYI": [
 [
 "2016-05-03",
+"2018-06-18"
+]
+],
+"RRC": [
+[
+null,
 "2018-06-18"
 ]
 ],
@@ -4097,15 +4097,15 @@ null,
 "2019-08-08"
 ]
 ],
-"APC": [
-[
-null,
-"2019-08-09"
-]
-],
 "FL": [
 [
 "2016-04-04",
+"2019-08-09"
+]
+],
+"APC": [
+[
+null,
 "2019-08-09"
 ]
 ],
@@ -4163,13 +4163,13 @@ null,
 "2019-12-05"
 ]
 ],
-"STI": [
+"BBT": [
 [
 null,
 "2019-12-09"
 ]
 ],
-"BBT": [
+"STI": [
 [
 null,
 "2019-12-09"
@@ -4223,27 +4223,27 @@ null,
 "2020-04-06"
 ]
 ],
-"M": [
-[
-null,
-"2020-04-06"
-]
-],
 "RTN": [
 [
 null,
 "2020-04-06"
 ]
 ],
-"CPRI": [
+"M": [
 [
-"2016-01-04",
-"2020-05-12"
+null,
+"2020-04-06"
 ]
 ],
 "AGN": [
 [
 null,
+"2020-05-12"
+]
+],
+"CPRI": [
+[
+"2016-01-04",
 "2020-05-12"
 ]
 ],
@@ -4259,13 +4259,13 @@ null,
 "2020-06-22"
 ]
 ],
-"HOG": [
+"ADS": [
 [
 null,
 "2020-06-22"
 ]
 ],
-"ADS": [
+"HOG": [
 [
 null,
 "2020-06-22"
@@ -4277,9 +4277,9 @@ null,
 "2020-09-18"
 ]
 ],
-"COTY": [
+"KSS": [
 [
-"2016-10-03",
+null,
 "2020-09-21"
 ]
 ],
@@ -4289,9 +4289,9 @@ null,
 "2020-09-21"
 ]
 ],
-"KSS": [
+"COTY": [
 [
-null,
+"2016-10-03",
 "2020-09-21"
 ]
 ],
@@ -4397,12 +4397,6 @@ null,
 "2021-08-30"
 ]
 ],
-"PRGO": [
-[
-null,
-"2021-09-20"
-]
-],
 "NOV": [
 [
 null,
@@ -4410,6 +4404,12 @@ null,
 ]
 ],
 "UNM": [
+[
+null,
+"2021-09-20"
+]
+],
+"PRGO": [
 [
 null,
 "2021-09-20"
@@ -4427,12 +4427,6 @@ null,
 "2021-12-14"
 ]
 ],
-"LEG": [
-[
-null,
-"2021-12-20"
-]
-],
 "HBI": [
 [
 null,
@@ -4440,6 +4434,12 @@ null,
 ]
 ],
 "WU": [
+[
+null,
+"2021-12-20"
+]
+],
+"LEG": [
 [
 null,
 "2021-12-20"
@@ -4481,13 +4481,13 @@ null,
 "2022-04-04"
 ]
 ],
-"DISCA": [
+"DISCK": [
 [
 null,
 "2022-04-11"
 ]
 ],
-"DISCK": [
+"DISCA": [
 [
 null,
 "2022-04-11"
@@ -4511,15 +4511,15 @@ null,
 "2022-06-09"
 ]
 ],
-"UAA": [
-[
-null,
-"2022-06-21"
-]
-],
 "IPGP": [
 [
 "2018-03-07",
+"2022-06-21"
+]
+],
+"UAA": [
+[
+null,
 "2022-06-21"
 ]
 ],
@@ -4547,15 +4547,15 @@ null,
 "2022-09-19"
 ]
 ],
-"DRE": [
-[
-"2017-07-26",
-"2022-10-03"
-]
-],
 "CTXS": [
 [
 null,
+"2022-10-03"
+]
+],
+"DRE": [
+[
+"2017-07-26",
 "2022-10-03"
 ]
 ],
@@ -4659,13 +4659,13 @@ null,
 "2023-08-30"
 ]
 ],
-"NWL": [
+"LNC": [
 [
 null,
 "2023-09-18"
 ]
 ],
-"LNC": [
+"NWL": [
 [
 null,
 "2023-09-18"
@@ -4677,15 +4677,15 @@ null,
 "2023-10-02"
 ]
 ],
-"ATVI": [
-[
-null,
-"2023-10-18"
-]
-],
 "OGN": [
 [
 "2021-06-04",
+"2023-10-18"
+]
+],
+"ATVI": [
+[
+null,
 "2023-10-18"
 ]
 ],
@@ -4755,6 +4755,12 @@ null,
 "2024-05-08"
 ]
 ],
+"RHI": [
+[
+null,
+"2024-06-24"
+]
+],
 "ILMN": [
 [
 null,
@@ -4767,16 +4773,16 @@ null,
 "2024-06-24"
 ]
 ],
-"RHI": [
-[
-null,
-"2024-06-24"
-]
-],
 "WRK": [
 [
 null,
 "2024-07-08"
+]
+],
+"BIO": [
+[
+"2020-06-22",
+"2024-09-23"
 ]
 ],
 "ETSY": [
@@ -4788,12 +4794,6 @@ null,
 "AAL": [
 [
 null,
-"2024-09-23"
-]
-],
-"BIO": [
-[
-"2020-06-22",
 "2024-09-23"
 ]
 ],
@@ -4809,15 +4809,15 @@ null,
 "2024-11-26"
 ]
 ],
-"QRVO": [
-[
-null,
-"2024-12-23"
-]
-],
 "CTLT": [
 [
 "2020-09-21",
+"2024-12-23"
+]
+],
+"QRVO": [
+[
+null,
 "2024-12-23"
 ]
 ],
@@ -4833,6 +4833,12 @@ null,
 "2025-03-24"
 ]
 ],
+"CE": [
+[
+"2018-12-24",
+"2025-03-24"
+]
+],
 "FMC": [
 [
 null,
@@ -4842,12 +4848,6 @@ null,
 "BWA": [
 [
 null,
-"2025-03-24"
-]
-],
-"CE": [
-[
-"2018-12-24",
 "2025-03-24"
 ]
 ],
@@ -4887,6 +4887,12 @@ null,
 "2025-08-28"
 ]
 ],
+"MKTX": [
+[
+"2019-07-01",
+"2025-09-22"
+]
+],
 "CZR": [
 [
 "2021-03-22",
@@ -4896,12 +4902,6 @@ null,
 "ENPH": [
 [
 "2021-01-07",
-"2025-09-22"
-]
-],
-"MKTX": [
-[
-"2019-07-01",
 "2025-09-22"
 ]
 ],
@@ -4935,6 +4935,12 @@ null,
 "2025-12-11"
 ]
 ],
+"MHK": [
+[
+null,
+"2025-12-22"
+]
+],
 "LKQ": [
 [
 "2016-05-23",
@@ -4944,12 +4950,6 @@ null,
 "SOLS": [
 [
 "2025-10-30",
-"2025-12-22"
-]
-],
-"MHK": [
-[
-null,
 "2025-12-22"
 ]
 ],
@@ -4963,12 +4963,6 @@ null,
 [
 "2024-02-01",
 "2026-02-09"
-]
-],
-"MTCH": [
-[
-"2021-09-20",
-"2026-03-23"
 ]
 ],
 "PAYC": [
@@ -4986,6 +4980,12 @@ null,
 "LW": [
 [
 "2018-12-03",
+"2026-03-23"
+]
+],
+"MTCH": [
+[
+"2021-09-20",
 "2026-03-23"
 ]
 ],
@@ -5013,15 +5013,15 @@ null,
 "2026-06-02"
 ]
 ],
-"POOL": [
-[
-"2020-10-07",
-"2026-06-22"
-]
-],
 "CPB": [
 [
 null,
+"2026-06-22"
+]
+],
+"POOL": [
+[
+"2020-10-07",
 "2026-06-22"
 ]
 ],
@@ -5043,481 +5043,19 @@ null,
 "2026-08-05"
 ]
 ],
-"AVB": [
-[
-null,
-"2026-08-18"
-]
-],
 "EQR": [
 [
 null,
 "2026-08-18"
 ]
 ],
-"PSA": [
+"AVB": [
 [
 null,
-null
+"2026-08-18"
 ]
 ],
-"AKAM": [
-[
-null,
-null
-]
-],
-"BMY": [
-[
-null,
-null
-]
-],
-"TEL": [
-[
-null,
-null
-]
-],
-"TSN": [
-[
-null,
-null
-]
-],
-"PFE": [
-[
-null,
-null
-]
-],
-"BAC": [
-[
-null,
-null
-]
-],
-"ALL": [
-[
-null,
-null
-]
-],
-"AME": [
-[
-null,
-null
-]
-],
-"STT": [
-[
-null,
-null
-]
-],
-"ISRG": [
-[
-null,
-null
-]
-],
-"KHC": [
-[
-null,
-null
-]
-],
-"GE": [
-[
-null,
-null
-]
-],
-"MCO": [
-[
-null,
-null
-]
-],
-"PAYX": [
-[
-null,
-null
-]
-],
-"NEM": [
-[
-null,
-null
-]
-],
-"MCD": [
-[
-null,
-null
-]
-],
-"ROK": [
-[
-null,
-null
-]
-],
-"PFG": [
-[
-null,
-null
-]
-],
-"XEL": [
-[
-null,
-null
-]
-],
-"NSC": [
-[
-null,
-null
-]
-],
-"SYY": [
-[
-null,
-null
-]
-],
-"DRI": [
-[
-null,
-null
-]
-],
-"DOV": [
-[
-null,
-null
-]
-],
-"IP": [
-[
-null,
-null
-]
-],
-"DLTR": [
-[
-null,
-null
-]
-],
-"PRU": [
-[
-null,
-null
-]
-],
-"YUM": [
-[
-null,
-null
-]
-],
-"HCA": [
-[
-null,
-null
-]
-],
-"WMT": [
-[
-null,
-null
-]
-],
-"PWR": [
-[
-null,
-null
-]
-],
-"AFL": [
-[
-null,
-null
-]
-],
-"TJX": [
-[
-null,
-null
-]
-],
-"MO": [
-[
-null,
-null
-]
-],
-"LH": [
-[
-null,
-null
-]
-],
-"EOG": [
-[
-null,
-null
-]
-],
-"WYNN": [
-[
-null,
-null
-]
-],
-"PPG": [
-[
-null,
-null
-]
-],
-"GILD": [
-[
-null,
-null
-]
-],
-"UPS": [
-[
-null,
-null
-]
-],
-"CTAS": [
-[
-null,
-null
-]
-],
-"GM": [
-[
-null,
-null
-]
-],
-"TPR": [
-[
-null,
-null
-]
-],
-"KLAC": [
-[
-null,
-null
-]
-],
-"PNC": [
-[
-null,
-null
-]
-],
-"HPQ": [
-[
-null,
-null
-]
-],
-"PGR": [
-[
-null,
-null
-]
-],
-"ADSK": [
-[
-null,
-null
-]
-],
-"ADP": [
-[
-null,
-null
-]
-],
-"AEE": [
-[
-null,
-null
-]
-],
-"NOC": [
-[
-null,
-null
-]
-],
-"KMB": [
-[
-null,
-null
-]
-],
-"LUV": [
-[
-null,
-null
-]
-],
-"ZBH": [
-[
-null,
-null
-]
-],
-"MNST": [
-[
-null,
-null
-]
-],
-"BAX": [
-[
-null,
-null
-]
-],
-"PG": [
-[
-null,
-null
-]
-],
-"DE": [
-[
-null,
-null
-]
-],
-"BA": [
-[
-null,
-null
-]
-],
-"WEC": [
-[
-null,
-null
-]
-],
-"NUE": [
-[
-null,
-null
-]
-],
-"TAP": [
-[
-null,
-null
-]
-],
-"RL": [
-[
-null,
-null
-]
-],
-"GPC": [
-[
-null,
-null
-]
-],
-"STX": [
-[
-null,
-null
-]
-],
-"UHS": [
-[
-null,
-null
-]
-],
-"CMCSA": [
-[
-null,
-null
-]
-],
-"MET": [
-[
-null,
-null
-]
-],
-"PHM": [
-[
-null,
-null
-]
-],
-"HSY": [
-[
-null,
-null
-]
-],
-"DTE": [
-[
-null,
-null
-]
-],
-"TSCO": [
-[
-null,
-null
-]
-],
-"GLW": [
-[
-null,
-null
-]
-],
-"BLK": [
-[
-null,
-null
-]
-],
-"VLO": [
-[
-null,
-null
-]
-],
-"SYF": [
-[
-null,
-null
-]
-],
-"PNR": [
-[
-null,
-null
-]
-],
-"APD": [
+"ROST": [
 [
 null,
 null
@@ -5529,115 +5067,31 @@ null,
 null
 ]
 ],
-"CAT": [
+"ORLY": [
 [
 null,
 null
 ]
 ],
-"GS": [
+"ADM": [
 [
 null,
 null
 ]
 ],
-"ROP": [
+"BSX": [
 [
 null,
 null
 ]
 ],
-"C": [
+"AMAT": [
 [
 null,
 null
 ]
 ],
-"AMZN": [
-[
-null,
-null
-]
-],
-"BKNG": [
-[
-null,
-null
-]
-],
-"VTR": [
-[
-null,
-null
-]
-],
-"ORCL": [
-[
-null,
-null
-]
-],
-"RSG": [
-[
-null,
-null
-]
-],
-"NWS": [
-[
-null,
-null
-]
-],
-"NRG": [
-[
-null,
-null
-]
-],
-"HPE": [
-[
-null,
-null
-]
-],
-"FDX": [
-[
-null,
-null
-]
-],
-"AMGN": [
-[
-null,
-null
-]
-],
-"CMI": [
-[
-null,
-null
-]
-],
-"HD": [
-[
-null,
-null
-]
-],
-"MDT": [
-[
-null,
-null
-]
-],
-"CL": [
-[
-null,
-null
-]
-],
-"SJM": [
+"DIS": [
 [
 null,
 null
@@ -5649,13 +5103,7 @@ null,
 null
 ]
 ],
-"UNP": [
-[
-null,
-null
-]
-],
-"FCX": [
+"NWS": [
 [
 null,
 null
@@ -5667,7 +5115,943 @@ null,
 null
 ]
 ],
-"HON": [
+"XEL": [
+[
+null,
+null
+]
+],
+"MTB": [
+[
+null,
+null
+]
+],
+"CI": [
+[
+null,
+null
+]
+],
+"PLD": [
+[
+null,
+null
+]
+],
+"WDC": [
+[
+null,
+null
+]
+],
+"COP": [
+[
+null,
+null
+]
+],
+"PSX": [
+[
+null,
+null
+]
+],
+"WYNN": [
+[
+null,
+null
+]
+],
+"MMM": [
+[
+null,
+null
+]
+],
+"EFX": [
+[
+null,
+null
+]
+],
+"ALLE": [
+[
+null,
+null
+]
+],
+"APD": [
+[
+null,
+null
+]
+],
+"IVZ": [
+[
+null,
+null
+]
+],
+"PEP": [
+[
+null,
+null
+]
+],
+"EMR": [
+[
+null,
+null
+]
+],
+"IR": [
+[
+null,
+null
+]
+],
+"MDLZ": [
+[
+null,
+null
+]
+],
+"CINF": [
+[
+null,
+null
+]
+],
+"AZO": [
+[
+null,
+null
+]
+],
+"GWW": [
+[
+null,
+null
+]
+],
+"AME": [
+[
+null,
+null
+]
+],
+"PFG": [
+[
+null,
+null
+]
+],
+"SLB": [
+[
+null,
+null
+]
+],
+"EXPE": [
+[
+null,
+null
+]
+],
+"UNP": [
+[
+null,
+null
+]
+],
+"TRV": [
+[
+null,
+null
+]
+],
+"DVN": [
+[
+null,
+null
+]
+],
+"GILD": [
+[
+null,
+null
+]
+],
+"PRU": [
+[
+null,
+null
+]
+],
+"EL": [
+[
+null,
+null
+]
+],
+"HIG": [
+[
+null,
+null
+]
+],
+"XOM": [
+[
+null,
+null
+]
+],
+"ECL": [
+[
+null,
+null
+]
+],
+"CLX": [
+[
+null,
+null
+]
+],
+"CAH": [
+[
+null,
+null
+]
+],
+"MCK": [
+[
+null,
+null
+]
+],
+"TROW": [
+[
+null,
+null
+]
+],
+"PPL": [
+[
+null,
+null
+]
+],
+"CF": [
+[
+null,
+null
+]
+],
+"SPG": [
+[
+null,
+null
+]
+],
+"ICE": [
+[
+null,
+null
+]
+],
+"VZ": [
+[
+null,
+null
+]
+],
+"SWK": [
+[
+null,
+null
+]
+],
+"MSI": [
+[
+null,
+null
+]
+],
+"EW": [
+[
+null,
+null
+]
+],
+"EXC": [
+[
+null,
+null
+]
+],
+"APH": [
+[
+null,
+null
+]
+],
+"FDX": [
+[
+null,
+null
+]
+],
+"LRCX": [
+[
+null,
+null
+]
+],
+"PWR": [
+[
+null,
+null
+]
+],
+"WELL": [
+[
+null,
+null
+]
+],
+"TJX": [
+[
+null,
+null
+]
+],
+"CL": [
+[
+null,
+null
+]
+],
+"FFIV": [
+[
+null,
+null
+]
+],
+"KR": [
+[
+null,
+null
+]
+],
+"MPC": [
+[
+null,
+null
+]
+],
+"PNR": [
+[
+null,
+null
+]
+],
+"CCL": [
+[
+null,
+null
+]
+],
+"ROK": [
+[
+null,
+null
+]
+],
+"BKNG": [
+[
+null,
+null
+]
+],
+"GOOG": [
+[
+null,
+null
+]
+],
+"SCHW": [
+[
+null,
+null
+]
+],
+"HPE": [
+[
+null,
+null
+]
+],
+"ALL": [
+[
+null,
+null
+]
+],
+"AXP": [
+[
+null,
+null
+]
+],
+"TSCO": [
+[
+null,
+null
+]
+],
+"SYF": [
+[
+null,
+null
+]
+],
+"COST": [
+[
+null,
+null
+]
+],
+"BDX": [
+[
+null,
+null
+]
+],
+"HSY": [
+[
+null,
+null
+]
+],
+"URI": [
+[
+null,
+null
+]
+],
+"COF": [
+[
+null,
+null
+]
+],
+"RSG": [
+[
+null,
+null
+]
+],
+"FAST": [
+[
+null,
+null
+]
+],
+"ADSK": [
+[
+null,
+null
+]
+],
+"DTE": [
+[
+null,
+null
+]
+],
+"BRK-B": [
+[
+null,
+null
+]
+],
+"AMGN": [
+[
+null,
+null
+]
+],
+"STX": [
+[
+null,
+null
+]
+],
+"A": [
+[
+null,
+null
+]
+],
+"UPS": [
+[
+null,
+null
+]
+],
+"CMI": [
+[
+null,
+null
+]
+],
+"DE": [
+[
+null,
+null
+]
+],
+"JPM": [
+[
+null,
+null
+]
+],
+"RCL": [
+[
+null,
+null
+]
+],
+"GE": [
+[
+null,
+null
+]
+],
+"ZBH": [
+[
+null,
+null
+]
+],
+"KEY": [
+[
+null,
+null
+]
+],
+"MOS": [
+[
+null,
+null
+]
+],
+"LYB": [
+[
+null,
+null
+]
+],
+"ZTS": [
+[
+null,
+null
+]
+],
+"ADI": [
+[
+null,
+null
+]
+],
+"CMCSA": [
+[
+null,
+null
+]
+],
+"KMB": [
+[
+null,
+null
+]
+],
+"IFF": [
+[
+null,
+null
+]
+],
+"BEN": [
+[
+null,
+null
+]
+],
+"MCHP": [
+[
+null,
+null
+]
+],
+"REGN": [
+[
+null,
+null
+]
+],
+"MO": [
+[
+null,
+null
+]
+],
+"DAL": [
+[
+null,
+null
+]
+],
+"JCI": [
+[
+null,
+null
+]
+],
+"BXP": [
+[
+null,
+null
+]
+],
+"PH": [
+[
+null,
+null
+]
+],
+"WMB": [
+[
+null,
+null
+]
+],
+"CRM": [
+[
+null,
+null
+]
+],
+"FCX": [
+[
+null,
+null
+]
+],
+"BAX": [
+[
+null,
+null
+]
+],
+"BLK": [
+[
+null,
+null
+]
+],
+"MKC": [
+[
+null,
+null
+]
+],
+"HRL": [
+[
+null,
+null
+]
+],
+"NKE": [
+[
+null,
+null
+]
+],
+"TSN": [
+[
+null,
+null
+]
+],
+"GS": [
+[
+null,
+null
+]
+],
+"NSC": [
+[
+null,
+null
+]
+],
+"PGR": [
+[
+null,
+null
+]
+],
+"SWKS": [
+[
+null,
+null
+]
+],
+"OKE": [
+[
+null,
+null
+]
+],
+"TPR": [
+[
+null,
+null
+]
+],
+"DLTR": [
+[
+null,
+null
+]
+],
+"PEG": [
+[
+null,
+null
+]
+],
+"ADBE": [
+[
+null,
+null
+]
+],
+"PPG": [
+[
+null,
+null
+]
+],
+"TAP": [
+[
+null,
+null
+]
+],
+"HD": [
+[
+null,
+null
+]
+],
+"ITW": [
+[
+null,
+null
+]
+],
+"LH": [
+[
+null,
+null
+]
+],
+"SJM": [
+[
+null,
+null
+]
+],
+"VRTX": [
+[
+null,
+null
+]
+],
+"ISRG": [
+[
+null,
+null
+]
+],
+"L": [
+[
+null,
+null
+]
+],
+"DUK": [
+[
+null,
+null
+]
+],
+"MAR": [
+[
+null,
+null
+]
+],
+"NEM": [
+[
+null,
+null
+]
+],
+"SO": [
+[
+null,
+null
+]
+],
+"AAPL": [
+[
+null,
+null
+]
+],
+"SYY": [
+[
+null,
+null
+]
+],
+"DHI": [
+[
+null,
+null
+]
+],
+"MU": [
+[
+null,
+null
+]
+],
+"XYL": [
+[
+null,
+null
+]
+],
+"AVGO": [
+[
+null,
+null
+]
+],
+"PNC": [
+[
+null,
+null
+]
+],
+"IBM": [
+[
+null,
+null
+]
+],
+"WFC": [
+[
+null,
+null
+]
+],
+"VRSN": [
+[
+null,
+null
+]
+],
+"NUE": [
+[
+null,
+null
+]
+],
+"RF": [
+[
+null,
+null
+]
+],
+"EIX": [
+[
+null,
+null
+]
+],
+"NRG": [
+[
+null,
+null
+]
+],
+"BIIB": [
+[
+null,
+null
+]
+],
+"USB": [
+[
+null,
+null
+]
+],
+"APA": [
+[
+null,
+null
+]
+],
+"NTRS": [
+[
+null,
+null
+]
+],
+"PYPL": [
+[
+null,
+null
+]
+],
+"VMC": [
+[
+null,
+null
+]
+],
+"CME": [
+[
+null,
+null
+]
+],
+"SRE": [
+[
+null,
+null
+]
+],
+"AVY": [
 [
 null,
 null
@@ -5679,13 +6063,139 @@ null,
 null
 ]
 ],
-"SYK": [
+"IP": [
 [
 null,
 null
 ]
 ],
-"LEN": [
+"MNST": [
+[
+null,
+null
+]
+],
+"EOG": [
+[
+null,
+null
+]
+],
+"OMC": [
+[
+null,
+null
+]
+],
+"BF-B": [
+[
+null,
+null
+]
+],
+"MAS": [
+[
+null,
+null
+]
+],
+"CBRE": [
+[
+null,
+null
+]
+],
+"AIZ": [
+[
+null,
+null
+]
+],
+"MDT": [
+[
+null,
+null
+]
+],
+"HCA": [
+[
+null,
+null
+]
+],
+"GLW": [
+[
+null,
+null
+]
+],
+"ETR": [
+[
+null,
+null
+]
+],
+"CNP": [
+[
+null,
+null
+]
+],
+"MRK": [
+[
+null,
+null
+]
+],
+"FOXA": [
+[
+null,
+null
+]
+],
+"MET": [
+[
+null,
+null
+]
+],
+"SNA": [
+[
+null,
+null
+]
+],
+"LMT": [
+[
+null,
+null
+]
+],
+"MCD": [
+[
+null,
+null
+]
+],
+"LUV": [
+[
+null,
+null
+]
+],
+"CHD": [
+[
+null,
+null
+]
+],
+"OXY": [
+[
+null,
+null
+]
+],
+"ABT": [
 [
 null,
 null
@@ -5697,7 +6207,91 @@ null,
 null
 ]
 ],
-"VRSN": [
+"NVDA": [
+[
+null,
+null
+]
+],
+"AFL": [
+[
+null,
+null
+]
+],
+"APTV": [
+[
+null,
+null
+]
+],
+"KHC": [
+[
+null,
+null
+]
+],
+"T": [
+[
+null,
+null
+]
+],
+"AMP": [
+[
+null,
+null
+]
+],
+"EBAY": [
+[
+null,
+null
+]
+],
+"DRI": [
+[
+null,
+null
+]
+],
+"HPQ": [
+[
+null,
+null
+]
+],
+"BBY": [
+[
+null,
+null
+]
+],
+"CSCO": [
+[
+null,
+null
+]
+],
+"TXT": [
+[
+null,
+null
+]
+],
+"AIG": [
+[
+null,
+null
+]
+],
+"CSX": [
+[
+null,
+null
+]
+],
+"STT": [
 [
 null,
 null
@@ -5715,294 +6309,6 @@ null,
 null
 ]
 ],
-"JCI": [
-[
-null,
-null
-]
-],
-"AXP": [
-[
-null,
-null
-]
-],
-"WY": [
-[
-null,
-null
-]
-],
-"LRCX": [
-[
-null,
-null
-]
-],
-"PLD": [
-[
-null,
-null
-]
-],
-"TXT": [
-[
-null,
-null
-]
-],
-"INTU": [
-[
-null,
-null
-]
-],
-"EXPD": [
-[
-null,
-null
-]
-],
-"CME": [
-[
-null,
-null
-]
-],
-"CSX": [
-[
-null,
-null
-]
-],
-"APTV": [
-[
-null,
-null
-]
-],
-"FE": [
-[
-null,
-null
-]
-],
-"ETN": [
-[
-null,
-null
-]
-],
-"EL": [
-[
-null,
-null
-]
-],
-"CSCO": [
-[
-null,
-null
-]
-],
-"T": [
-[
-null,
-null
-]
-],
-"RF": [
-[
-null,
-null
-]
-],
-"EMR": [
-[
-null,
-null
-]
-],
-"COST": [
-[
-null,
-null
-]
-],
-"VZ": [
-[
-null,
-null
-]
-],
-"CMS": [
-[
-null,
-null
-]
-],
-"CRM": [
-[
-null,
-null
-]
-],
-"VRSK": [
-[
-null,
-null
-]
-],
-"IBM": [
-[
-null,
-null
-]
-],
-"SHW": [
-[
-null,
-null
-]
-],
-"APA": [
-[
-null,
-null
-]
-],
-"SWKS": [
-[
-null,
-null
-]
-],
-"DAL": [
-[
-null,
-null
-]
-],
-"EXPE": [
-[
-null,
-null
-]
-],
-"AIZ": [
-[
-null,
-null
-]
-],
-"ACN": [
-[
-null,
-null
-]
-],
-"GRMN": [
-[
-null,
-null
-]
-],
-"BEN": [
-[
-null,
-null
-]
-],
-"MKC": [
-[
-null,
-null
-]
-],
-"ES": [
-[
-null,
-null
-]
-],
-"SNA": [
-[
-null,
-null
-]
-],
-"MA": [
-[
-null,
-null
-]
-],
-"DUK": [
-[
-null,
-null
-]
-],
-"O": [
-[
-null,
-null
-]
-],
-"KR": [
-[
-null,
-null
-]
-],
-"NFLX": [
-[
-null,
-null
-]
-],
-"TGT": [
-[
-null,
-null
-]
-],
-"INTC": [
-[
-null,
-null
-]
-],
-"AMAT": [
-[
-null,
-null
-]
-],
-"V": [
-[
-null,
-null
-]
-],
-"EQIX": [
-[
-null,
-null
-]
-],
-"GWW": [
-[
-null,
-null
-]
-],
-"CVS": [
-[
-null,
-null
-]
-],
 "DHR": [
 [
 null,
@@ -6015,475 +6321,7 @@ null,
 null
 ]
 ],
-"MOS": [
-[
-null,
-null
-]
-],
-"ETR": [
-[
-null,
-null
-]
-],
-"MSI": [
-[
-null,
-null
-]
-],
-"PPL": [
-[
-null,
-null
-]
-],
-"STZ": [
-[
-null,
-null
-]
-],
-"MCHP": [
-[
-null,
-null
-]
-],
-"EBAY": [
-[
-null,
-null
-]
-],
-"BF-B": [
-[
-null,
-null
-]
-],
-"MCK": [
-[
-null,
-null
-]
-],
-"MAR": [
-[
-null,
-null
-]
-],
-"CINF": [
-[
-null,
-null
-]
-],
-"VRTX": [
-[
-null,
-null
-]
-],
-"TXN": [
-[
-null,
-null
-]
-],
-"REGN": [
-[
-null,
-null
-]
-],
-"SPGI": [
-[
-null,
-null
-]
-],
-"SLB": [
-[
-null,
-null
-]
-],
-"AEP": [
-[
-null,
-null
-]
-],
-"WDC": [
-[
-null,
-null
-]
-],
-"NTRS": [
-[
-null,
-null
-]
-],
-"PM": [
-[
-null,
-null
-]
-],
-"UNH": [
-[
-null,
-null
-]
-],
-"CVX": [
-[
-null,
-null
-]
-],
-"CB": [
-[
-null,
-null
-]
-],
-"AMP": [
-[
-null,
-null
-]
-],
-"HRL": [
-[
-null,
-null
-]
-],
-"TROW": [
-[
-null,
-null
-]
-],
-"WMB": [
-[
-null,
-null
-]
-],
-"KEY": [
-[
-null,
-null
-]
-],
-"PH": [
-[
-null,
-null
-]
-],
-"USB": [
-[
-null,
-null
-]
-],
-"UAL": [
-[
-null,
-null
-]
-],
-"CBRE": [
-[
-null,
-null
-]
-],
-"ADI": [
-[
-null,
-null
-]
-],
-"NTAP": [
-[
-null,
-null
-]
-],
-"SWK": [
-[
-null,
-null
-]
-],
-"WELL": [
-[
-null,
-null
-]
-],
-"MSFT": [
-[
-null,
-null
-]
-],
-"MS": [
-[
-null,
-null
-]
-],
-"SO": [
-[
-null,
-null
-]
-],
-"KO": [
-[
-null,
-null
-]
-],
-"JBHT": [
-[
-null,
-null
-]
-],
-"DVN": [
-[
-null,
-null
-]
-],
-"LLY": [
-[
-null,
-null
-]
-],
-"MDLZ": [
-[
-null,
-null
-]
-],
-"AVY": [
-[
-null,
-null
-]
-],
-"MRK": [
-[
-null,
-null
-]
-],
-"ICE": [
-[
-null,
-null
-]
-],
-"LYB": [
-[
-null,
-null
-]
-],
-"CMG": [
-[
-null,
-null
-]
-],
-"HUM": [
-[
-null,
-null
-]
-],
-"HIG": [
-[
-null,
-null
-]
-],
-"OMC": [
-[
-null,
-null
-]
-],
-"ABBV": [
-[
-null,
-null
-]
-],
-"WFC": [
-[
-null,
-null
-]
-],
-"AIG": [
-[
-null,
-null
-]
-],
-"ZTS": [
-[
-null,
-null
-]
-],
-"PEP": [
-[
-null,
-null
-]
-],
-"MLM": [
-[
-null,
-null
-]
-],
-"NVDA": [
-[
-null,
-null
-]
-],
-"XYL": [
-[
-null,
-null
-]
-],
-"VMC": [
-[
-null,
-null
-]
-],
-"KIM": [
-[
-null,
-null
-]
-],
-"WM": [
-[
-null,
-null
-]
-],
-"NI": [
-[
-null,
-null
-]
-],
-"ADM": [
-[
-null,
-null
-]
-],
-"ORLY": [
-[
-null,
-null
-]
-],
-"DIS": [
-[
-null,
-null
-]
-],
-"FAST": [
-[
-null,
-null
-]
-],
-"ABT": [
-[
-null,
-null
-]
-],
-"BSX": [
-[
-null,
-null
-]
-],
-"URI": [
-[
-null,
-null
-]
-],
-"DHI": [
-[
-null,
-null
-]
-],
-"HAS": [
-[
-null,
-null
-]
-],
-"JPM": [
-[
-null,
-null
-]
-],
-"PNW": [
-[
-null,
-null
-]
-],
-"OKE": [
-[
-null,
-null
-]
-],
-"XOM": [
-[
-null,
-null
-]
-],
-"AAPL": [
-[
-null,
-null
-]
-],
-"COF": [
+"PAYX": [
 [
 null,
 null
@@ -6495,121 +6333,7 @@ null,
 null
 ]
 ],
-"HAL": [
-[
-null,
-null
-]
-],
-"ROST": [
-[
-null,
-null
-]
-],
-"CLX": [
-[
-null,
-null
-]
-],
-"CCI": [
-[
-null,
-null
-]
-],
-"MPC": [
-[
-null,
-null
-]
-],
-"IFF": [
-[
-null,
-null
-]
-],
-"PSX": [
-[
-null,
-null
-]
-],
-"CHRW": [
-[
-null,
-null
-]
-],
-"RCL": [
-[
-null,
-null
-]
-],
-"PEG": [
-[
-null,
-null
-]
-],
-"APH": [
-[
-null,
-null
-]
-],
-"GD": [
-[
-null,
-null
-]
-],
-"PCAR": [
-[
-null,
-null
-]
-],
-"MTB": [
-[
-null,
-null
-]
-],
-"TRV": [
-[
-null,
-null
-]
-],
-"EFX": [
-[
-null,
-null
-]
-],
-"COP": [
-[
-null,
-null
-]
-],
-"AES": [
-[
-null,
-null
-]
-],
-"PYPL": [
-[
-null,
-null
-]
-],
-"FOX": [
+"AMZN": [
 [
 null,
 null
@@ -6621,187 +6345,97 @@ null,
 null
 ]
 ],
-"L": [
+"WEC": [
 [
 null,
 null
 ]
 ],
-"JNJ": [
+"INTU": [
 [
 null,
 null
 ]
 ],
-"MMM": [
+"MS": [
 [
 null,
 null
 ]
 ],
-"AVGO": [
+"BA": [
 [
 null,
 null
 ]
 ],
-"EIX": [
+"VTR": [
 [
 null,
 null
 ]
 ],
-"FIS": [
+"FOX": [
 [
 null,
 null
 ]
 ],
-"IRM": [
+"ROP": [
 [
 null,
 null
 ]
 ],
-"WAT": [
+"UAL": [
 [
 null,
 null
 ]
 ],
-"CAH": [
+"MA": [
 [
 null,
 null
 ]
 ],
-"FOXA": [
+"JBHT": [
 [
 null,
 null
 ]
 ],
-"CF": [
+"INTC": [
 [
 null,
 null
 ]
 ],
-"NWSA": [
+"ACN": [
 [
 null,
 null
 ]
 ],
-"EW": [
+"EXPD": [
 [
 null,
 null
 ]
 ],
-"MAS": [
+"CB": [
 [
 null,
 null
 ]
 ],
-"IVZ": [
+"CMG": [
 [
 null,
 null
 ]
 ],
-"CI": [
-[
-null,
-null
-]
-],
-"HSIC": [
-[
-null,
-null
-]
-],
-"IR": [
-[
-null,
-null
-]
-],
-"BIIB": [
-[
-null,
-null
-]
-],
-"MU": [
-[
-null,
-null
-]
-],
-"SRE": [
-[
-null,
-null
-]
-],
-"BBY": [
-[
-null,
-null
-]
-],
-"ADBE": [
-[
-null,
-null
-]
-],
-"OXY": [
-[
-null,
-null
-]
-],
-"BRK-B": [
-[
-null,
-null
-]
-],
-"FFIV": [
-[
-null,
-null
-]
-],
-"DG": [
-[
-null,
-null
-]
-],
-"D": [
-[
-null,
-null
-]
-],
-"CNP": [
-[
-null,
-null
-]
-],
-"ITW": [
-[
-null,
-null
-]
-],
-"EXC": [
+"AES": [
 [
 null,
 null
@@ -6813,127 +6447,25 @@ null,
 null
 ]
 ],
-"NDAQ": [
+"SYK": [
 [
 null,
 null
 ]
 ],
-"NKE": [
+"NI": [
 [
 null,
 null
 ]
 ],
-"AMT": [
+"AEP": [
 [
 null,
 null
 ]
 ],
-"CCL": [
-[
-null,
-null
-]
-],
-"SCHW": [
-[
-null,
-null
-]
-],
-"ECL": [
-[
-null,
-null
-]
-],
-"BDX": [
-[
-null,
-null
-]
-],
-"F": [
-[
-null,
-null
-]
-],
-"LMT": [
-[
-null,
-null
-]
-],
-"A": [
-[
-null,
-null
-]
-],
-"ALLE": [
-[
-null,
-null
-]
-],
-"AZO": [
-[
-null,
-null
-]
-],
-"LOW": [
-[
-null,
-null
-]
-],
-"DVA": [
-[
-null,
-null
-]
-],
-"SPG": [
-[
-null,
-null
-]
-],
-"KMI": [
-[
-null,
-null
-]
-],
-"CHD": [
-[
-null,
-null
-]
-],
-"SBUX": [
-[
-null,
-null
-]
-],
-"GOOG": [
-[
-null,
-null
-]
-],
-"GIS": [
-[
-null,
-null
-]
-],
-"BXP": [
+"CVS": [
 [
 null,
 null
@@ -6945,19 +6477,487 @@ null,
 null
 ]
 ],
+"GRMN": [
+[
+null,
+null
+]
+],
+"NOC": [
+[
+null,
+null
+]
+],
+"HUM": [
+[
+null,
+null
+]
+],
+"PHM": [
+[
+null,
+null
+]
+],
+"SHW": [
+[
+null,
+null
+]
+],
+"CAT": [
+[
+null,
+null
+]
+],
+"ADP": [
+[
+null,
+null
+]
+],
+"IRM": [
+[
+null,
+null
+]
+],
+"STZ": [
+[
+null,
+null
+]
+],
+"C": [
+[
+null,
+null
+]
+],
+"BAC": [
+[
+null,
+null
+]
+],
+"JNJ": [
+[
+null,
+null
+]
+],
+"AKAM": [
+[
+null,
+null
+]
+],
+"PCAR": [
+[
+null,
+null
+]
+],
+"YUM": [
+[
+null,
+null
+]
+],
+"AMT": [
+[
+null,
+null
+]
+],
+"EQIX": [
+[
+null,
+null
+]
+],
+"TXN": [
+[
+null,
+null
+]
+],
+"GIS": [
+[
+null,
+null
+]
+],
+"PSA": [
+[
+null,
+null
+]
+],
+"GM": [
+[
+null,
+null
+]
+],
+"HON": [
+[
+null,
+null
+]
+],
+"NWSA": [
+[
+null,
+null
+]
+],
+"CTAS": [
+[
+null,
+null
+]
+],
+"MSFT": [
+[
+null,
+null
+]
+],
+"UNH": [
+[
+null,
+null
+]
+],
+"LOW": [
+[
+null,
+null
+]
+],
+"VRSK": [
+[
+null,
+null
+]
+],
+"TGT": [
+[
+null,
+null
+]
+],
+"PM": [
+[
+null,
+null
+]
+],
+"RL": [
+[
+null,
+null
+]
+],
+"ES": [
+[
+null,
+null
+]
+],
+"O": [
+[
+null,
+null
+]
+],
+"TEL": [
+[
+null,
+null
+]
+],
+"PG": [
+[
+null,
+null
+]
+],
+"FE": [
+[
+null,
+null
+]
+],
+"CCI": [
+[
+null,
+null
+]
+],
+"PNW": [
+[
+null,
+null
+]
+],
+"CMS": [
+[
+null,
+null
+]
+],
+"GD": [
+[
+null,
+null
+]
+],
+"AEE": [
+[
+null,
+null
+]
+],
+"D": [
+[
+null,
+null
+]
+],
+"CVX": [
+[
+null,
+null
+]
+],
+"KIM": [
+[
+null,
+null
+]
+],
+"KO": [
+[
+null,
+null
+]
+],
+"SBUX": [
+[
+null,
+null
+]
+],
+"WY": [
+[
+null,
+null
+]
+],
+"LLY": [
+[
+null,
+null
+]
+],
+"WAT": [
+[
+null,
+null
+]
+],
+"F": [
+[
+null,
+null
+]
+],
+"LEN": [
+[
+null,
+null
+]
+],
+"HSIC": [
+[
+null,
+null
+]
+],
+"GPC": [
+[
+null,
+null
+]
+],
+"BMY": [
+[
+null,
+null
+]
+],
+"HAS": [
+[
+null,
+null
+]
+],
+"PFE": [
+[
+null,
+null
+]
+],
+"UHS": [
+[
+null,
+null
+]
+],
+"NDAQ": [
+[
+null,
+null
+]
+],
+"V": [
+[
+null,
+null
+]
+],
+"MCO": [
+[
+null,
+null
+]
+],
+"CHRW": [
+[
+null,
+null
+]
+],
+"DG": [
+[
+null,
+null
+]
+],
+"ORCL": [
+[
+null,
+null
+]
+],
+"ETN": [
+[
+null,
+null
+]
+],
+"FIS": [
+[
+null,
+null
+]
+],
+"VLO": [
+[
+null,
+null
+]
+],
+"WMT": [
+[
+null,
+null
+]
+],
+"NTAP": [
+[
+null,
+null
+]
+],
+"DVA": [
+[
+null,
+null
+]
+],
+"KLAC": [
+[
+null,
+null
+]
+],
+"HAL": [
+[
+null,
+null
+]
+],
+"NFLX": [
+[
+null,
+null
+]
+],
+"WM": [
+[
+null,
+null
+]
+],
+"ABBV": [
+[
+null,
+null
+]
+],
+"KMI": [
+[
+null,
+null
+]
+],
+"MLM": [
+[
+null,
+null
+]
+],
+"DOV": [
+[
+null,
+null
+]
+],
+"SPGI": [
+[
+null,
+null
+]
+],
 "EXR": [
 [
 "2016-01-19",
 null
 ]
 ],
-"FRT": [
+"CFG": [
 [
 "2016-02-01",
 null
 ]
 ],
-"CFG": [
+"FRT": [
 [
 "2016-02-01",
 null
@@ -7083,6 +7083,12 @@ null
 null
 ]
 ],
+"AMD": [
+[
+"2017-03-20",
+null
+]
+],
 "ARE": [
 [
 "2017-03-20",
@@ -7095,21 +7101,9 @@ null
 null
 ]
 ],
-"AMD": [
-[
-"2017-03-20",
-null
-]
-],
 "IT": [
 [
 "2017-04-05",
-null
-]
-],
-"ALGN": [
-[
-"2017-06-19",
 null
 ]
 ],
@@ -7119,15 +7113,9 @@ null
 null
 ]
 ],
-"AOS": [
+"ALGN": [
 [
-"2017-07-26",
-null
-]
-],
-"RMD": [
-[
-"2017-07-26",
+"2017-06-19",
 null
 ]
 ],
@@ -7138,6 +7126,18 @@ null
 ]
 ],
 "PKG": [
+[
+"2017-07-26",
+null
+]
+],
+"AOS": [
+[
+"2017-07-26",
+null
+]
+],
+"RMD": [
 [
 "2017-07-26",
 null
@@ -7221,13 +7221,13 @@ null
 null
 ]
 ],
-"LIN": [
+"KEYS": [
 [
 "2018-11-06",
 null
 ]
 ],
-"KEYS": [
+"LIN": [
 [
 "2018-11-06",
 null
@@ -7377,13 +7377,13 @@ null
 null
 ]
 ],
-"CARR": [
+"OTIS": [
 [
 "2020-04-03",
 null
 ]
 ],
-"OTIS": [
+"CARR": [
 [
 "2020-04-03",
 null
@@ -7569,13 +7569,13 @@ null
 null
 ]
 ],
-"INVH": [
+"CSGP": [
 [
 "2022-09-19",
 null
 ]
 ],
-"CSGP": [
+"INVH": [
 [
 "2022-09-19",
 null
@@ -7665,13 +7665,13 @@ null
 null
 ]
 ],
-"BX": [
+"ABNB": [
 [
 "2023-09-18",
 null
 ]
 ],
-"ABNB": [
+"BX": [
 [
 "2023-09-18",
 null
@@ -7701,13 +7701,13 @@ null
 null
 ]
 ],
-"JBL": [
+"UBER": [
 [
 "2023-12-18",
 null
 ]
 ],
-"UBER": [
+"JBL": [
 [
 "2023-12-18",
 null
@@ -7755,12 +7755,6 @@ null
 null
 ]
 ],
-"GDDY": [
-[
-"2024-06-24",
-null
-]
-],
 "CRWD": [
 [
 "2024-06-24",
@@ -7768,6 +7762,12 @@ null
 ]
 ],
 "KKR": [
+[
+"2024-06-24",
+null
+]
+],
+"GDDY": [
 [
 "2024-06-24",
 null
@@ -7785,13 +7785,13 @@ null
 null
 ]
 ],
-"DELL": [
+"PLTR": [
 [
 "2024-09-23",
 null
 ]
 ],
-"PLTR": [
+"DELL": [
 [
 "2024-09-23",
 null
@@ -7821,18 +7821,6 @@ null
 null
 ]
 ],
-"DASH": [
-[
-"2025-03-24",
-null
-]
-],
-"EXE": [
-[
-"2025-03-24",
-null
-]
-],
 "WSM": [
 [
 "2025-03-24",
@@ -7840,6 +7828,18 @@ null
 ]
 ],
 "TKO": [
+[
+"2025-03-24",
+null
+]
+],
+"DASH": [
+[
+"2025-03-24",
+null
+]
+],
+"EXE": [
 [
 "2025-03-24",
 null
@@ -7911,7 +7911,7 @@ null
 null
 ]
 ],
-"CVNA": [
+"FIX": [
 [
 "2025-12-22",
 null
@@ -7923,7 +7923,7 @@ null
 null
 ]
 ],
-"FIX": [
+"CVNA": [
 [
 "2025-12-22",
 null
@@ -8013,13 +8013,13 @@ null
 null
 ]
 ],
-"RDDT": [
+"VMRK": [
 [
 "2026-08-18",
 null
 ]
 ],
-"VMRK": [
+"RDDT": [
 [
 "2026-08-18",
 null
