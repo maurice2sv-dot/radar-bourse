@@ -241,8 +241,37 @@ def classement(rep):
     return h + "</section>"
 
 
+def europe(rep):
+    idx = [m for m in rep.get("marches") or [] if m.get("europe")]
+    val = rep.get("europe") or []
+    if not idx and not val:
+        return ""
+    h = ['<section id="europe"><h2>Europe</h2><p class="sub">Grands indices et valeurs européennes suivies. Cours de clôture, en devise locale.</p>']
+    if idx:
+        h.append('<div class="cols">' + "".join(
+            f'<div class="panel"><h3>{e(m["label"])}</h3><div class="small">{num(m["niveau"], 0)} au {e(m["date"])}. '
+            f'1 séance <b class="{sens(m["chg1"])}">{pc(m["chg1"], 1, True)}</b>, 20 séances <b class="{sens(m["chg20"])}">{pc(m["chg20"], 1, True)}</b></div>'
+            + spark(m.get("serie") or []) + "</div>" for m in idx) + "</div>")
+    if val:
+        n = len(rep["all_p5"])
+
+        def var(x):
+            return f'<td class="n {"" if x is None else sens(x)}">{pc(x, 1, True)}</td>'
+
+        def table(lignes):
+            return ('<div class="scroll"><table><thead><tr><th>Valeur</th><th class="n">Rang</th><th class="n">5 s.</th><th class="n">20 s.</th></tr></thead><tbody>'
+                    + "".join(f'<tr><td>{e(x["name"])}</td><td class="n">{rang(x["rang"])}</td>{var(x.get("ret5"))}{var(x.get("ret20"))}</tr>' for x in lignes)
+                    + "</tbody></table></div>")
+        connues = sorted((x for x in val if x.get("ret20") is not None), key=lambda x: -x["ret20"])
+        blocs = [("Mieux classées par le radar", val[:8]), ("Plus fortes sur 20 séances", connues[:8]), ("Plus faibles sur 20 séances", connues[::-1][:8])]
+        h.append(f'<p class="small">Rang sur l\'ensemble des {n} valeurs. 5 s. et 20 s. : variation sur 5 et 20 séances.</p><div class="cols">'
+                 + "".join(f'<div class="panel"><h3>{t}</h3>{table(v)}</div>' for t, v in blocs if v) + "</div>"
+                 + f'<details><summary>Les {len(val)} valeurs européennes suivies</summary><div class="panel">{table(val)}</div></details>')
+    return "".join(h) + "</section>"
+
+
 def marches(rep):
-    mk = rep.get("marches") or []
+    mk = [m for m in rep.get("marches") or [] if not m.get("europe")]
     h = ['<section id="marches"><h2>Marchés et actualité</h2><div class="cols">']
     if mk:
         vm = max([abs(x["chg20"]) for x in mk if not x["points"]] + [.01])
@@ -413,7 +442,9 @@ def render(rep, path):
     out = ['<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
            f'<title>Radar bourse</title><style>{CSS}</style></head><body>', entete(rep)]
     pf = portefeuille(rep)
-    liens = [("valeurs", "Valeurs"), ("classement", "Classement"), ("marches", "Marchés"), ("tendances", "Secteurs")] \
+    eu = europe(rep)
+    liens = [("valeurs", "Valeurs"), ("classement", "Classement")] + ([("europe", "Europe")] if eu else []) \
+        + [("marches", "Marchés"), ("tendances", "Secteurs")] \
         + ([("portefeuille", "Portefeuille")] if pf else []) + [("fiabilite", "Fiabilité")]
     out.append('<nav aria-label="Sections"><div class="wrap">' + "".join(f'<a href="#{i}">{t}</a>' for i, t in liens) + '</div></nav><main class="wrap">')
     if rep["mode"] == "demo":
@@ -423,7 +454,7 @@ def render(rep, path):
     if rep.get("errors") or stale:
         msg = ([f'Cours figés depuis {rep["stale_days"]} jours.'] if stale else []) + rep.get("errors", [])
         out.append('<div class="banner"><b>Anomalies de collecte :</b> ' + e(" ; ".join(msg)) + "</div>")
-    out += [valeurs(rep), classement(rep), marches(rep), tendances(rep), pf, fiabilite(rep), methode(rep)]
+    out += [valeurs(rep), classement(rep), eu, marches(rep), tendances(rep), pf, fiabilite(rep), methode(rep)]
     out.append(f'<footer>Veille informative, pas un conseil en investissement. Les probabilités sont volontairement rapprochées de 50 % tant que le journal n\'a pas prouvé leur fiabilité. '
                f'{len(rep["all_p5"])} valeurs suivies, {rep.get("n_articles", 0)} signaux analysés, généré le {e(rep.get("generated_utc", ""))} UTC.</footer></main></body></html>')
     open(path, "w", encoding="utf-8").write("".join(out))

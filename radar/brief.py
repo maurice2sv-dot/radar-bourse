@@ -178,6 +178,16 @@ def _bloc_alerte(rep):
     asie = [m for m in rep.get("marches", []) if m.get("asie")]
     if asie:
         lignes.append("  Asie (dernière séance close) : " + " ; ".join(f"{m['label']} {_sn(m['chg1'] * 100)} % le {m['date']}" for m in asie))
+    eur = [m for m in rep.get("marches", []) if m.get("europe")]
+    if eur:
+        lignes.append("  Europe (dernière séance close) : " + " ; ".join(f"{m['label']} {_sn(m['chg1'] * 100)} % le {m['date']}" for m in eur))
+    veur = rep.get("europe") or []
+    if veur:
+        lignes.append("  Valeurs européennes les mieux classées : " + " ; ".join(f"{x['name']} ({_ord(x['rang'])})" for x in veur[:5]))
+        fortes = sorted((x for x in veur if x.get("ret20") is not None), key=lambda x: -x["ret20"])[:5]
+        if fortes:
+            lignes.append("  Valeurs européennes les plus fortes sur 20 séances : "
+                          + " ; ".join(f"{x['name']} {_sn(x['ret20'] * 100)} %" for x in fortes))
     lignes.append("  Actualité : " + (f"{h['cat']} à ×{_n(h['ratio'])} la normale" if h and h["ratio"] >= 2 else
                                        f"aucune pression inhabituelle (thème le plus actif : {h['cat']}, ×{_n(h['ratio'])} la normale)" if h else
                                        "en calibrage (historique d'actualités insuffisant)"))

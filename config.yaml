@@ -8,7 +8,7 @@ evaluation:             # lots 2 à 4
   cout_bps: 10          # frais par sens (achat ou vente), en points de base
   gain_min_ic: 0.003    # gain d'IC exigé (sur la période de développement) pour garder un groupe de variables
   reselection_jours: 7  # fréquence de la sélection des groupes de variables
-  periode_fraiche_debut: 2026-11-19  # mesure honnête à partir d'ici : aucun réglage ne s'appuie sur ces résultats
+  periode_fraiche_debut: 2026-11-26  # mesure honnête à partir d'ici (univers européen élargi) : aucun réglage ne s'appuie sur ces résultats
 univers:                # environ 500 valeurs : S&P 500 (Wikipedia, rafraîchi chaque semaine) + valeurs de la liste ci-dessous
   sp500: true           # appartenance historique appliquée (biais du survivant réduit, voir radar/univers.py)
   nouvelles_par_passage: 500   # valeurs nouvelles dont on télécharge les 10 ans d'historique à chaque passage
@@ -52,6 +52,11 @@ marches:                # indicateurs de marché (yfinance) : contexte des secte
   Dollar: DX-Y.NYB
   Or: GC=F
   EUR/USD: EURUSD=X
+  CAC 40: ^FCHI           # Europe : contexte et suivi seulement, hors modèle
+  DAX: ^GDAXI
+  Euro Stoxx 50: ^STOXX50E
+  FTSE 100: ^FTSE
+  SMI: ^SSMI
   Nikkei 225: ^N225       # Asie : contexte et alertes seulement (séance asiatique close avant l'ouverture de l'Europe)
   Hang Seng: ^HSI
   Shanghai: 000001.SS
@@ -462,3 +467,24 @@ watchlist:
     sector: telecom
     match: [opérateur Orange, groupe Orange, Orange SA, Orange Business]
   DTE.DE: {name: Deutsche Telekom, sector: telecom}
+  # Europe : compléments de l'Euro Stoxx 50 et grandes capitalisations suisses et britanniques (ajout du 26/11/2026).
+  # « case » et « match » évitent de reconnaître à tort un nom courant dans la presse.
+  BBVA.MC: {name: BBVA, sector: finance, case: true}
+  UCG.MI: {name: UniCredit, sector: finance}
+  INGA.AS: {name: ING, sector: finance, case: true, match: [ING Group, ING Groep, banque ING, groupe ING]}
+  NDA-FI.HE: {name: Nordea, sector: finance}
+  DB1.DE: {name: Deutsche Börse, sector: finance, aliases: [Deutsche Boerse]}
+  ENR.DE: {name: Siemens Energy, sector: industrie}
+  ENEL.MI: {name: Enel, sector: services_publics, case: true}
+  DHL.DE: {name: DHL Group, sector: industrie, case: true, match: [DHL]}
+  ABI.BR: {name: AB InBev, sector: distribution, aliases: [Anheuser-Busch InBev]}
+  AD.AS: {name: Ahold Delhaize, sector: distribution}
+  ADYEN.AS: {name: Adyen, sector: finance}
+  PRX.AS: {name: Prosus, sector: conso}
+  ARGX.BR: {name: argenx, sector: sante, techs: [biotech]}
+  RACE.MI: {name: Ferrari, sector: auto, match: [Ferrari NV, groupe Ferrari, constructeur Ferrari]}
+  NOKIA.HE: {name: Nokia, sector: tech}
+  ROG.SW: {name: Roche, sector: sante, case: true, techs: [biotech], match: [groupe Roche, laboratoire Roche, Roche Holding]}
+  UBSG.SW: {name: UBS, sector: finance, case: true}
+  BP.L: {name: BP, sector: energie, case: true, match: [BP plc, groupe BP, British Petroleum]}
+  GSK.L: {name: GSK, sector: sante, case: true, techs: [biotech]}

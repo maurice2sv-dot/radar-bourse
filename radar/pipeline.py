@@ -6,7 +6,7 @@ import pathlib
 import numpy as np
 import pandas as pd
 
-from . import analysis, collect, db, events, features, gdelt, gdelt_events, journal, model, portefeuille, regime, risque, univers
+from . import analysis, collect, db, europe, events, features, gdelt, gdelt_events, journal, model, portefeuille, regime, risque, univers
 
 
 def score_new(con, cfg):
@@ -233,6 +233,10 @@ def run(cfg, root=".", do_replay=True):
     except Exception as ex:
         rq = {}
         errs.append(f"profils de risque : {type(ex).__name__} {str(ex)[:80]}")
+    try:  # suivi des valeurs européennes (affichage seulement)
+        rep["europe"] = europe.resume(close, rep["all_p5"])
+    except Exception as ex:
+        errs.append(f"suivi européen : {type(ex).__name__} {str(ex)[:80]}")
     try:  # portefeuille fictif : règle appliquée sans argent réel, état conservé dans data/
         nom = "portefeuille.json" if cfg["mode"] == "live" else "portefeuille_demo.json"
         rep["portefeuille"] = portefeuille.update(close, rep["all_p5"], run_date, out / nom, rep["cout_bps"],

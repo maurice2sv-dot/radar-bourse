@@ -26,7 +26,7 @@ from .model import MAINTIEN  # même règle que l'évaluation (choix fait sur la
 
 PART = 0.20
 DUREE = 5
-VERSION = 4  # 4 : maintien porté à 50 % (compteur remis à zéro le 23/11/2026)
+VERSION = 5  # 5 : univers européen élargi (compteur remis à zéro le 26/11/2026) ; 4 : maintien porté à 50 %
 PROFILS = ("prudent", "équilibré", "dynamique")
 STRATS = ("radar", "momentum") + tuple(f"radar_{p}" for p in PROFILS) + ("radar_frein",)
 # règles par profil : le classement du radar appliqué à l'intérieur de chaque tiers de volatilité,

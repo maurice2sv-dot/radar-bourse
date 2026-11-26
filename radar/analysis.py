@@ -9,6 +9,7 @@ CAT_FR = {"militaire": "militaire", "securitaire": "sécuritaire", "politique": 
           "meteo": "météo", "economique": "économique", "scientifique": "scientifique", "religieux": "religieux",
           "media": "médiatique"}
 ASIE = {"^N225", "^HSI", "000001.SS"}  # indices asiatiques : contexte et alertes, hors modèle
+EUROPE = {"^FCHI", "^GDAXI", "^STOXX50E", "^FTSE", "^SSMI"}  # indices européens : suivi, hors modèle
 MIN_HIST = 30  # jours actifs exigés sur les 60 jours de référence avant de parler de hausse ou d'émergence
 SEC_FR = {"tech": "Technologie", "conso": "Consommation", "auto": "Automobile", "finance": "Finance",
           "energie": "Énergie", "defense": "Défense", "aero": "Aéronautique", "luxe": "Luxe", "sante": "Santé",
@@ -34,6 +35,8 @@ def marches_alertes(macro, last_date, cfg):
             chg1 = float(v.iloc[-1] / v.iloc[-2] - 1) if s != "^TNX" else float(v.iloc[-1] - v.iloc[-2])
             marches.append({"label": lab, "niveau": lvl, "chg20": chg20, "chg1": chg1, "points": s == "^TNX", "date": v.index[-1].strftime("%d/%m"),
                             "asie": s in ASIE})
+            if s in EUROPE:  # courbe sur 60 séances pour le tableau de bord
+                marches[-1].update(europe=True, serie=[round(float(x), 2) for x in v.iloc[-60:]])
             if s in ASIE:
                 if abs(chg1) >= 0.03:
                     alertes.append(f"Asie, {lab} {chg1 * 100:+.1f} % sur la séance du {v.index[-1].strftime('%d/%m')}".replace(".", ",", 1))

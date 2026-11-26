@@ -57,9 +57,13 @@ Mode `demo` (défaut) : données synthétiques, pour tester la mécanique. Pour 
 
 `radar/univers.py` élargit l'univers à environ 550 valeurs : composition du S&P 500 lue chaque semaine sur Wikipedia (copie dans `data/univers.json`), plus les valeurs de `config.yaml`. Une valeur ne compte qu'aux dates où elle appartenait à l'indice ; les valeurs sorties depuis 2016 et encore cotées sont gardées sur leur période d'appartenance. Changements de symbole d'une même société (FB devenu META, UTX devenu RTX, etc., liste `RENOMMAGES` dans `radar/univers.py`) : l'historique de l'ancien symbole est rattaché au nouveau, seulement si le fichier historique confirme la date. Biais résiduels : sociétés radiées sans cours disponibles chez Yahoo (rachats, faillites), valeurs européennes considérées comme membres sur toute la période. La part des membres historiques couverts par des cours est mesurée chaque passage (`couverture_indice` dans `data/status.json`).
 
+## Suivi européen
+
+Indices CAC 40, DAX, Euro Stoxx 50, FTSE 100 et SMI (contexte seulement, hors modèle) et valeurs européennes (`radar/europe.py`), affichés dans le tableau de bord et le brief. Le 26/11/2026, 19 grandes valeurs ont rejoint l'univers (les 15 de l'Euro Stoxx 50 qui manquaient, Roche, UBS, BP, GSK) : le portefeuille fictif et la période fraîche repartent de cette date. Ces valeurs, choisies aujourd'hui, sont considérées comme membres sur tout le passé (biais du survivant).
+
 ## Mesure honnête : la période fraîche
 
-Le test réservé (depuis le 17/11/2025) a été consulté chaque jour ; il reste affiché pour mémoire et n'est plus recalculé qu'une fois par semaine. La mesure de référence est la période fraîche (`evaluation.periode_fraiche_debut`, 19/11/2026) : prévisions faites en direct après le dernier réglage. Ne pas régler le modèle en regardant ces résultats.
+Le test réservé (depuis le 17/11/2025) a été consulté chaque jour ; il reste affiché pour mémoire et n'est plus recalculé qu'une fois par semaine. La mesure de référence est la période fraîche (`evaluation.periode_fraiche_debut`, 26/11/2026) : prévisions faites en direct après le dernier réglage. Ne pas régler le modèle en regardant ces résultats.
 
 ## Tests et contrôles
 
