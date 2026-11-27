@@ -1,8 +1,8 @@
 {
- "genere_utc": "2026-11-27 00:48",
+ "genere_utc": "2026-11-27 09:50",
  "mode": "live",
- "cours_au": "2026-11-25",
- "jours_de_retard": 2,
+ "cours_au": "2026-11-26",
+ "jours_de_retard": 1,
  "anomalies": [
   "valeurs actives écartées faute d'historique (7) : ROG.SW, HONA, SNDK, VYLR, WBD, KVUE, PSKY"
  ],
@@ -18,8 +18,7 @@
   ],
   "controle_croise": "Nasdaq : 15 valeurs comparées, 0 écart(s)",
   "resultats": {
-   "rafraichies": 98,
-   "sans_donnees": 0
+   "rafraichies": 0
   },
   "marches": 16,
   "fondamentaux": {
@@ -29,10 +28,8 @@
   "flux_ok": 5,
   "gdelt_series": 3,
   "gdelt_evenements": {
-   "jours_acquis": 1,
-   "sources": {
-    "v2": 1
-   },
+   "jours_acquis": 0,
+   "sources": {},
    "historique": {
     "jours": 1087,
     "du": "2023-11-18",
@@ -40,7 +37,7 @@
    }
   },
   "gdelt_signaux": 8430,
-  "nouveaux_articles": 63,
+  "nouveaux_articles": 62,
   "univers_du_jour": 589,
   "couverture_indice": {
    "2016": 0.767,
@@ -56,7 +53,7 @@
    "2026": 0.984
   },
   "rejeu": 0,
-  "resolues": 0,
-  "signalees_resolues": 0
+  "resolues": 1160,
+  "signalees_resolues": 3
  }
 }
