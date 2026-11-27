@@ -1,4 +1,4 @@
-Radar bourse, cours au 2026-11-25, généré le 2026-11-26 15:38 UTC
+Radar bourse, cours au 2026-11-25, généré le 2026-11-27 00:48 UTC
 
 1. Valeurs à surveiller
   Axon Enterprise (Défense) : 588e sur 589, hier 523e (perd 65 places) ; signal net, défavorable (49,5 %, soit -0,5 pt par rapport à pile ou face) ; thème d'actualité dominant : militaire ; profil dynamique (volatilité 65 % par an, bêta 2,0, pire baisse sur un an -55 %)
@@ -25,9 +25,9 @@ Radar bourse, cours au 2026-11-25, généré le 2026-11-26 15:38 UTC
   Europe (dernière séance close) : CAC 40 -0,7 % le 25/11 ; DAX -1,3 % le 25/11 ; Euro Stoxx 50 -1,8 % le 25/11 ; FTSE 100 -0,4 % le 25/11 ; SMI -0,5 % le 25/11
   Valeurs européennes les mieux classées : Infineon (12e) ; STMicroelectronics (15e) ; Nokia (25e) ; ASML (26e) ; AB InBev (28e)
   Valeurs européennes les plus fortes sur 20 séances : Sanofi +30,0 % ; Bayer +10,1 % ; Pernod Ricard +9,3 % ; Danone +9,3 % ; AstraZeneca +9,1 %
-  Actualité : aucune pression inhabituelle (thème le plus actif : religieux, ×1,2 la normale)
+  Actualité : aucune pression inhabituelle (thème le plus actif : religieux, ×1,3 la normale)
   Événement marquant : Diego Tovar, ex-FARC : « Il est dans l’intérêt de l’UE de faire pression sur Abelardo de la Espriella pour qu’il respecte l’accord de paix » (lemonde_inter)
-  À venir : résultats Okta, Inc. le 01/12 ; résultats NetApp le 01/12 ; résultats CrowdStrike le 01/12 ; résultats Marvell Technology le 01/12
+  À venir : résultats Marvell Technology le 01/12 ; résultats NetApp le 01/12 ; résultats Copart le 01/12 ; résultats Okta, Inc. le 01/12
   Régime de marché : tension (VIX 28,3 ; S&P 500 -1,8 % sur 5 séances ; 8 % sous son plus haut d'un an)
   Frein anti-krach du momentum : inactif
   En clair : le VIX mesure la nervosité attendue sur la bourse américaine (sous 15 : calme ; 15 à 20 : normal ; 20 à 30 : tension ; au-delà de 30 : stress). La pression d'actualité compare le volume d'articles par thème à sa moyenne : ×1 = habituel, ×2 ou plus = inhabituel. Les bourses asiatiques (Tokyo, Hong Kong, Shanghai) ferment avant l'ouverture de l'Europe : une forte variation y donne souvent le ton de la séance européenne ; alerte au-delà de 3 % sur une séance ou de 10 % de baisse sur 20 séances. Régime de marché : calme (VIX sous 20), tension (20 à 30), stress (30 ou plus, ou S&P 500 en baisse de 5 % en 5 séances), krach (40 ou plus, ou baisse de 10 % en 5 séances). Le frein anti-krach s'active après un marché baissier agité : c'est dans les rebonds qui suivent que les stratégies de tendance subissent leurs pires pertes.

@@ -1,14 +1,12 @@
 {
- "genere_utc": "2026-11-26 15:38",
+ "genere_utc": "2026-11-27 00:48",
  "mode": "live",
  "cours_au": "2026-11-25",
- "jours_de_retard": 1,
+ "jours_de_retard": 2,
  "anomalies": [
   "valeurs actives écartées faute d'historique (7) : ROG.SW, HONA, SNDK, VYLR, WBD, KVUE, PSKY"
  ],
  "journal": {
-  "univers": "S&P 500 rafraîchi (503 membres, 0 changements)",
-  "historique": "composition historique fja05680/sp500 jusqu'au 2026-08-18 (745 valeurs)",
   "changements_de_symbole": 27,
   "valeurs": {
    "actives": 596,
@@ -20,7 +18,7 @@
   ],
   "controle_croise": "Nasdaq : 15 valeurs comparées, 0 écart(s)",
   "resultats": {
-   "rafraichies": 120,
+   "rafraichies": 98,
    "sans_donnees": 0
   },
   "marches": 16,
@@ -33,16 +31,16 @@
   "gdelt_evenements": {
    "jours_acquis": 1,
    "sources": {
-    "v1": 1
+    "v2": 1
    },
    "historique": {
-    "jours": 1086,
+    "jours": 1087,
     "du": "2023-11-18",
-    "au": "2026-11-25"
+    "au": "2026-11-26"
    }
   },
-  "gdelt_signaux": 8425,
-  "nouveaux_articles": 133,
+  "gdelt_signaux": 8430,
+  "nouveaux_articles": 63,
   "univers_du_jour": 589,
   "couverture_indice": {
    "2016": 0.767,
