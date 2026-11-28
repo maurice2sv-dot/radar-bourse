@@ -1,7 +1,7 @@
 {
- "genere_utc": "2026-11-27 09:50",
+ "genere_utc": "2026-11-28 02:54",
  "mode": "live",
- "cours_au": "2026-11-26",
+ "cours_au": "2026-11-27",
  "jours_de_retard": 1,
  "anomalies": [
   "valeurs actives écartées faute d'historique (7) : ROG.SW, HONA, SNDK, VYLR, WBD, KVUE, PSKY"
@@ -28,16 +28,18 @@
   "flux_ok": 5,
   "gdelt_series": 3,
   "gdelt_evenements": {
-   "jours_acquis": 0,
-   "sources": {},
+   "jours_acquis": 1,
+   "sources": {
+    "v2": 1
+   },
    "historique": {
-    "jours": 1087,
+    "jours": 1088,
     "du": "2023-11-18",
-    "au": "2026-11-26"
+    "au": "2026-11-27"
    }
   },
-  "gdelt_signaux": 8430,
-  "nouveaux_articles": 62,
+  "gdelt_signaux": 8435,
+  "nouveaux_articles": 99,
   "univers_du_jour": 589,
   "couverture_indice": {
    "2016": 0.767,
