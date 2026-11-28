@@ -63,7 +63,9 @@ Indices CAC 40, DAX, Euro Stoxx 50, FTSE 100 et SMI (contexte seulement, hors mo
 
 ## Mesure honnête : la période fraîche
 
-Le test réservé (depuis le 17/11/2025) a été consulté chaque jour ; il reste affiché pour mémoire et n'est plus recalculé qu'une fois par semaine. La mesure de référence est la période fraîche (`evaluation.periode_fraiche_debut`, 26/11/2026) : prévisions faites en direct après le dernier réglage. Ne pas régler le modèle en regardant ces résultats.
+Le test réservé (depuis le 17/11/2025) a été consulté chaque jour ; il reste affiché pour mémoire et n'est plus recalculé qu'une fois par semaine. La mesure de référence est la période fraîche (`evaluation.periode_fraiche_debut`, 26/11/2026) : prévisions faites en direct après le dernier réglage. Ne pas régler le modèle en regardant ces résultats. Le brief et le tableau de bord indiquent le nombre de dates acquises sur 20 et les échéances estimées.
+
+Coefficient de confiance (rapprochement des probabilités vers 50 %) : fixé à 0,30 tant que moins de 20 périodes indépendantes en direct sont résolues (une date compte pour une observation, fenêtres de 5 jours ouvrés sans chevauchement). Il ne change pas le classement. Les indices de référence du portefeuille fictif sont recalculés à chaque passage depuis la date de départ.
 
 ## Tests et contrôles
 

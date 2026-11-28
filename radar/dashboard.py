@@ -373,12 +373,23 @@ def fiabilite(rep):
     su = rep.get("suivi") or {}
     h = ['<section id="fiabilite"><h2>Peut-on s\'y fier ?</h2><p class="sub">IC : ressemblance entre le classement prévu et le classement observé. '
          '0 = hasard ; 0,02 à 0,05 = avantage modeste. Un t inférieur à 2 laisse le hasard comme explication possible.</p>']
+    requis = fr.get("requis", 20)
+    suite = ""
+    if fr.get("dates", 0) < requis:
+        if not fr.get("dates") and fr.get("premier_attendu"):
+            suite += f", premier résultat après la séance du {jour(fr['premier_attendu'])}"
+        if fr.get("complet_attendu"):
+            suite += f", {requis} dates vers le {jour(fr['complet_attendu'])}"
+    recalcul = (f", calculé le {jour(evl['date'])}, prochain à partir du {jour(evl['prochain_recalcul'])}"
+                if evl.get("date") and evl.get("prochain_recalcul") else "")
+    attente = (f", fixe tant que moins de {rep['shrink_requis']} périodes en direct ({rep['shrink_periodes']})"
+               if rep.get("shrink_requis") and rep.get("shrink_periodes", 0) < rep["shrink_requis"] else "")
     faits = [(num(fr.get("ic"), 3, True) if fr.get("ic") is not None else "en cours",
-              f'IC sur la période fraîche, mesure de référence ({fr.get("dates", 0)} date{"s" if fr.get("dates", 0) > 1 else ""} depuis le {jour(fr.get("debut", ""))})'),
-             (num(rs.get("ic"), 3, True), f'IC historique en test réservé (t = {num(rs.get("t"))})'),
+              f'IC sur la période fraîche, mesure de référence ({fr.get("dates", 0)} date{"s" if fr.get("dates", 0) > 1 else ""} sur {requis} depuis le {jour(fr.get("debut", ""))}{suite})'),
+             (num(rs.get("ic"), 3, True), f'IC historique en test réservé (t = {num(rs.get("t"))}){recalcul}'),
              (pc(rs.get("net"), 2, True), f"20 % les mieux classées contre la moyenne, par {main} jours, après frais"),
              (pc(su.get("beat"), 0) if su.get("n") else "en cours", f'Valeurs signalées battant le marché à {main} jours ({su.get("n", 0)} cas)'),
-             (num(rep.get("shrink"), 2), "Coefficient de confiance (0,1 à 1)")]
+             (num(rep.get("shrink"), 2), f"Coefficient de confiance (0,1 à 1){attente}")]
     h.append('<div class="cols">' + "".join(f'<div class="panel"><div class="big">{v}</div><div class="small">{e(t)}</div></div>' for v, t in faits) + "</div>")
     rg = evl.get("regimes") or {}
     groupes = [("Selon le climat de marché", rg.get("regimes") or {}), ("Pendant les épisodes de stress", rg.get("episodes") or {})]

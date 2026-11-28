@@ -265,16 +265,28 @@ def _bloc_fiabilite(rep, main, evl):
     fr = rep.get("fraiche") or {}
     grp = " + ".join(["prix"] + [_GRP.get(g, g) for g in evl["groupes"]])
     ic, t, net = rs.get("ic", float("nan")), rs.get("t", float("nan")), rs.get("net", float("nan"))
+    requis = fr.get("requis", 20)
+    attendu = fr.get("complet_attendu")
+    complet = f", {requis} dates vers le {attendu}" if attendu else ""
     if fr.get("dates"):
         l0 = (f"  Période fraîche depuis le {fr['debut']} (mesure de référence) : IC {_sn(fr['ic'], 3)}"
               + (f" (t = {_n(fr['t'])})" if fr.get("t") is not None else "") + f" sur {fr['dates']} date{'s' if fr['dates'] > 1 else ''}, "
-              f"{_p(fr['justes'])} de prévisions justes")
+              f"{_p(fr['justes'])} de prévisions justes"
+              + (f" ; {fr['dates']} sur {requis}{complet}" if fr["dates"] < requis else ""))
     else:
-        l0 = f"  Période fraîche depuis le {fr.get('debut', '?')} (mesure de référence) : premiers résultats après {main} séances"
+        premier = fr.get("premier_attendu")
+        l0 = (f"  Période fraîche depuis le {fr.get('debut', '?')} (mesure de référence) : 0 date sur {requis}, "
+              + (f"premier résultat attendu après la séance du {premier}" if premier else f"premiers résultats après {main} séances")
+              + complet)
+    quand = (f" ; calculé le {evl['date']}, prochain recalcul à partir du {evl['prochain_recalcul']}"
+             if evl.get("date") and evl.get("prochain_recalcul") else "")
+    attente = (f" (fixe tant que moins de {rep['shrink_requis']} périodes indépendantes en direct : "
+               f"{rep['shrink_periodes']} à ce jour)"
+               if rep.get("shrink_requis") and rep.get("shrink_periodes", 0) < rep["shrink_requis"] else "")
     lignes = [l0,
               f"  Historique, test réservé depuis le {evl['reserve_debut']} (ne sert plus aux réglages) : IC {_sn(ic, 3)} (t = {_n(t)}) ; "
-              f"les 20 % les mieux classées font {_sn(net * 100, 2)} % par {main} jours de mieux que la moyenne, frais déduits",
-              f"  Variables retenues : {grp} ; coefficient de confiance {_n(rep['shrink'], 2)} ; {rep['n_resolved']} prévisions résolues"
+              f"les 20 % les mieux classées font {_sn(net * 100, 2)} % par {main} jours de mieux que la moyenne, frais déduits{quand}",
+              f"  Variables retenues : {grp} ; coefficient de confiance {_n(rep['shrink'], 2)}{attente} ; {rep['n_resolved']} prévisions résolues"
               + (f", {_p(rep['live_hit'])} justes" if rep.get("live_hit") is not None else "")]
     lignes += _ligne_regimes(evl)
     sv = rep.get("suivi") or {}

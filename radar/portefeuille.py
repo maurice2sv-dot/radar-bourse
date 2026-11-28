@@ -66,6 +66,24 @@ def _choix_neutre(scores, mom, held, n, k=5):
     return {t: 1.0 / len(out) for t in out}
 
 
+def _indices(st, macro, refs):
+    """Indices réels recalculés à chaque passage depuis la date de départ : un cours publié en retard est repris
+    au passage suivant (un cumul séance par séance perdait définitivement la variation du jour)."""
+    if macro is None or not len(macro):
+        return
+    for k, sym in refs.items():
+        if sym not in macro:
+            continue
+        s = macro[sym].dropna().sort_index()
+        base = s.asof(np.datetime64(st["debut"])) if len(s) else np.nan
+        if not base > 0:
+            continue
+        niveau = lambda d: float(100.0 * s.asof(np.datetime64(d)) / base)
+        for x in st["historique"]:
+            x[k] = round(niveau(x["date"]), 4)
+        st["refs"][k] = niveau(st["derniere_date"])
+
+
 def momentum_scores(close, member, run_date):
     """Tendance 12 mois hors dernier mois, pour les valeurs de l'univers à la date du signal."""
     px = close.ffill(limit=3)
@@ -88,7 +106,6 @@ def update(close, all_p5, run_date, path, cout_bps=10, member=None, macro=None, 
     keys = [d.strftime("%Y-%m-%d") for d in px.index]
     pos = {d: i for i, d in enumerate(keys)}
     refs = refs or {}
-    mac = macro.reindex(columns=list(refs.values())).ffill(limit=5) if macro is not None and len(macro) else None
     if st is None:
         st = {"version": VERSION, "debut": run_date, "derniere_date": run_date,
               "regle": (f"{int(PART * 100)} % les mieux classées, parts égales, revues toutes les {DUREE} séances, "
@@ -115,14 +132,6 @@ def update(close, all_p5, run_date, path, cout_bps=10, member=None, macro=None, 
             g = r.reindex(grp).dropna()
             if len(g):
                 st["refs"][f"moyenne_{p}"] *= 1 + float(g.mean())
-        if mac is not None:
-            for k, sym in refs.items():
-                try:
-                    a, b = mac.asof(np.datetime64(prev))[sym], mac.asof(np.datetime64(d))[sym]
-                    if a == a and b == b and a > 0:
-                        st["refs"][k] *= b / a
-                except Exception:
-                    pass
         tenu = False
         for s in STRATS:
             S = st["strats"][s]
@@ -140,6 +149,7 @@ def update(close, all_p5, run_date, path, cout_bps=10, member=None, macro=None, 
                                  **{k: round(v, 4) for k, v in st["refs"].items()}})
         prev = d
     st["derniere_date"] = max(st["derniere_date"], run_date)
+    _indices(st, macro, refs)
 
     # 2. Revue des lignes (premier passage, puis toutes les DUREE séances)
     vide = not any(st["strats"][s]["lignes"] for s in STRATS)

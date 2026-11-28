@@ -42,14 +42,32 @@ def live_stats(con):
     return pd.read_sql(q, con)
 
 
-def shrink_factor(stats, main):
-    """Plus le modèle a fait ses preuves en conditions réelles, moins on rétrécit ses probabilités vers 50 %."""
+SHRINK_NEUTRE = 0.3
+PERIODES_MIN = 20  # périodes indépendantes en direct exigées avant d'adapter le coefficient
+
+
+def independent_hits(con, h=5):
+    """Réussite par date, sur des dates en direct dont les fenêtres de h jours ouvrés ne se chevauchent pas.
+    Les valeurs d'une même date évoluent ensemble : une date compte pour une seule observation."""
+    out, last = [], None
+    for d, hit in con.execute("SELECT run_date, AVG(hit) FROM predictions WHERE resolved=1 AND kind='live' AND horizon=? "
+                              "GROUP BY run_date ORDER BY run_date", (h,)):
+        if last is None or np.busday_count(last, d) >= h:
+            out.append(float(hit))
+            last = d
+    return out
+
+
+def shrink_factor(stats, main, periodes):
+    """Plus le modèle a fait ses preuves en conditions réelles, moins on rétrécit ses probabilités vers 50 %.
+    periodes : réussite par période indépendante (voir independent_hits) ; coefficient neutre tant qu'il y en a moins
+    de PERIODES_MIN. Renvoie (coefficient, prévisions résolues, part de prévisions justes)."""
     s = stats[(stats.horizon == main)]
     n = int(s.n.sum())
-    if n < 30:
-        return 0.3, n, None
-    hit = float((s.hit * s.n).sum() / n)
-    return float(np.clip(0.3 + (hit - 0.5) * 6, 0.1, 1.0)), n, hit
+    hit = float((s.hit * s.n).sum() / n) if n else None
+    if len(periodes) < PERIODES_MIN:
+        return SHRINK_NEUTRE, n, hit
+    return float(np.clip(SHRINK_NEUTRE + (np.mean(periodes) - 0.5) * 6, 0.1, 1.0)), n, hit
 
 
 def learn_weights(con, close, scores, wl, h=5):
@@ -153,16 +171,28 @@ def watch_stats(con):
     return {"n": int(n), "jours": int(days), "beat": beat, "excess": ex, "en_attente": int(pending)}
 
 
+DATES_MIN = 20  # dates résolues exigées avant l'appréciation de la période fraîche
+
+
+def _jour_ouvre(d, k):
+    """k jours ouvrés après d (estimation : jours fériés et passages manqués non pris en compte)."""
+    return str(np.busday_offset(str(d), k, roll="backward"))
+
+
 def fresh_stats(con, debut, h=5):
     """Période fraîche : prévisions faites en direct après `debut`, jamais vues pendant la construction ni les réglages.
     IC par date (corrélation de rang entre probabilité prévue et résultat réel), t sur dates sans chevauchement."""
     p = pd.read_sql("SELECT run_date, ticker, p_up, realized FROM predictions WHERE kind='live' AND resolved=1 "
                     "AND horizon=? AND run_date>=?", con, params=(h, str(debut)))
-    out = {"debut": str(debut), "dates": 0, "ic": None, "t": None, "justes": None, "n": int(len(p))}
+    out = {"debut": str(debut), "dates": 0, "ic": None, "t": None, "justes": None, "n": int(len(p)),
+           "requis": DATES_MIN, "premier_attendu": _jour_ouvre(debut, h),
+           "complet_attendu": _jour_ouvre(debut, DATES_MIN - 1 + h)}
     if p.empty:
         return out
     ic = p.groupby("run_date").apply(lambda g: g["p_up"].rank().corr(g["realized"].rank()) if len(g) > 5 else np.nan).dropna()
     icn = ic.iloc[::h]
+    if len(ic):  # la prochaine date résolue suit la dernière acquise
+        out["complet_attendu"] = _jour_ouvre(max(ic.index), h + DATES_MIN - len(ic)) if len(ic) < DATES_MIN else None
     out.update(dates=int(len(ic)), ic=float(ic.mean()) if len(ic) else None,
                t=float(icn.mean() / icn.std() * np.sqrt(len(icn))) if len(icn) > 2 and icn.std() > 0 else None,
                justes=float(((p["p_up"] > 0.5) == (p["realized"] > 0)).mean()))

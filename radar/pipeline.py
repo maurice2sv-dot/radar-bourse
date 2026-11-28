@@ -104,7 +104,8 @@ def evaluation(con, d, cfg, h, macro=None):
     if opened is None or opened.get("debut") != debut:
         opened = {"debut": debut, "le": today.isoformat()}
         db.meta_set(con, "reserve_ouverte", opened)
-    out = dict(sel, reserve=res, reserve_ouverte_le=opened["le"], recalcule=stale)
+    prochain = dt.date.fromisoformat(sel["date"]) + dt.timedelta(days=cfg["evaluation"].get("reselection_jours", 7))
+    out = dict(sel, reserve=res, reserve_ouverte_le=opened["le"], recalcule=stale, prochain_recalcul=prochain.isoformat())
     out.pop("reserve_cache", None)
     return out
 
@@ -200,7 +201,8 @@ def run(cfg, root=".", do_replay=True):
     df = features.build_features(close, volume, scores, wl, hz, wsrc, wcs, cal=cal, macro=macro, fund=fund, member=member)
     preds, last = model.predict_latest(df.dropna(subset=["ret20"]), model.feats_for(ev["groupes"]), hz)
     stats = journal.live_stats(con)
-    k, n_res, hit = journal.shrink_factor(stats, main)
+    periodes = journal.independent_hits(con, main)
+    k, n_res, hit = journal.shrink_factor(stats, main, periodes)
     preds["p_up"] = 0.5 + k * (preds["p_raw"] - 0.5)
     rep = analysis.analyze(df, scores, close, dict(cfg, watchlist=wl), preds, wcs, cal, macro)
     run_date = last.strftime("%Y-%m-%d")
@@ -220,7 +222,7 @@ def run(cfg, root=".", do_replay=True):
     rep.update({"mode": cfg["mode"], "eval": ev, "main_horizon": main, "horizons": hz,
                 "weights_source": w("source"), "weights_pairs": pairs, "n_tests": n_tests, "n_sig": n_sig,
                 "suivi": journal.watch_stats(con),
-                "fraiche": journal.fresh_stats(con, cfg["evaluation"].get("periode_fraiche_debut", run_date), main), "cout_bps": cfg["evaluation"].get("cout_bps", 10), "gain_min_ic": cfg["evaluation"].get("gain_min_ic", 0.003), "journal": stats.to_dict("records"), "shrink": k, "n_resolved": n_res, "live_hit": hit,
+                "fraiche": journal.fresh_stats(con, cfg["evaluation"].get("periode_fraiche_debut", run_date), main), "cout_bps": cfg["evaluation"].get("cout_bps", 10), "gain_min_ic": cfg["evaluation"].get("gain_min_ic", 0.003), "journal": stats.to_dict("records"), "shrink": k, "shrink_periodes": len(periodes), "shrink_requis": journal.PERIODES_MIN, "n_resolved": n_res, "live_hit": hit,
                 "n_articles": int(len(scores)), "n_gdelt": int((scores["source"] == "GDELT").sum()) if len(scores) else 0,
                 "generated_utc": today.strftime("%Y-%m-%d %H:%M"), "stale_days": int((today.date() - last.date()).days),
                 "errors": errs, "log": log})
